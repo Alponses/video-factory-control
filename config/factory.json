@@ -1,0 +1,46 @@
+{
+  "project": "video-factory",
+  "version": 1,
+  "channel": "religion-es",
+  "language": "es-MX",
+  "status": "active",
+
+  "video": {
+    "minDurationSeconds": 61,
+    "targetDurationMinSeconds": 65,
+    "targetDurationMaxSeconds": 85,
+    "sceneCount": 16,
+    "resolution": {
+      "width": 1080,
+      "height": 1920
+    },
+    "orientation": "portrait"
+  },
+
+  "renderer": {
+    "voice": "ef_dora",
+    "musicVolume": "low",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "paddingBack": 500
+  },
+
+  "content": {
+    "targetWordsMin": 175,
+    "targetWordsMax": 205,
+    "searchTermsPerScene": 3
+  },
+
+  "categories": [
+    "oracion-manana",
+    "oracion-noche",
+    "esperanza",
+    "gratitud",
+    "familia",
+    "momentos-dificiles",
+    "paz",
+    "fe",
+    "perdon",
+    "reflexion-dia"
+  ]
+}

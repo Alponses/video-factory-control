@@ -1,0 +1,10 @@
+.env
+.env.*
+*.mp4
+*.mov
+*.wav
+*.mp3
+node_modules/
+.DS_Store
+tmp/
+cache/

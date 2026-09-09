@@ -1,0 +1,60 @@
+{
+  "audience": {
+    "primary": "adultos y adultos mayores",
+    "language": "es-MX",
+    "tone": [
+      "tranquilo",
+      "esperanzador",
+      "humano",
+      "respetuoso",
+      "facil-de-entender"
+    ]
+  },
+
+  "writing": {
+    "useStrongHook": true,
+    "useNarrativeProgression": true,
+    "avoidClickbait": true,
+    "avoidRepetitiveIntroductions": true,
+    "avoidGenericTemplates": true,
+    "avoidYouthSlang": true,
+    "avoidEmojis": true
+  },
+
+  "religion": {
+    "allowGodReferences": true,
+    "allowFaithReferences": true,
+    "allowPrayerReferences": true,
+
+    "allowExactBibleQuotesWithoutVerification": false,
+    "allowInventedBibleVerses": false,
+    "allowInventedQuotesFromJesus": false,
+    "allowInventedQuotesFromGod": false,
+
+    "avoidReligiousAttacks": true,
+    "avoidReligiousControversy": true
+  },
+
+  "claims": {
+    "promiseMiracles": false,
+    "promiseHealing": false,
+    "promiseMoney": false,
+    "promiseSupernaturalResults": false
+  },
+
+  "scenes": {
+    "oneIdeaPerScene": true,
+    "targetWordsPerSceneMin": 8,
+    "targetWordsPerSceneMax": 16,
+    "searchTermsLanguage": "en",
+    "preferConcreteVisualTerms": true,
+    "avoidAbstractSearchTerms": true
+  },
+
+  "originality": {
+    "checkPreviousTitles": true,
+    "checkPreviousTopics": true,
+    "avoidNearDuplicates": true,
+    "maximumTitleSimilarity": 0.55
+  }
+}

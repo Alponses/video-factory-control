@@ -1,0 +1,58 @@
+{
+  "id": "religion-000001",
+  "slug": "oracion-manana-001",
+  "title": "Una reflexión para comenzar el día con paz",
+  "category": "oracion-manana",
+  "status": "approved",
+
+  "createdAt": "2026-09-08T13:43:00-06:00",
+
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+
+  "scenes": [],
+
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 82.86,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true
+  },
+
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  }
+}

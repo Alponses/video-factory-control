@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Video Factory Job",
+  "type": "object",
+
+  "required": [
+    "id",
+    "slug",
+    "title",
+    "category",
+    "status",
+    "createdAt",
+    "scenes",
+    "renderConfig",
+    "render",
+    "publishing"
+  ],
+
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+
+    "slug": {
+      "type": "string"
+    },
+
+    "title": {
+      "type": "string"
+    },
+
+    "category": {
+      "type": "string"
+    },
+
+    "status": {
+      "enum": [
+        "pending",
+        "processing",
+        "approved",
+        "failed",
+        "published"
+      ]
+    },
+
+    "createdAt": {
+      "type": "string"
+    },
+
+    "scenes": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+
+      "items": {
+        "type": "object",
+
+        "required": [
+          "text",
+          "searchTerms"
+        ],
+
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+
+          "searchTerms": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+
+    "renderConfig": {
+      "type": "object"
+    },
+
+    "render": {
+      "type": "object"
+    },
+
+    "publishing": {
+      "type": "object"
+    },
+
+    "analytics": {
+      "type": "object"
+    }
+  }
+}
