@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "channelId": "religion-es",
+  "brand": {
+    "displayName": null,
+    "bio": null,
+    "language": "es-MX",
+    "audience": "adultos y adultos mayores"
+  },
+  "platforms": {
+    "tiktok": {
+      "enabled": true,
+      "profileId": "religion-es-tiktok",
+      "displayName": null,
+      "username": null,
+      "bio": null
+    },
+    "youtube": {
+      "enabled": true,
+      "profileId": "religion-es-youtube",
+      "channelName": null,
+      "handle": null,
+      "about": null
+    },
+    "facebook": {
+      "enabled": true,
+      "profileId": "religion-es-facebook",
+      "pageName": null,
+      "username": null,
+      "bio": null
+    }
+  }
+}
