@@ -1,33 +1,28 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-09T13:57:00-06:00",
-
+  "updatedAt": "2026-09-09T14:17:00-06:00",
   "jobs": {
-    "total": 1,
-    "pending": 0,
+    "total": 11,
+    "pending": 10,
     "processing": 0,
     "approved": 1,
     "failed": 0,
     "published": 0
   },
-
   "render": {
     "totalDurationSeconds": 82.86,
     "averageDurationSeconds": 82.86,
     "totalRenderFailures": 0
   },
-
   "platforms": {
     "youtube": {
       "published": 0,
       "views": 0
     },
-
     "tiktok": {
       "published": 0,
       "views": 0
     },
-
     "facebook": {
       "published": 0,
       "views": 0
