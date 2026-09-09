@@ -17,6 +17,14 @@
   ],
 
   "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+
+    "channelId": {
+      "type": "string"
+    },
+
     "id": {
       "type": "string"
     },
@@ -54,22 +62,18 @@
 
       "items": {
         "type": "object",
-
         "required": [
           "text",
           "searchTerms"
         ],
-
         "properties": {
           "text": {
             "type": "string"
           },
-
           "searchTerms": {
             "type": "array",
             "minItems": 3,
             "maxItems": 3,
-
             "items": {
               "type": "string"
             }
@@ -87,7 +91,62 @@
     },
 
     "publishing": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "tiktok": {
+          "type": "object",
+          "properties": {
+            "profileId": { "type": ["string", "null"] },
+            "status": { "type": "string" },
+            "caption": { "type": ["string", "null"] },
+            "hashtags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "coverText": { "type": ["string", "null"] },
+            "pinnedComment": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] },
+            "publishedAt": { "type": ["string", "null"] }
+          }
+        },
+
+        "youtube": {
+          "type": "object",
+          "properties": {
+            "profileId": { "type": ["string", "null"] },
+            "status": { "type": "string" },
+            "title": { "type": ["string", "null"] },
+            "description": { "type": ["string", "null"] },
+            "hashtags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "coverText": { "type": ["string", "null"] },
+            "pinnedComment": { "type": ["string", "null"] },
+            "videoId": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] },
+            "publishedAt": { "type": ["string", "null"] }
+          }
+        },
+
+        "facebook": {
+          "type": "object",
+          "properties": {
+            "profileId": { "type": ["string", "null"] },
+            "status": { "type": "string" },
+            "description": { "type": ["string", "null"] },
+            "hashtags": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "coverText": { "type": ["string", "null"] },
+            "pinnedComment": { "type": ["string", "null"] },
+            "postId": { "type": ["string", "null"] },
+            "url": { "type": ["string", "null"] },
+            "publishedAt": { "type": ["string", "null"] }
+          }
+        }
+      }
     },
 
     "analytics": {
