@@ -1,0 +1,61 @@
+{
+  "version": 1,
+
+  "global": {
+    "originalContent": true,
+    "avoidDuplicateCaptions": true,
+    "avoidDuplicateHashtagBlocks": true,
+    "avoidKeywordStuffing": true,
+    "useNaturalCTA": true,
+    "generatePinnedComment": true,
+    "generateCover": true,
+    "generateDiscoveryKeywords": true
+  },
+
+  "cover": {
+    "headlineMaxWords": 7,
+    "subheadlineMaxWords": 6,
+    "mustBeReadableOnMobile": true,
+    "avoidLongSentences": true,
+    "preferEmotionalClarity": true,
+    "generateVisualConcept": true,
+    "generateImagePrompt": true
+  },
+
+  "tiktok": {
+    "enabled": true,
+    "generateCaption": true,
+    "generateHashtags": true,
+    "hashtagsMin": 4,
+    "hashtagsMax": 8,
+    "generateSearchKeyword": true,
+    "generateCoverText": true,
+    "generatePinnedComment": true,
+    "generateCTA": true
+  },
+
+  "youtube": {
+    "enabled": true,
+    "generateTitle": true,
+    "generateDescription": true,
+    "generateHashtags": true,
+    "hashtagsMin": 3,
+    "hashtagsMax": 8,
+    "generateTags": true,
+    "generateThumbnailText": true,
+    "generatePinnedComment": true,
+    "generateCTA": true
+  },
+
+  "facebook": {
+    "enabled": true,
+    "generateDescription": true,
+    "generateHashtags": true,
+    "hashtagsMin": 3,
+    "hashtagsMax": 8,
+    "generateCoverText": true,
+    "generatePinnedComment": true,
+    "generateCTA": true,
+    "defaultAudience": "public"
+  }
+}

@@ -1,33 +1,51 @@
 {
   "version": 1,
   "channelId": "religion-es",
+
   "brand": {
     "displayName": null,
-    "bio": null,
+    "tagline": null,
     "language": "es-MX",
-    "audience": "adultos y adultos mayores"
+    "audience": "adultos y adultos mayores",
+
+    "visualIdentity": {
+      "profileImage": null,
+      "profileImagePrompt": null,
+      "style": "calmado, cálido, espiritual, limpio",
+      "fontStyle": null
+    }
   },
+
   "platforms": {
     "tiktok": {
       "enabled": true,
       "profileId": "religion-es-tiktok",
       "displayName": null,
       "username": null,
-      "bio": null
+      "bio": null,
+      "profileImage": null
     },
+
     "youtube": {
       "enabled": true,
       "profileId": "religion-es-youtube",
       "channelName": null,
       "handle": null,
-      "about": null
+      "description": null,
+      "profileImage": null,
+      "bannerImage": null,
+      "bannerPrompt": null
     },
+
     "facebook": {
       "enabled": true,
       "profileId": "religion-es-facebook",
       "pageName": null,
       "username": null,
-      "bio": null
+      "description": null,
+      "profileImage": null,
+      "coverImage": null,
+      "coverPrompt": null
     }
   }
 }

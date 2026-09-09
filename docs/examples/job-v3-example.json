@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 3,
+  "channelId": "religion-es",
+
+  "id": "religion-999999",
+  "slug": "ejemplo-video",
+
+  "title": "Ejemplo de video",
+  "category": "esperanza",
+
+  "status": "pending",
+  "createdAt": "2026-09-09T00:00:00-06:00",
+
+  "generator": {
+    "type": "chatgpt"
+  },
+
+  "discovery": {
+    "primaryKeyword": "reflexión de esperanza",
+    "secondaryKeywords": [
+      "mensaje de esperanza",
+      "reflexión cristiana",
+      "seguir adelante"
+    ],
+    "searchIntent": "persona que necesita ánimo y tranquilidad"
+  },
+
+  "content": {
+    "hook": {
+      "text": "Si hoy sientes que ya no puedes más, escucha esto.",
+      "type": "problem"
+    },
+
+    "closing": "Mañana puede comenzar de una forma diferente.",
+
+    "wordCount": 180
+  },
+
+  "cover": {
+    "headline": "NO TE RINDAS HOY",
+    "subheadline": "Escucha esto",
+    "visualConcept": "persona contemplando un amanecer tranquilo",
+    "imagePrompt": "peaceful sunrise, older adult looking toward horizon, warm natural light, vertical composition",
+    "frameSeconds": 2.5,
+    "asset": null,
+    "status": "pending",
+
+    "platforms": {
+      "tiktok": {
+        "text": "NO TE RINDAS HOY"
+      },
+
+      "youtube": {
+        "text": "CUANDO YA NO PUEDAS MÁS",
+        "asset": null
+      },
+
+      "facebook": {
+        "text": "TODAVÍA PUEDES CONTINUAR",
+        "asset": null
+      }
+    }
+  },
+
+  "scenes": [],
+
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+
+  "render": {
+    "worker": null,
+    "durationSeconds": null,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": null,
+    "qaPassed": false
+  },
+
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok",
+      "status": "pending",
+      "caption": "Un mensaje para esos días donde seguir adelante se siente difícil.",
+      "hashtags": [
+        "#Esperanza",
+        "#Fe",
+        "#Reflexion",
+        "#PazInterior"
+      ],
+      "searchKeyword": "reflexión de esperanza",
+      "coverText": "NO TE RINDAS HOY",
+      "cta": "Guárdalo para volver a escucharlo cuando lo necesites.",
+      "pinnedComment": "¿Qué te ayuda a seguir adelante?",
+      "url": null,
+      "publishedAt": null
+    },
+
+    "youtube": {
+      "profileId": "religion-es-youtube",
+      "status": "pending",
+      "title": "Cuando sientas que ya no puedes más | Reflexión",
+      "description": "Una reflexión breve para esos días en los que continuar parece difícil.",
+      "hashtags": [
+        "#Reflexion",
+        "#Esperanza",
+        "#Fe"
+      ],
+      "tags": [
+        "reflexion de esperanza",
+        "mensaje de esperanza",
+        "reflexion cristiana"
+      ],
+      "thumbnailText": "CUANDO YA NO PUEDAS MÁS",
+      "cta": "Suscríbete si quieres escuchar más reflexiones como esta.",
+      "pinnedComment": "¿Qué mensaje necesitabas escuchar hoy?",
+      "videoId": null,
+      "url": null,
+      "publishedAt": null
+    },
+
+    "facebook": {
+      "profileId": "religion-es-facebook",
+      "status": "pending",
+      "description": "Hay días en los que continuar también es una victoria. Esta reflexión es para uno de esos días.",
+      "hashtags": [
+        "#Fe",
+        "#Esperanza",
+        "#Reflexion"
+      ],
+      "coverText": "TODAVÍA PUEDES CONTINUAR",
+      "audience": "public",
+      "cta": "Compártelo con alguien que pueda necesitar este mensaje.",
+      "pinnedComment": "¿Por qué quieres dar gracias hoy?",
+      "postId": null,
+      "url": null,
+      "publishedAt": null
+    }
+  },
+
+  "engagement": {
+    "cta": "Guarda esta reflexión para escucharla nuevamente.",
+    "question": "¿Qué te ayuda a seguir adelante?",
+    "pinnedComment": "Hoy decido continuar porque ______."
+  },
+
+  "qa": {
+    "passed": false,
+    "durationPassed": null,
+    "resolutionPassed": null,
+    "audioPassed": null,
+    "captionsPassed": null
+  },
+
+  "performance": {
+    "tiktok": {
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "saves": 0,
+      "averageWatchTimeSeconds": null,
+      "completionRate": null
+    },
+
+    "youtube": {
+      "views": 0,
+      "viewedVsSwipedAway": null,
+      "averageViewDurationSeconds": null,
+      "averagePercentageViewed": null,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "subscribersGained": 0
+    },
+
+    "facebook": {
+      "views": 0,
+      "qualifiedViews": null,
+      "watchTimeSeconds": null,
+      "likes": 0,
+      "comments": 0,
+      "shares": 0,
+      "earnings": null
+    }
+  }
+}

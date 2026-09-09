@@ -1,8 +1,9 @@
 {
   "project": "video-factory",
-  "version": 2,
+  "version": 3,
+  "jobSchemaVersion": 3,
+
   "channel": "religion-es",
-  "profilesFile": "config/profiles.json",
   "language": "es-MX",
   "status": "active",
 
@@ -10,11 +11,14 @@
     "minDurationSeconds": 61,
     "targetDurationMinSeconds": 65,
     "targetDurationMaxSeconds": 85,
+
     "sceneCount": 16,
+
     "resolution": {
       "width": 1080,
       "height": 1920
     },
+
     "orientation": "portrait"
   },
 
@@ -32,18 +36,11 @@
     "searchTermsPerScene": 3
   },
 
-  "publishing": {
-    "generateMetadataWithJob": true,
-    "hashtagsMin": 4,
-    "hashtagsMax": 8,
-    "generateCoverText": true,
-    "generatePinnedComment": true,
-    "platforms": [
-      "tiktok",
-      "youtube",
-      "facebook"
-    ]
-  },
+  "publishingPlatforms": [
+    "tiktok",
+    "youtube",
+    "facebook"
+  ],
 
   "categories": [
     "oracion-manana",
