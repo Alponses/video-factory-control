@@ -7,15 +7,18 @@ on:
       - "db/dashboard/**"
       - "db/migrations/v4/**"
       - "config/**"
+      - "prompts/**"
       - ".github/workflows/dashboard-v4-smoke.yml"
   push:
     branches:
+      - main
       - video-factory-v4
     paths:
       - "dashboard/**"
       - "db/dashboard/**"
       - "db/migrations/v4/**"
       - "config/**"
+      - "prompts/**"
       - ".github/workflows/dashboard-v4-smoke.yml"
 
 permissions:

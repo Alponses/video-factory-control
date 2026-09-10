@@ -137,6 +137,12 @@ const address = server.address();
 assert.equal(address.address, '127.0.0.1');
 const base = `http://127.0.0.1:${address.port}`;
 
+const configResponse = await fetch(`${base}/api/config`);
+assert.equal(configResponse.status, 200);
+const configBody = await configResponse.json();
+assert.equal(configBody.github.branch, 'main');
+assert.equal(configBody.github.tokenConfigured, false);
+
 const health = await fetch(`${base}/api/health`);
 assert.equal(health.status, 200);
 assert.equal((await health.json()).ok, true);

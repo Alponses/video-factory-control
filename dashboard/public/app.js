@@ -447,7 +447,7 @@ function renderGithubPanel() {
   const github = state.config?.github || {};
   $('#githubOwner').value = github.owner || '';
   $('#githubRepo').value = github.repo || '';
-  $('#githubBranch').value = github.branch || 'video-factory-v4';
+  $('#githubBranch').value = github.branch || 'main';
   $('#githubToken').value = '';
   $('#githubPanelStatus').textContent = github.tokenConfigured
     ? 'PAT configurado localmente. El valor no se envía al navegador.'

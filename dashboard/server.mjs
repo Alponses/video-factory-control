@@ -292,7 +292,7 @@ function publicGithubConfig(secrets = {}) {
   return {
     owner: github.owner || '',
     repo: github.repo || '',
-    branch: github.branch || 'video-factory-v4',
+    branch: github.branch || 'main',
     tokenConfigured: Boolean(github.token)
   };
 }
@@ -321,7 +321,7 @@ async function testGithubConfig(root = DEFAULT_ROOT) {
   if (!github.owner || !github.repo || !github.token) {
     throw Object.assign(new Error('Completa owner, repo y PAT.'), { statusCode: 400 });
   }
-  const branch = github.branch || 'video-factory-v4';
+  const branch = github.branch || 'main';
   const { response } = await githubRequest(
     root,
     `/contents/README.md?ref=${encodeURIComponent(branch)}`
@@ -337,7 +337,7 @@ async function saveGithubSettings(body, root = DEFAULT_ROOT) {
   const previous = current.github || {};
   const owner = String(body.owner || '').trim();
   const repo = String(body.repo || '').trim();
-  const branch = String(body.branch || 'video-factory-v4').trim();
+  const branch = String(body.branch || 'main').trim();
   const incomingToken = typeof body.token === 'string' ? body.token.trim() : '';
   if (!owner || !repo || !branch) throw Object.assign(new Error('Owner, repo y branch son obligatorios.'), { statusCode: 400 });
 
@@ -366,7 +366,7 @@ export async function saveOverrideToGithub(jobId, override, root = DEFAULT_ROOT)
   if (!github.owner || !github.repo || !github.token) {
     throw Object.assign(new Error('GitHub no está configurado localmente.'), { statusCode: 400 });
   }
-  const branch = github.branch || 'video-factory-v4';
+  const branch = github.branch || 'main';
   const repoPath = `db/dashboard/${jobId}.json`;
   const base = `/contents/${repoPath}`;
   const { response: existing } = await githubRequest(root, `${base}?ref=${encodeURIComponent(branch)}`);
@@ -397,7 +397,7 @@ export async function saveOverrideToGithub(jobId, override, root = DEFAULT_ROOT)
 async function syncGithub(root = DEFAULT_ROOT) {
   const secrets = await loadSecrets(root);
   const github = secrets.github || {};
-  const branch = github.branch || 'video-factory-v4';
+  const branch = github.branch || 'main';
   const { response } = await githubRequest(root, `/git/ref/heads/${encodeURIComponent(branch)}`);
   if (!response.ok) throw Object.assign(new Error(`GitHub sync ${response.status}: ${await response.text()}`), { statusCode: response.status });
   const json = await response.json();

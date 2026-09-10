@@ -34,6 +34,8 @@ La vista de cada job se construye:
 Copia `.secrets.example.json` solo si quieres preparar el archivo manualmente.
 También puedes configurar owner, repo, branch y PAT desde la ventana GitHub.
 
+La rama predeterminada es `main`. El campo branch sigue siendo editable desde la UI para apuntar temporalmente a otra rama durante pruebas.
+
 El PAT nunca se devuelve al frontend. Para lectura usa un fine-grained PAT con
 `Contents: Read`. Para "Guardar en GitHub", usa `Contents: Read and write`.
 
