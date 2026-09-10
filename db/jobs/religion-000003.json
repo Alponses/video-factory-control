@@ -1,1 +1,189 @@
-{"id":"religion-000003","slug":"esperanza-camino-cerrado-003","title":"Cuando el camino se cierre, recuerda que aún puedes avanzar","category":"esperanza","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"Hay momentos en que una puerta cerrada parece detenerlo todo de golpe.","searchTerms":["closed wooden door","person hallway","hand on doorknob"]},{"text":"Un plan cambia, una respuesta no llega o algo simplemente sale distinto.","searchTerms":["calendar crossed date","unread email screen","person at desk"]},{"text":"Eso puede doler, especialmente cuando habías puesto tanta ilusión allí.","searchTerms":["thoughtful older adult","empty chair home","hands holding photo"]},{"text":"Pero un cierre no siempre significa que tu historia terminó ahí.","searchTerms":["road detour sign","walking path forest","person turning corner"]},{"text":"A veces necesitas detenerte para mirar opciones que antes no veías.","searchTerms":["person at crossroads","forest trail signs","map in hands"]},{"text":"La esperanza no exige fingir que todo está bien inmediatamente.","searchTerms":["person sitting bench","cloudy park","older adult alone"]},{"text":"Puedes sentir tristeza y, al mismo tiempo, conservar ganas de seguir.","searchTerms":["person walking slowly","park path sunset","senior walking outdoors"]},{"text":"Habla con Dios sobre aquello que no salió como esperabas hoy.","searchTerms":["hands praying outside","quiet church bench","person praying home"]},{"text":"Pide sabiduría para reconocer el siguiente paso, aunque sea pequeño.","searchTerms":["shoes on path","single step stairs","walking feet closeup"]},{"text":"Quizá hoy solo puedas ordenar tus ideas y descansar un poco.","searchTerms":["notebook and pen","tea table home","person resting chair"]},{"text":"Mañana tal vez aparezca una conversación, una idea o una nueva posibilidad.","searchTerms":["morning phone call","open notebook desk","sunrise city"]},{"text":"No necesitas conocer todo el camino para avanzar con prudencia.","searchTerms":["foggy road path","walking boots trail","trail through trees"]},{"text":"Recuerda las veces anteriores en que también encontraste una salida.","searchTerms":["family album hands","old photographs table","smiling senior home"]},{"text":"Tu experiencia, tu fe y tu paciencia siguen contigo en este momento.","searchTerms":["older hands rosary","person reading quietly","sunlight on hands"]},{"text":"Da el paso posible de hoy sin castigarte por no ver más.","searchTerms":["person climbing stairs","small footstep","doorway sunlight"]},{"text":"A veces avanzar comienza simplemente aceptando que todavía hay camino.","searchTerms":["open road sunrise","person walking horizon","country road"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000003",
+  "slug": "esperanza-camino-cerrado-003",
+  "title": "Cuando el camino se cierre, recuerda que aún puedes avanzar",
+  "category": "esperanza",
+  "status": "approved",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "Hay momentos en que una puerta cerrada parece detenerlo todo de golpe.",
+      "searchTerms": [
+        "closed wooden door",
+        "person hallway",
+        "hand on doorknob"
+      ]
+    },
+    {
+      "text": "Un plan cambia, una respuesta no llega o algo simplemente sale distinto.",
+      "searchTerms": [
+        "calendar crossed date",
+        "unread email screen",
+        "person at desk"
+      ]
+    },
+    {
+      "text": "Eso puede doler, especialmente cuando habías puesto tanta ilusión allí.",
+      "searchTerms": [
+        "thoughtful older adult",
+        "empty chair home",
+        "hands holding photo"
+      ]
+    },
+    {
+      "text": "Pero un cierre no siempre significa que tu historia terminó ahí.",
+      "searchTerms": [
+        "road detour sign",
+        "walking path forest",
+        "person turning corner"
+      ]
+    },
+    {
+      "text": "A veces necesitas detenerte para mirar opciones que antes no veías.",
+      "searchTerms": [
+        "person at crossroads",
+        "forest trail signs",
+        "map in hands"
+      ]
+    },
+    {
+      "text": "La esperanza no exige fingir que todo está bien inmediatamente.",
+      "searchTerms": [
+        "person sitting bench",
+        "cloudy park",
+        "older adult alone"
+      ]
+    },
+    {
+      "text": "Puedes sentir tristeza y, al mismo tiempo, conservar ganas de seguir.",
+      "searchTerms": [
+        "person walking slowly",
+        "park path sunset",
+        "senior walking outdoors"
+      ]
+    },
+    {
+      "text": "Habla con Dios sobre aquello que no salió como esperabas hoy.",
+      "searchTerms": [
+        "hands praying outside",
+        "quiet church bench",
+        "person praying home"
+      ]
+    },
+    {
+      "text": "Pide sabiduría para reconocer el siguiente paso, aunque sea pequeño.",
+      "searchTerms": [
+        "shoes on path",
+        "single step stairs",
+        "walking feet closeup"
+      ]
+    },
+    {
+      "text": "Quizá hoy solo puedas ordenar tus ideas y descansar un poco.",
+      "searchTerms": [
+        "notebook and pen",
+        "tea table home",
+        "person resting chair"
+      ]
+    },
+    {
+      "text": "Mañana tal vez aparezca una conversación, una idea o una nueva posibilidad.",
+      "searchTerms": [
+        "morning phone call",
+        "open notebook desk",
+        "sunrise city"
+      ]
+    },
+    {
+      "text": "No necesitas conocer todo el camino para avanzar con prudencia.",
+      "searchTerms": [
+        "foggy road path",
+        "walking boots trail",
+        "trail through trees"
+      ]
+    },
+    {
+      "text": "Recuerda las veces anteriores en que también encontraste una salida.",
+      "searchTerms": [
+        "family album hands",
+        "old photographs table",
+        "smiling senior home"
+      ]
+    },
+    {
+      "text": "Tu experiencia, tu fe y tu paciencia siguen contigo en este momento.",
+      "searchTerms": [
+        "older hands rosary",
+        "person reading quietly",
+        "sunlight on hands"
+      ]
+    },
+    {
+      "text": "Da el paso posible de hoy sin castigarte por no ver más.",
+      "searchTerms": [
+        "person climbing stairs",
+        "small footstep",
+        "doorway sunlight"
+      ]
+    },
+    {
+      "text": "A veces avanzar comienza simplemente aceptando que todavía hay camino.",
+      "searchTerms": [
+        "open road sunrise",
+        "person walking horizon",
+        "country road"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 67.776,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true,
+    "startedAt": "2026-09-09T21:59:14.952Z",
+    "videoId": "cmtun55p0000hf23d20pk8gvg",
+    "finishedAt": "2026-09-09T22:19:27.771Z",
+    "localFile": "/Users/administrador2/video-factory/factory/approved/religion-000003-cmtun55p0000hf23d20pk8gvg.mp4"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "qa": {
+    "passed": true,
+    "durationPassed": true,
+    "resolutionPassed": true,
+    "audioPassed": true,
+    "captionsPassed": null
+  }
+}

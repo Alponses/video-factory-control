@@ -1,1 +1,189 @@
-{"id":"religion-000005","slug":"familia-oracion-corazon-005","title":"Una oración breve por la familia que llevas en el corazón","category":"familia","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"Hay personas que llevamos en el corazón aunque hoy estén lejos.","searchTerms":["family photo hands","older adult portrait","empty chair home"]},{"text":"La familia puede darnos alegría, preocupación, recuerdos y preguntas profundas al mismo tiempo.","searchTerms":["family dinner table","old photo album","phone call home"]},{"text":"Quizá hoy estás pensando especialmente en alguien que atraviesa una dificultad.","searchTerms":["person holding photo","worried senior home","family picture frame"]},{"text":"No siempre podemos resolver sus problemas ni acompañarlos como realmente quisiéramos.","searchTerms":["long distance call","empty guest room","hands on table"]},{"text":"Pero podemos detenernos un momento y presentarlos en nuestra oración.","searchTerms":["hands praying family photo","quiet prayer room","older adult praying"]},{"text":"Dios, cuida a quienes amo y acompáñalos en lo que viven.","searchTerms":["hands together prayer","family portrait table","window sunlight"]},{"text":"Dales serenidad para decidir y fortaleza para enfrentar este día.","searchTerms":["person at kitchen table","adult walking street","morning doorway"]},{"text":"Ayúdame también a escuchar mejor antes de querer tener respuestas.","searchTerms":["two people talking home","senior listening","family conversation"]},{"text":"Que mis palabras sean respetuosas cuando existan diferencias entre nosotros.","searchTerms":["family discussion table","hands calmly gesturing","older couple talking"]},{"text":"Recuérdame demostrar cariño mientras tengo oportunidad de hacerlo con sencillez.","searchTerms":["family hug living room","hand on shoulder","grandparent and adult"]},{"text":"Si alguien está lejos, ayúdame a buscar una forma de acercarme.","searchTerms":["phone video call","person writing message","senior using smartphone"]},{"text":"Si existe un conflicto, dame paciencia para no aumentar la herida.","searchTerms":["two chairs conversation","quiet family room","hands folded table"]},{"text":"Y si hoy todo está bien, enséñame a valorar profundamente esa tranquilidad compartida.","searchTerms":["family meal home","smiling relatives","warm dining room"]},{"text":"Cuida nuestra casa, nuestros caminos y las decisiones que tomemos.","searchTerms":["house exterior evening","family walking street","front door home"]},{"text":"Que podamos tratarnos con paciencia, cuidado, respeto y verdad cada día.","searchTerms":["family hands together","older couple kitchen","grandparent smiling"]},{"text":"Y que nunca demos por sentado el regalo de seguir compartiendo vida.","searchTerms":["family gathering home","photo album family","sunset family walk"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000005",
+  "slug": "familia-oracion-corazon-005",
+  "title": "Una oración breve por la familia que llevas en el corazón",
+  "category": "familia",
+  "status": "approved",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "Hay personas que llevamos en el corazón aunque hoy estén lejos.",
+      "searchTerms": [
+        "family photo hands",
+        "older adult portrait",
+        "empty chair home"
+      ]
+    },
+    {
+      "text": "La familia puede darnos alegría, preocupación, recuerdos y preguntas profundas al mismo tiempo.",
+      "searchTerms": [
+        "family dinner table",
+        "old photo album",
+        "phone call home"
+      ]
+    },
+    {
+      "text": "Quizá hoy estás pensando especialmente en alguien que atraviesa una dificultad.",
+      "searchTerms": [
+        "person holding photo",
+        "worried senior home",
+        "family picture frame"
+      ]
+    },
+    {
+      "text": "No siempre podemos resolver sus problemas ni acompañarlos como realmente quisiéramos.",
+      "searchTerms": [
+        "long distance call",
+        "empty guest room",
+        "hands on table"
+      ]
+    },
+    {
+      "text": "Pero podemos detenernos un momento y presentarlos en nuestra oración.",
+      "searchTerms": [
+        "hands praying family photo",
+        "quiet prayer room",
+        "older adult praying"
+      ]
+    },
+    {
+      "text": "Dios, cuida a quienes amo y acompáñalos en lo que viven.",
+      "searchTerms": [
+        "hands together prayer",
+        "family portrait table",
+        "window sunlight"
+      ]
+    },
+    {
+      "text": "Dales serenidad para decidir y fortaleza para enfrentar este día.",
+      "searchTerms": [
+        "person at kitchen table",
+        "adult walking street",
+        "morning doorway"
+      ]
+    },
+    {
+      "text": "Ayúdame también a escuchar mejor antes de querer tener respuestas.",
+      "searchTerms": [
+        "two people talking home",
+        "senior listening",
+        "family conversation"
+      ]
+    },
+    {
+      "text": "Que mis palabras sean respetuosas cuando existan diferencias entre nosotros.",
+      "searchTerms": [
+        "family discussion table",
+        "hands calmly gesturing",
+        "older couple talking"
+      ]
+    },
+    {
+      "text": "Recuérdame demostrar cariño mientras tengo oportunidad de hacerlo con sencillez.",
+      "searchTerms": [
+        "family hug living room",
+        "hand on shoulder",
+        "grandparent and adult"
+      ]
+    },
+    {
+      "text": "Si alguien está lejos, ayúdame a buscar una forma de acercarme.",
+      "searchTerms": [
+        "phone video call",
+        "person writing message",
+        "senior using smartphone"
+      ]
+    },
+    {
+      "text": "Si existe un conflicto, dame paciencia para no aumentar la herida.",
+      "searchTerms": [
+        "two chairs conversation",
+        "quiet family room",
+        "hands folded table"
+      ]
+    },
+    {
+      "text": "Y si hoy todo está bien, enséñame a valorar profundamente esa tranquilidad compartida.",
+      "searchTerms": [
+        "family meal home",
+        "smiling relatives",
+        "warm dining room"
+      ]
+    },
+    {
+      "text": "Cuida nuestra casa, nuestros caminos y las decisiones que tomemos.",
+      "searchTerms": [
+        "house exterior evening",
+        "family walking street",
+        "front door home"
+      ]
+    },
+    {
+      "text": "Que podamos tratarnos con paciencia, cuidado, respeto y verdad cada día.",
+      "searchTerms": [
+        "family hands together",
+        "older couple kitchen",
+        "grandparent smiling"
+      ]
+    },
+    {
+      "text": "Y que nunca demos por sentado el regalo de seguir compartiendo vida.",
+      "searchTerms": [
+        "family gathering home",
+        "photo album family",
+        "sunset family walk"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 71.850667,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true,
+    "startedAt": "2026-09-09T22:40:06.098Z",
+    "videoId": "cmtuolp08001ff23deh5n4pag",
+    "finishedAt": "2026-09-09T23:01:31.549Z",
+    "localFile": "/Users/administrador2/video-factory/factory/approved/religion-000005-cmtuolp08001ff23deh5n4pag.mp4"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "qa": {
+    "passed": true,
+    "durationPassed": true,
+    "resolutionPassed": true,
+    "audioPassed": true,
+    "captionsPassed": null
+  }
+}

@@ -1,1 +1,180 @@
-{"id":"religion-000009","slug":"perdon-descanso-interior-009","title":"Perdonar no borra lo vivido, pero puede darte descanso","category":"perdon","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"Hay heridas que vuelven a la memoria incluso después de muchos años.","searchTerms":["old photograph hands","thoughtful senior","empty chair room"]},{"text":"Una palabra, una ausencia o una traición pueden seguir pesando.","searchTerms":["unopened letter","family photo table","person looking window"]},{"text":"Perdonar no significa decir que aquello estuvo bien o fue insignificante.","searchTerms":["person serious face","closed door hallway","hands on table"]},{"text":"Tampoco obliga a recuperar una relación que todavía necesita límites claros.","searchTerms":["two chairs apart","closed gate","person walking away"]},{"text":"El perdón puede comenzar como una decisión de no alimentar el rencor.","searchTerms":["person journaling","hands releasing paper","quiet park bench"]},{"text":"Eso puede tomar tiempo y quizá necesites repetir esa decisión muchas veces.","searchTerms":["calendar pages","walking same path","older adult thinking"]},{"text":"Si tienes fe, habla con Dios sobre la herida sin minimizarla.","searchTerms":["hands praying photo","quiet church pew","person praying home"]},{"text":"Pide sabiduría para distinguir entre perdonar, reconciliarte y protegerte.","searchTerms":["three road signs","person at crossroads","notebook decision"]},{"text":"Son cosas relacionadas, pero no siempre significan exactamente lo mismo.","searchTerms":["two paths forest","open and closed door","person choosing path"]},{"text":"También reconoce cualquier enojo que todavía aparece cuando recuerdas lo ocurrido.","searchTerms":["person holding old letter","rainy window","hands clenched"]},{"text":"No necesitas apresurarte para parecer fuerte frente a los demás.","searchTerms":["older adult alone home","slow walking park","person resting bench"]},{"text":"Avanza con honestidad, respetando tu proceso y los límites necesarios.","searchTerms":["person closing gate","journal and pen","walking calm street"]},{"text":"Con el tiempo, quizá el recuerdo deje de controlar tus emociones diarias.","searchTerms":["sunlight on old photo","person smiling softly","open window"]},{"text":"No porque desaparezca, sino porque ya no ocupa todo el espacio.","searchTerms":["box storing letters","clear desk","room with sunlight"]},{"text":"Permítete buscar paz sin negar la verdad de lo que viviste.","searchTerms":["lake calm morning","person by water","hands open"]},{"text":"A veces el perdón empieza cuando eliges descansar del peso del resentimiento.","searchTerms":["person exhaling outside","sunset bench","open hands closeup"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000009",
+  "slug": "perdon-descanso-interior-009",
+  "title": "Perdonar no borra lo vivido, pero puede darte descanso",
+  "category": "perdon",
+  "status": "processing",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "Hay heridas que vuelven a la memoria incluso después de muchos años.",
+      "searchTerms": [
+        "old photograph hands",
+        "thoughtful senior",
+        "empty chair room"
+      ]
+    },
+    {
+      "text": "Una palabra, una ausencia o una traición pueden seguir pesando.",
+      "searchTerms": [
+        "unopened letter",
+        "family photo table",
+        "person looking window"
+      ]
+    },
+    {
+      "text": "Perdonar no significa decir que aquello estuvo bien o fue insignificante.",
+      "searchTerms": [
+        "person serious face",
+        "closed door hallway",
+        "hands on table"
+      ]
+    },
+    {
+      "text": "Tampoco obliga a recuperar una relación que todavía necesita límites claros.",
+      "searchTerms": [
+        "two chairs apart",
+        "closed gate",
+        "person walking away"
+      ]
+    },
+    {
+      "text": "El perdón puede comenzar como una decisión de no alimentar el rencor.",
+      "searchTerms": [
+        "person journaling",
+        "hands releasing paper",
+        "quiet park bench"
+      ]
+    },
+    {
+      "text": "Eso puede tomar tiempo y quizá necesites repetir esa decisión muchas veces.",
+      "searchTerms": [
+        "calendar pages",
+        "walking same path",
+        "older adult thinking"
+      ]
+    },
+    {
+      "text": "Si tienes fe, habla con Dios sobre la herida sin minimizarla.",
+      "searchTerms": [
+        "hands praying photo",
+        "quiet church pew",
+        "person praying home"
+      ]
+    },
+    {
+      "text": "Pide sabiduría para distinguir entre perdonar, reconciliarte y protegerte.",
+      "searchTerms": [
+        "three road signs",
+        "person at crossroads",
+        "notebook decision"
+      ]
+    },
+    {
+      "text": "Son cosas relacionadas, pero no siempre significan exactamente lo mismo.",
+      "searchTerms": [
+        "two paths forest",
+        "open and closed door",
+        "person choosing path"
+      ]
+    },
+    {
+      "text": "También reconoce cualquier enojo que todavía aparece cuando recuerdas lo ocurrido.",
+      "searchTerms": [
+        "person holding old letter",
+        "rainy window",
+        "hands clenched"
+      ]
+    },
+    {
+      "text": "No necesitas apresurarte para parecer fuerte frente a los demás.",
+      "searchTerms": [
+        "older adult alone home",
+        "slow walking park",
+        "person resting bench"
+      ]
+    },
+    {
+      "text": "Avanza con honestidad, respetando tu proceso y los límites necesarios.",
+      "searchTerms": [
+        "person closing gate",
+        "journal and pen",
+        "walking calm street"
+      ]
+    },
+    {
+      "text": "Con el tiempo, quizá el recuerdo deje de controlar tus emociones diarias.",
+      "searchTerms": [
+        "sunlight on old photo",
+        "person smiling softly",
+        "open window"
+      ]
+    },
+    {
+      "text": "No porque desaparezca, sino porque ya no ocupa todo el espacio.",
+      "searchTerms": [
+        "box storing letters",
+        "clear desk",
+        "room with sunlight"
+      ]
+    },
+    {
+      "text": "Permítete buscar paz sin negar la verdad de lo que viviste.",
+      "searchTerms": [
+        "lake calm morning",
+        "person by water",
+        "hands open"
+      ]
+    },
+    {
+      "text": "A veces el perdón empieza cuando eliges descansar del peso del resentimiento.",
+      "searchTerms": [
+        "person exhaling outside",
+        "sunset bench",
+        "open hands closeup"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": null,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": null,
+    "qaPassed": false,
+    "startedAt": "2026-09-10T00:03:07.638Z",
+    "videoId": "cmturkgsc003bf23d6omieebt"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  }
+}

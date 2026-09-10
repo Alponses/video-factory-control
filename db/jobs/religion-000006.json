@@ -1,1 +1,189 @@
-{"id":"religion-000006","slug":"momentos-dificiles-no-puedes-mas-006","title":"Para esos días en que parece que ya no puedes más","category":"momentos-dificiles","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"Hay días en que hasta lo más sencillo parece requerir demasiada fuerza.","searchTerms":["tired older adult","stairs at home","person sitting chair"]},{"text":"Quizá llevas preocupaciones económicas, familiares o personales desde hace tiempo.","searchTerms":["bills on table","family photo worried","person reading letter"]},{"text":"Cuando todo se acumula, es normal sentir que necesitas una pausa.","searchTerms":["person resting sofa","hands covering face","quiet living room"]},{"text":"No tienes que resolver cada asunto durante las próximas horas.","searchTerms":["closed planner desk","phone face down","clock on wall"]},{"text":"Empieza por distinguir lo urgente de aquello que puede esperar mañana.","searchTerms":["to do list paper","calendar desk","pen checking list"]},{"text":"Luego haz una sola cosa posible, aunque parezca demasiado pequeña.","searchTerms":["person washing cup","single phone call","one checked task"]},{"text":"Bebe agua, come algo sencillo, llama a alguien o simplemente siéntate un momento.","searchTerms":["glass of water","simple meal table","phone call senior"]},{"text":"Cuidarte también forma parte de atravesar una temporada complicada.","searchTerms":["older adult resting","medicine free bedside","walking slowly park"]},{"text":"Si tienes fe, habla con Dios sin esconder tu cansancio.","searchTerms":["hands praying chair","person praying window","quiet church pew"]},{"text":"No necesitas sonar fuerte cuando por dentro te sientes agotado.","searchTerms":["older adult prayer","hands trembling table","tearful person home"]},{"text":"Pide calma para este momento y claridad para tomar la siguiente decisión.","searchTerms":["window morning light","notebook decision","hands together prayer"]},{"text":"También permite que otras personas te ayuden cuando sea posible.","searchTerms":["friend helping senior","family conversation","hand holding another"]},{"text":"Aceptar compañía no te hace menos capaz ni menos valioso jamás.","searchTerms":["two people walking","supportive shoulder touch","friends sitting bench"]},{"text":"Este día difícil no define todo lo que eres ni todo tu camino.","searchTerms":["storm clouds clearing","road after rain","person walking outside"]},{"text":"Avanza por partes, descansando cuando lo necesites y retomando después.","searchTerms":["slow walk path","person resting bench","stairs one step"]},{"text":"Por hoy, llegar hasta aquí ya es una buena razón para seguir intentando.","searchTerms":["sunset silhouette walking","open doorway light","person standing outside"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000006",
+  "slug": "momentos-dificiles-no-puedes-mas-006",
+  "title": "Para esos días en que parece que ya no puedes más",
+  "category": "momentos-dificiles",
+  "status": "approved",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "Hay días en que hasta lo más sencillo parece requerir demasiada fuerza.",
+      "searchTerms": [
+        "tired older adult",
+        "stairs at home",
+        "person sitting chair"
+      ]
+    },
+    {
+      "text": "Quizá llevas preocupaciones económicas, familiares o personales desde hace tiempo.",
+      "searchTerms": [
+        "bills on table",
+        "family photo worried",
+        "person reading letter"
+      ]
+    },
+    {
+      "text": "Cuando todo se acumula, es normal sentir que necesitas una pausa.",
+      "searchTerms": [
+        "person resting sofa",
+        "hands covering face",
+        "quiet living room"
+      ]
+    },
+    {
+      "text": "No tienes que resolver cada asunto durante las próximas horas.",
+      "searchTerms": [
+        "closed planner desk",
+        "phone face down",
+        "clock on wall"
+      ]
+    },
+    {
+      "text": "Empieza por distinguir lo urgente de aquello que puede esperar mañana.",
+      "searchTerms": [
+        "to do list paper",
+        "calendar desk",
+        "pen checking list"
+      ]
+    },
+    {
+      "text": "Luego haz una sola cosa posible, aunque parezca demasiado pequeña.",
+      "searchTerms": [
+        "person washing cup",
+        "single phone call",
+        "one checked task"
+      ]
+    },
+    {
+      "text": "Bebe agua, come algo sencillo, llama a alguien o simplemente siéntate un momento.",
+      "searchTerms": [
+        "glass of water",
+        "simple meal table",
+        "phone call senior"
+      ]
+    },
+    {
+      "text": "Cuidarte también forma parte de atravesar una temporada complicada.",
+      "searchTerms": [
+        "older adult resting",
+        "medicine free bedside",
+        "walking slowly park"
+      ]
+    },
+    {
+      "text": "Si tienes fe, habla con Dios sin esconder tu cansancio.",
+      "searchTerms": [
+        "hands praying chair",
+        "person praying window",
+        "quiet church pew"
+      ]
+    },
+    {
+      "text": "No necesitas sonar fuerte cuando por dentro te sientes agotado.",
+      "searchTerms": [
+        "older adult prayer",
+        "hands trembling table",
+        "tearful person home"
+      ]
+    },
+    {
+      "text": "Pide calma para este momento y claridad para tomar la siguiente decisión.",
+      "searchTerms": [
+        "window morning light",
+        "notebook decision",
+        "hands together prayer"
+      ]
+    },
+    {
+      "text": "También permite que otras personas te ayuden cuando sea posible.",
+      "searchTerms": [
+        "friend helping senior",
+        "family conversation",
+        "hand holding another"
+      ]
+    },
+    {
+      "text": "Aceptar compañía no te hace menos capaz ni menos valioso jamás.",
+      "searchTerms": [
+        "two people walking",
+        "supportive shoulder touch",
+        "friends sitting bench"
+      ]
+    },
+    {
+      "text": "Este día difícil no define todo lo que eres ni todo tu camino.",
+      "searchTerms": [
+        "storm clouds clearing",
+        "road after rain",
+        "person walking outside"
+      ]
+    },
+    {
+      "text": "Avanza por partes, descansando cuando lo necesites y retomando después.",
+      "searchTerms": [
+        "slow walk path",
+        "person resting bench",
+        "stairs one step"
+      ]
+    },
+    {
+      "text": "Por hoy, llegar hasta aquí ya es una buena razón para seguir intentando.",
+      "searchTerms": [
+        "sunset silhouette walking",
+        "open doorway light",
+        "person standing outside"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 68.842667,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true,
+    "startedAt": "2026-09-09T23:01:31.551Z",
+    "videoId": "cmtupd8v9001wf23dek3s14n0",
+    "finishedAt": "2026-09-09T23:23:02.222Z",
+    "localFile": "/Users/administrador2/video-factory/factory/approved/religion-000006-cmtupd8v9001wf23dek3s14n0.mp4"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "qa": {
+    "passed": true,
+    "durationPassed": true,
+    "resolutionPassed": true,
+    "audioPassed": true,
+    "captionsPassed": null
+  }
+}

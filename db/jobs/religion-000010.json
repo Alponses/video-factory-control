@@ -1,1 +1,189 @@
-{"id":"religion-000010","slug":"reflexion-aprender-dia-010","title":"Lo que hoy no salió bien también puede enseñarte algo","category":"reflexion-dia","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"Tal vez hoy cometiste un error que todavía sigue dando vueltas en tu cabeza.","searchTerms":["person at desk worried","crumpled paper","missed appointment calendar"]},{"text":"Quizá dijiste algo de más o tomaste una decisión apresurada.","searchTerms":["two people conversation","phone message regret","person thinking"]},{"text":"Cuando algo sale mal, la primera reacción suele ser castigarnos demasiado por dentro.","searchTerms":["person looking mirror","hands on forehead","quiet room"]},{"text":"Pero un error también puede convertirse en información para mañana.","searchTerms":["notebook lessons","pen writing","calendar next day"]},{"text":"Pregúntate qué ocurrió sin exagerar ni esconder lo que pasó.","searchTerms":["person journaling","checklist paper","thoughtful older adult"]},{"text":"Después identifica qué parte realmente estaba bajo tu responsabilidad.","searchTerms":["hands sorting papers","decision notes","person reviewing document"]},{"text":"No cargues con aquello que dependía completamente de otras personas.","searchTerms":["multiple hands table","person walking away","closed office door"]},{"text":"Y no excuses lo que sí puedes hacer diferente la próxima vez.","searchTerms":["person correcting notes","calendar reminder","hand rewriting list"]},{"text":"Aprender requiere honestidad, pero también un poco de paciencia contigo.","searchTerms":["older adult writing","slow walk garden","calm home desk"]},{"text":"Si dañaste a alguien, quizá mañana puedas ofrecer una disculpa sincera.","searchTerms":["two people talking","handshake apology","family conversation home"]},{"text":"Si falló un plan, revisa qué podrías ajustar antes de repetirlo.","searchTerms":["planning board","notebook revisions","person organizing desk"]},{"text":"Y si simplemente fue un mal día, permite que termine aquí por completo.","searchTerms":["sunset window","closing laptop","person leaving room"]},{"text":"No conviertas una dificultad en una sentencia sobre todo tu valor.","searchTerms":["person looking sunrise","open doorway","walking outside"]},{"text":"Dios puede acompañarte también mientras corriges, aprendes y vuelves a intentar.","searchTerms":["hands praying desk","person walking morning","quiet church doorway"]},{"text":"Mañana tendrás una nueva oportunidad para aplicar lo que hoy entendiste.","searchTerms":["sunrise alarm clock","fresh notebook page","morning street"]},{"text":"Que este día termine con aprendizaje, no solamente con culpa.","searchTerms":["closed journal","night lamp","person peaceful bed"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000010",
+  "slug": "reflexion-aprender-dia-010",
+  "title": "Lo que hoy no salió bien también puede enseñarte algo",
+  "category": "reflexion-dia",
+  "status": "approved",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "Tal vez hoy cometiste un error que todavía sigue dando vueltas en tu cabeza.",
+      "searchTerms": [
+        "person at desk worried",
+        "crumpled paper",
+        "missed appointment calendar"
+      ]
+    },
+    {
+      "text": "Quizá dijiste algo de más o tomaste una decisión apresurada.",
+      "searchTerms": [
+        "two people conversation",
+        "phone message regret",
+        "person thinking"
+      ]
+    },
+    {
+      "text": "Cuando algo sale mal, la primera reacción suele ser castigarnos demasiado por dentro.",
+      "searchTerms": [
+        "person looking mirror",
+        "hands on forehead",
+        "quiet room"
+      ]
+    },
+    {
+      "text": "Pero un error también puede convertirse en información para mañana.",
+      "searchTerms": [
+        "notebook lessons",
+        "pen writing",
+        "calendar next day"
+      ]
+    },
+    {
+      "text": "Pregúntate qué ocurrió sin exagerar ni esconder lo que pasó.",
+      "searchTerms": [
+        "person journaling",
+        "checklist paper",
+        "thoughtful older adult"
+      ]
+    },
+    {
+      "text": "Después identifica qué parte realmente estaba bajo tu responsabilidad.",
+      "searchTerms": [
+        "hands sorting papers",
+        "decision notes",
+        "person reviewing document"
+      ]
+    },
+    {
+      "text": "No cargues con aquello que dependía completamente de otras personas.",
+      "searchTerms": [
+        "multiple hands table",
+        "person walking away",
+        "closed office door"
+      ]
+    },
+    {
+      "text": "Y no excuses lo que sí puedes hacer diferente la próxima vez.",
+      "searchTerms": [
+        "person correcting notes",
+        "calendar reminder",
+        "hand rewriting list"
+      ]
+    },
+    {
+      "text": "Aprender requiere honestidad, pero también un poco de paciencia contigo.",
+      "searchTerms": [
+        "older adult writing",
+        "slow walk garden",
+        "calm home desk"
+      ]
+    },
+    {
+      "text": "Si dañaste a alguien, quizá mañana puedas ofrecer una disculpa sincera.",
+      "searchTerms": [
+        "two people talking",
+        "handshake apology",
+        "family conversation home"
+      ]
+    },
+    {
+      "text": "Si falló un plan, revisa qué podrías ajustar antes de repetirlo.",
+      "searchTerms": [
+        "planning board",
+        "notebook revisions",
+        "person organizing desk"
+      ]
+    },
+    {
+      "text": "Y si simplemente fue un mal día, permite que termine aquí por completo.",
+      "searchTerms": [
+        "sunset window",
+        "closing laptop",
+        "person leaving room"
+      ]
+    },
+    {
+      "text": "No conviertas una dificultad en una sentencia sobre todo tu valor.",
+      "searchTerms": [
+        "person looking sunrise",
+        "open doorway",
+        "walking outside"
+      ]
+    },
+    {
+      "text": "Dios puede acompañarte también mientras corriges, aprendes y vuelves a intentar.",
+      "searchTerms": [
+        "hands praying desk",
+        "person walking morning",
+        "quiet church doorway"
+      ]
+    },
+    {
+      "text": "Mañana tendrás una nueva oportunidad para aplicar lo que hoy entendiste.",
+      "searchTerms": [
+        "sunrise alarm clock",
+        "fresh notebook page",
+        "morning street"
+      ]
+    },
+    {
+      "text": "Que este día termine con aprendizaje, no solamente con culpa.",
+      "searchTerms": [
+        "closed journal",
+        "night lamp",
+        "person peaceful bed"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 69.098667,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true,
+    "startedAt": "2026-09-10T17:14:00.919Z",
+    "videoId": "cmtvse73x00001e3d8zatgmgr",
+    "finishedAt": "2026-09-10T17:35:26.086Z",
+    "localFile": "/Users/administrador2/video-factory/factory/approved/religion-000010-cmtvse73x00001e3d8zatgmgr.mp4"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "qa": {
+    "passed": true,
+    "durationPassed": true,
+    "resolutionPassed": true,
+    "audioPassed": true,
+    "captionsPassed": null
+  }
+}

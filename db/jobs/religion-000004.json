@@ -1,1 +1,189 @@
-{"id":"religion-000004","slug":"gratitud-cosas-sencillas-004","title":"Tres cosas sencillas que hoy merecen tu gratitud","category":"gratitud","status":"pending","createdAt":"2026-09-09T14:17:00-06:00","generator":{"type":"manual","model":"chatgpt"},"scenes":[{"text":"No todos los días traen grandes noticias, pero siempre dejan pequeños momentos.","searchTerms":["morning kitchen","sunlight through window","older adult home"]},{"text":"La gratitud empieza cuando dejamos de esperar únicamente cosas extraordinarias.","searchTerms":["person looking window","simple breakfast table","garden flowers"]},{"text":"Piensa primero en alguien que estuvo presente de alguna manera hoy.","searchTerms":["phone call family","older friends talking","family photo frame"]},{"text":"Tal vez te escuchó, te escribió o simplemente preguntó cómo estabas.","searchTerms":["text message phone","senior phone call","two people talking"]},{"text":"Ese gesto sencillo puede ser la primera razón para agradecer.","searchTerms":["hands holding phone","smiling older adult","friendship at home"]},{"text":"Ahora recuerda algo cotidiano que tu cuerpo pudo hacer por ti.","searchTerms":["walking shoes hallway","hands preparing food","person watering plants"]},{"text":"Caminar, respirar, cocinar o levantarte también tiene valor cuando lo notas.","searchTerms":["senior walking park","cooking at home","person opening curtains"]},{"text":"Esa puede ser tu segunda razón, sin compararla con nadie más.","searchTerms":["person journaling","notebook gratitude","pen in hand"]},{"text":"Por último, piensa en un lugar donde hoy encontraste un poco de calma.","searchTerms":["quiet bedroom","park bench trees","sunset balcony"]},{"text":"Quizá fue tu casa, una banca, el patio o una ventana.","searchTerms":["home living room","garden bench","window with sunlight"]},{"text":"No importa si duró poco; ese instante también merece ser recordado.","searchTerms":["clock on table","sunlight wall","person resting chair"]},{"text":"Agradecer no significa ignorar aquello que fue difícil durante el día.","searchTerms":["rainy window person","unfinished bills table","thoughtful senior"]},{"text":"Significa permitir que lo bueno también tenga un lugar en tu memoria.","searchTerms":["family photos","warm home light","smiling senior"]},{"text":"Si quieres, menciona esas tres cosas en una oración sencilla esta noche.","searchTerms":["hands praying table","bedside prayer","older adult praying"]},{"text":"Dale gracias a Dios por lo pequeño, sin pedir que sea perfecto.","searchTerms":["prayer hands closeup","candle on table","quiet church interior"]},{"text":"Mañana quizá descubras nuevas razones donde antes solo veías rutina.","searchTerms":["morning market","flowers sidewalk","sunrise neighborhood"]}],"renderConfig":{"voice":"ef_dora","orientation":"portrait","captionPosition":"center","captionBackgroundColor":"rgba(0,0,0,0.55)","music":"hopeful","musicVolume":"low","paddingBack":500},"render":{"worker":null,"durationSeconds":null,"width":1080,"height":1920,"hasAudio":null,"qaPassed":false},"publishing":{"youtube":{"status":"pending","url":null},"tiktok":{"status":"pending","url":null},"facebook":{"status":"pending","url":null}},"analytics":{"youtube":null,"tiktok":null,"facebook":null}}
+{
+  "id": "religion-000004",
+  "slug": "gratitud-cosas-sencillas-004",
+  "title": "Tres cosas sencillas que hoy merecen tu gratitud",
+  "category": "gratitud",
+  "status": "approved",
+  "createdAt": "2026-09-09T14:17:00-06:00",
+  "generator": {
+    "type": "manual",
+    "model": "chatgpt"
+  },
+  "scenes": [
+    {
+      "text": "No todos los días traen grandes noticias, pero siempre dejan pequeños momentos.",
+      "searchTerms": [
+        "morning kitchen",
+        "sunlight through window",
+        "older adult home"
+      ]
+    },
+    {
+      "text": "La gratitud empieza cuando dejamos de esperar únicamente cosas extraordinarias.",
+      "searchTerms": [
+        "person looking window",
+        "simple breakfast table",
+        "garden flowers"
+      ]
+    },
+    {
+      "text": "Piensa primero en alguien que estuvo presente de alguna manera hoy.",
+      "searchTerms": [
+        "phone call family",
+        "older friends talking",
+        "family photo frame"
+      ]
+    },
+    {
+      "text": "Tal vez te escuchó, te escribió o simplemente preguntó cómo estabas.",
+      "searchTerms": [
+        "text message phone",
+        "senior phone call",
+        "two people talking"
+      ]
+    },
+    {
+      "text": "Ese gesto sencillo puede ser la primera razón para agradecer.",
+      "searchTerms": [
+        "hands holding phone",
+        "smiling older adult",
+        "friendship at home"
+      ]
+    },
+    {
+      "text": "Ahora recuerda algo cotidiano que tu cuerpo pudo hacer por ti.",
+      "searchTerms": [
+        "walking shoes hallway",
+        "hands preparing food",
+        "person watering plants"
+      ]
+    },
+    {
+      "text": "Caminar, respirar, cocinar o levantarte también tiene valor cuando lo notas.",
+      "searchTerms": [
+        "senior walking park",
+        "cooking at home",
+        "person opening curtains"
+      ]
+    },
+    {
+      "text": "Esa puede ser tu segunda razón, sin compararla con nadie más.",
+      "searchTerms": [
+        "person journaling",
+        "notebook gratitude",
+        "pen in hand"
+      ]
+    },
+    {
+      "text": "Por último, piensa en un lugar donde hoy encontraste un poco de calma.",
+      "searchTerms": [
+        "quiet bedroom",
+        "park bench trees",
+        "sunset balcony"
+      ]
+    },
+    {
+      "text": "Quizá fue tu casa, una banca, el patio o una ventana.",
+      "searchTerms": [
+        "home living room",
+        "garden bench",
+        "window with sunlight"
+      ]
+    },
+    {
+      "text": "No importa si duró poco; ese instante también merece ser recordado.",
+      "searchTerms": [
+        "clock on table",
+        "sunlight wall",
+        "person resting chair"
+      ]
+    },
+    {
+      "text": "Agradecer no significa ignorar aquello que fue difícil durante el día.",
+      "searchTerms": [
+        "rainy window person",
+        "unfinished bills table",
+        "thoughtful senior"
+      ]
+    },
+    {
+      "text": "Significa permitir que lo bueno también tenga un lugar en tu memoria.",
+      "searchTerms": [
+        "family photos",
+        "warm home light",
+        "smiling senior"
+      ]
+    },
+    {
+      "text": "Si quieres, menciona esas tres cosas en una oración sencilla esta noche.",
+      "searchTerms": [
+        "hands praying table",
+        "bedside prayer",
+        "older adult praying"
+      ]
+    },
+    {
+      "text": "Dale gracias a Dios por lo pequeño, sin pedir que sea perfecto.",
+      "searchTerms": [
+        "prayer hands closeup",
+        "candle on table",
+        "quiet church interior"
+      ]
+    },
+    {
+      "text": "Mañana quizá descubras nuevas razones donde antes solo veías rutina.",
+      "searchTerms": [
+        "morning market",
+        "flowers sidewalk",
+        "sunrise neighborhood"
+      ]
+    }
+  ],
+  "renderConfig": {
+    "voice": "ef_dora",
+    "orientation": "portrait",
+    "captionPosition": "center",
+    "captionBackgroundColor": "rgba(0,0,0,0.55)",
+    "music": "hopeful",
+    "musicVolume": "low",
+    "paddingBack": 500
+  },
+  "render": {
+    "worker": "imac-01",
+    "durationSeconds": 69.376,
+    "width": 1080,
+    "height": 1920,
+    "hasAudio": true,
+    "qaPassed": true,
+    "startedAt": "2026-09-09T22:19:27.774Z",
+    "videoId": "cmtunv5ig000yf23dfo6lct5v",
+    "finishedAt": "2026-09-09T22:40:06.095Z",
+    "localFile": "/Users/administrador2/video-factory/factory/approved/religion-000004-cmtunv5ig000yf23dfo6lct5v.mp4"
+  },
+  "publishing": {
+    "youtube": {
+      "status": "pending",
+      "url": null
+    },
+    "tiktok": {
+      "status": "pending",
+      "url": null
+    },
+    "facebook": {
+      "status": "pending",
+      "url": null
+    }
+  },
+  "analytics": {
+    "youtube": null,
+    "tiktok": null,
+    "facebook": null
+  },
+  "qa": {
+    "passed": true,
+    "durationPassed": true,
+    "resolutionPassed": true,
+    "audioPassed": true,
+    "captionsPassed": null
+  }
+}
