@@ -1,27 +1,21 @@
 {
   "project": "video-factory",
-  "version": 3,
-  "jobSchemaVersion": 3,
-
+  "version": 4,
+  "jobSchemaVersion": 4,
   "channel": "religion-es",
   "language": "es-MX",
   "status": "active",
-
   "video": {
     "minDurationSeconds": 61,
     "targetDurationMinSeconds": 65,
     "targetDurationMaxSeconds": 85,
-
     "sceneCount": 16,
-
     "resolution": {
       "width": 1080,
       "height": 1920
     },
-
     "orientation": "portrait"
   },
-
   "renderer": {
     "voice": "ef_dora",
     "musicVolume": "low",
@@ -29,19 +23,25 @@
     "captionBackgroundColor": "rgba(0,0,0,0.55)",
     "paddingBack": 500
   },
-
   "content": {
     "targetWordsMin": 175,
     "targetWordsMax": 205,
     "searchTermsPerScene": 3
   },
-
   "publishingPlatforms": [
     "tiktok",
     "youtube",
     "facebook"
   ],
-
+  "migrationLayers": [
+    "db/migrations/v3",
+    "db/migrations/v4",
+    "db/dashboard"
+  ],
+  "dashboard": {
+    "overrideDirectory": "db/dashboard",
+    "neverWriteJobs": true
+  },
   "categories": [
     "oracion-manana",
     "oracion-noche",
