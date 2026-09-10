@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 4,
+  "channelId": "religion-es",
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok",
+      "status": "pending",
+      "caption": "Hay personas que llevamos en el corazón aunque hoy estén lejos. 🙏❤️\nEsta oración es un momento para pensar en tu familia con cariño, pedir serenidad y recordar el valor de acompañarnos. 🕊️✨\nCompártela con alguien de tu familia o escribe por quién quieres pedir hoy. 💛",
+      "hashtags": ["#OracionPorLaFamilia", "#Familia", "#Fe", "#OracionCristiana", "#PausaConFe"],
+      "searchKeyword": "oración por la familia",
+      "coverText": "Ora hoy por tu familia",
+      "cta": "Compártela con alguien de tu familia a quien quieras acompañar hoy.",
+      "pinnedComment": "Puedes tener a alguien en mente mientras escuchas. ❤️ ¿Por quién quieres pedir hoy?",
+      "videoId": null, "scheduledAt": null, "publishedAt": null, "url": null
+    },
+    "youtube": {
+      "profileId": "religion-es-youtube",
+      "status": "pending",
+      "title": "Una oración breve por tu familia y quienes amas",
+      "description": "Esta oración por la familia es una pausa sencilla para pensar en quienes amas, estén cerca o lejos. 🙏❤️ Puedes pedir serenidad para los momentos difíciles, paciencia para escucharse y sabiduría para cuidar mejor las relaciones que forman parte de tu vida.\n\nNo necesitas palabras perfectas para orar. 🕊️ Si alguien vino a tu mente mientras escuchabas, guarda este Short o compártelo con esa persona como una forma de acompañarla.",
+      "hashtags": ["#OracionPorLaFamilia", "#Familia", "#Fe", "#PausaConFe"],
+      "tags": ["oración por la familia", "oración familiar", "orar por un familiar", "familia y fe", "oración corta"],
+      "thumbnailText": "Ora por tu familia",
+      "cta": "Comparte esta oración con alguien de tu familia a quien quieras acompañar.",
+      "pinnedComment": "¿Por quién de tu familia quieres hacer una oración hoy? ❤️",
+      "videoId": null, "scheduledAt": null, "publishedAt": null, "url": null
+    },
+    "facebook": {
+      "profileId": "religion-es-facebook",
+      "status": "pending",
+      "description": "Hay familiares que vemos todos los días y otros que llevamos en el corazón desde lejos. 🙏❤️ Esta oración es una pausa para pedir serenidad, paciencia y cuidado para quienes amamos, sin necesidad de usar palabras complicadas. 🕊️💛\n\nPiensa en una persona de tu familia mientras escuchas. ¿Por quién quieres pedir hoy? Puedes compartirle este mensaje para hacerle saber que la tienes presente. ✨",
+      "hashtags": ["#Familia", "#Oracion", "#Fe", "#PausaConFe"],
+      "coverText": "Por quienes amas",
+      "cta": "Comparte esta oración con un familiar que quieras tener presente hoy.",
+      "pinnedComment": "Hoy tengo presente a ________. ❤️ ¿Por quién quieres pedir tú?",
+      "postId": null, "scheduledAt": null, "publishedAt": null, "url": null, "audience": "public"
+    }
+  },
+  "performance": {
+    "tiktok": {"views": null, "likes": null, "comments": null, "shares": null, "saves": null, "averageWatchTime": null, "completionRate": null},
+    "youtube": {"views": null, "likes": null, "comments": null, "shares": null, "averageViewDuration": null, "averagePercentageViewed": null, "viewedVsSwipedAway": null, "subscribersGained": null},
+    "facebook": {"views": null, "qualifiedViews": null, "watchTime": null, "likes": null, "comments": null, "shares": null, "earnings": null}
+  }
+}
