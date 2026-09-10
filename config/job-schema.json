@@ -1,8 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Video Factory Job V3",
+  "title": "Video Factory Job V3/V4",
   "type": "object",
-
   "required": [
     "schemaVersion",
     "channelId",
@@ -23,517 +22,224 @@
     "qa",
     "performance"
   ],
-
   "properties": {
-    "schemaVersion": {
-      "const": 3
-    },
-
-    "channelId": {
-      "type": "string"
-    },
-
-    "id": {
-      "type": "string"
-    },
-
-    "slug": {
-      "type": "string"
-    },
-
-    "title": {
-      "type": "string"
-    },
-
-    "category": {
-      "type": "string"
-    },
-
-    "status": {
-      "enum": [
-        "pending",
-        "processing",
-        "approved",
-        "failed",
-        "publishing",
-        "published"
-      ]
-    },
-
-    "createdAt": {
-      "type": "string"
-    },
-
-    "generator": {
-      "type": "object"
-    },
-
+    "schemaVersion": {"enum": [3, 4]},
+    "channelId": {"type": "string"},
+    "id": {"type": "string"},
+    "slug": {"type": "string"},
+    "title": {"type": "string"},
+    "category": {"type": "string"},
+    "status": {"enum": ["pending", "processing", "approved", "failed", "publishing", "published"]},
+    "createdAt": {"type": "string"},
+    "generator": {"type": "object"},
     "discovery": {
       "type": "object",
-
-      "required": [
-        "primaryKeyword",
-        "secondaryKeywords",
-        "searchIntent"
-      ],
-
+      "required": ["primaryKeyword", "secondaryKeywords", "searchIntent"],
       "properties": {
-        "primaryKeyword": {
-          "type": "string"
-        },
-
-        "secondaryKeywords": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-
-        "searchIntent": {
-          "type": "string"
-        }
+        "primaryKeyword": {"type": "string"},
+        "secondaryKeywords": {"type": "array", "items": {"type": "string"}},
+        "searchIntent": {"type": "string"}
       }
     },
-
     "content": {
       "type": "object",
-
-      "required": [
-        "hook",
-        "closing",
-        "wordCount"
-      ],
-
+      "required": ["hook", "closing", "wordCount"],
       "properties": {
         "hook": {
           "type": "object",
-
-          "required": [
-            "text",
-            "type"
-          ],
-
+          "required": ["text", "type"],
           "properties": {
-            "text": {
-              "type": "string"
-            },
-
-            "type": {
-              "enum": [
-                "question",
-                "problem",
-                "curiosity",
-                "statement",
-                "prayer",
-                "story"
-              ]
-            }
+            "text": {"type": "string"},
+            "type": {"enum": ["question", "problem", "curiosity", "statement", "prayer", "story"]}
           }
         },
-
-        "closing": {
-          "type": "string"
-        },
-
-        "wordCount": {
-          "type": "integer"
-        }
+        "closing": {"type": "string"},
+        "wordCount": {"type": "integer"}
       }
     },
-
     "cover": {
       "type": "object",
-
-      "required": [
-        "headline",
-        "subheadline",
-        "visualConcept",
-        "imagePrompt",
-        "frameSeconds",
-        "asset",
-        "status"
-      ],
-
+      "required": ["headline", "subheadline", "visualConcept", "imagePrompt", "frameSeconds", "asset", "status", "platforms"],
       "properties": {
-        "headline": {
-          "type": "string"
-        },
-
-        "subheadline": {
-          "type": "string"
-        },
-
-        "visualConcept": {
-          "type": "string"
-        },
-
-        "imagePrompt": {
-          "type": "string"
-        },
-
-        "frameSeconds": {
-          "type": "number"
-        },
-
-        "asset": {
-          "type": ["string", "null"]
-        },
-
-        "status": {
-          "enum": [
-            "pending",
-            "ready",
-            "failed"
-          ]
-        },
-
+        "headline": {"type": "string"},
+        "subheadline": {"type": "string"},
+        "visualConcept": {"type": "string"},
+        "imagePrompt": {"type": "string"},
+        "frameSeconds": {"type": "number"},
+        "asset": {"type": ["string", "null"]},
+        "status": {"enum": ["pending", "ready", "failed"]},
         "platforms": {
           "type": "object",
-
+          "required": ["tiktok", "youtube", "facebook"],
           "properties": {
-            "tiktok": {
-              "type": "object",
-              "properties": {
-                "text": {
-                  "type": "string"
-                }
-              }
-            },
-
-            "youtube": {
-              "type": "object",
-              "properties": {
-                "text": {
-                  "type": "string"
-                },
-                "asset": {
-                  "type": ["string", "null"]
-                }
-              }
-            },
-
-            "facebook": {
-              "type": "object",
-              "properties": {
-                "text": {
-                  "type": "string"
-                },
-                "asset": {
-                  "type": ["string", "null"]
-                }
-              }
-            }
+            "tiktok": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}},
+            "youtube": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}, "asset": {"type": ["string", "null"]}}},
+            "facebook": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}, "asset": {"type": ["string", "null"]}}}
           }
         }
       }
     },
-
     "scenes": {
       "type": "array",
       "minItems": 16,
       "maxItems": 16,
-
       "items": {
         "type": "object",
-
-        "required": [
-          "text",
-          "searchTerms"
-        ],
-
+        "required": ["text", "searchTerms"],
         "properties": {
-          "text": {
-            "type": "string"
-          },
-
-          "searchTerms": {
-            "type": "array",
-            "minItems": 3,
-            "maxItems": 3,
-
-            "items": {
-              "type": "string"
-            }
-          }
+          "text": {"type": "string"},
+          "searchTerms": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string"}}
         }
       }
     },
-
-    "renderConfig": {
-      "type": "object"
-    },
-
-    "render": {
-      "type": "object"
-    },
-
+    "renderConfig": {"type": "object"},
+    "render": {"type": "object"},
     "publishing": {
       "type": "object",
-
-      "required": [
-        "tiktok",
-        "youtube",
-        "facebook"
-      ],
-
+      "required": ["tiktok", "youtube", "facebook"],
       "properties": {
         "tiktok": {
           "type": "object",
-
-          "required": [
-            "profileId",
-            "status",
-            "caption",
-            "hashtags",
-            "searchKeyword",
-            "coverText"
-          ],
-
+          "required": ["profileId", "status", "caption", "hashtags", "searchKeyword", "coverText"],
           "properties": {
-            "profileId": {
-              "type": "string"
-            },
-
-            "status": {
-              "type": "string"
-            },
-
-            "caption": {
-              "type": "string"
-            },
-
-            "hashtags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-
-            "searchKeyword": {
-              "type": "string"
-            },
-
-            "coverText": {
-              "type": "string"
-            },
-
-            "cta": {
-              "type": ["string", "null"]
-            },
-
-            "pinnedComment": {
-              "type": ["string", "null"]
-            },
-
-            "url": {
-              "type": ["string", "null"]
-            },
-
-            "publishedAt": {
-              "type": ["string", "null"]
-            }
+            "profileId": {"type": "string"},
+            "status": {"enum": ["pending", "ready", "scheduled", "published", "failed"]},
+            "caption": {"type": "string"},
+            "hashtags": {"type": "array", "items": {"type": "string", "pattern": "^#[^\\s#]+$"}},
+            "searchKeyword": {"type": "string"},
+            "coverText": {"type": "string"},
+            "cta": {"type": ["string", "null"]},
+            "pinnedComment": {"type": ["string", "null"]},
+            "url": {"type": ["string", "null"]},
+            "scheduledAt": {"type": ["string", "null"]},
+            "publishedAt": {"type": ["string", "null"]},
+            "videoId": {"type": ["string", "null"]}
           }
         },
-
         "youtube": {
           "type": "object",
-
-          "required": [
-            "profileId",
-            "status",
-            "title",
-            "description",
-            "hashtags",
-            "tags",
-            "thumbnailText"
-          ],
-
+          "required": ["profileId", "status", "title", "description", "hashtags", "tags", "thumbnailText"],
           "properties": {
-            "profileId": {
-              "type": "string"
-            },
-
-            "status": {
-              "type": "string"
-            },
-
-            "title": {
-              "type": "string"
-            },
-
-            "description": {
-              "type": "string"
-            },
-
-            "hashtags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-
-            "thumbnailText": {
-              "type": "string"
-            },
-
-            "cta": {
-              "type": ["string", "null"]
-            },
-
-            "pinnedComment": {
-              "type": ["string", "null"]
-            },
-
-            "videoId": {
-              "type": ["string", "null"]
-            },
-
-            "url": {
-              "type": ["string", "null"]
-            },
-
-            "publishedAt": {
-              "type": ["string", "null"]
-            }
+            "profileId": {"type": "string"},
+            "status": {"enum": ["pending", "ready", "scheduled", "published", "failed"]},
+            "title": {"type": "string", "maxLength": 100},
+            "description": {"type": "string", "maxLength": 5000},
+            "hashtags": {"type": "array", "items": {"type": "string", "pattern": "^#[^\\s#]+$"}},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "thumbnailText": {"type": "string"},
+            "cta": {"type": ["string", "null"]},
+            "pinnedComment": {"type": ["string", "null"]},
+            "url": {"type": ["string", "null"]},
+            "scheduledAt": {"type": ["string", "null"]},
+            "publishedAt": {"type": ["string", "null"]},
+            "videoId": {"type": ["string", "null"]}
           }
         },
-
         "facebook": {
           "type": "object",
-
-          "required": [
-            "profileId",
-            "status",
-            "description",
-            "hashtags",
-            "coverText",
-            "audience"
-          ],
-
+          "required": ["profileId", "status", "description", "hashtags", "coverText", "audience"],
           "properties": {
-            "profileId": {
-              "type": "string"
-            },
-
-            "status": {
-              "type": "string"
-            },
-
-            "description": {
-              "type": "string"
-            },
-
-            "hashtags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-
-            "coverText": {
-              "type": "string"
-            },
-
-            "audience": {
-              "type": "string"
-            },
-
-            "cta": {
-              "type": ["string", "null"]
-            },
-
-            "pinnedComment": {
-              "type": ["string", "null"]
-            },
-
-            "postId": {
-              "type": ["string", "null"]
-            },
-
-            "url": {
-              "type": ["string", "null"]
-            },
-
-            "publishedAt": {
-              "type": ["string", "null"]
-            }
+            "profileId": {"type": "string"},
+            "status": {"enum": ["pending", "ready", "scheduled", "published", "failed"]},
+            "description": {"type": "string"},
+            "hashtags": {"type": "array", "items": {"type": "string", "pattern": "^#[^\\s#]+$"}},
+            "coverText": {"type": "string"},
+            "audience": {"type": "string"},
+            "cta": {"type": ["string", "null"]},
+            "pinnedComment": {"type": ["string", "null"]},
+            "url": {"type": ["string", "null"]},
+            "scheduledAt": {"type": ["string", "null"]},
+            "publishedAt": {"type": ["string", "null"]},
+            "postId": {"type": ["string", "null"]}
           }
         }
       }
     },
-
     "engagement": {
       "type": "object",
-
-      "required": [
-        "cta",
-        "question"
-      ],
-
+      "required": ["cta", "question"],
       "properties": {
-        "cta": {
-          "type": "string"
-        },
-
-        "question": {
-          "type": "string"
-        },
-
-        "pinnedComment": {
-          "type": "string"
-        }
+        "cta": {"type": "string"},
+        "question": {"type": "string"},
+        "pinnedComment": {"type": "string"}
       }
     },
-
     "qa": {
       "type": "object",
-
       "properties": {
-        "passed": {
-          "type": "boolean"
-        },
-
-        "durationPassed": {
-          "type": ["boolean", "null"]
-        },
-
-        "resolutionPassed": {
-          "type": ["boolean", "null"]
-        },
-
-        "audioPassed": {
-          "type": ["boolean", "null"]
-        },
-
-        "captionsPassed": {
-          "type": ["boolean", "null"]
-        }
+        "passed": {"type": "boolean"},
+        "durationPassed": {"type": ["boolean", "null"]},
+        "resolutionPassed": {"type": ["boolean", "null"]},
+        "audioPassed": {"type": ["boolean", "null"]},
+        "captionsPassed": {"type": ["boolean", "null"]}
       }
     },
-
+    "admin": {
+      "type": "object",
+      "properties": {
+        "status": {"enum": ["review", "ready", "scheduled", "published", "needs_changes"]}
+      }
+    },
     "performance": {
       "type": "object",
-
       "properties": {
         "tiktok": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "views": {"type": ["integer", "null"], "minimum": 0},
+            "likes": {"type": ["integer", "null"], "minimum": 0},
+            "comments": {"type": ["integer", "null"], "minimum": 0},
+            "shares": {"type": ["integer", "null"], "minimum": 0},
+            "saves": {"type": ["integer", "null"], "minimum": 0},
+            "averageWatchTime": {"type": ["number", "null"]},
+            "averageWatchTimeSeconds": {"type": ["number", "null"]},
+            "completionRate": {"type": ["number", "null"]}
+          }
         },
-
         "youtube": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "views": {"type": ["integer", "null"], "minimum": 0},
+            "likes": {"type": ["integer", "null"], "minimum": 0},
+            "comments": {"type": ["integer", "null"], "minimum": 0},
+            "shares": {"type": ["integer", "null"], "minimum": 0},
+            "averageViewDuration": {"type": ["number", "null"]},
+            "averageViewDurationSeconds": {"type": ["number", "null"]},
+            "averagePercentageViewed": {"type": ["number", "null"]},
+            "viewedVsSwipedAway": {"type": ["number", "null"]},
+            "subscribersGained": {"type": ["integer", "null"], "minimum": 0}
+          }
         },
-
         "facebook": {
-          "type": "object"
+          "type": "object",
+          "properties": {
+            "views": {"type": ["integer", "null"], "minimum": 0},
+            "qualifiedViews": {"type": ["integer", "null"], "minimum": 0},
+            "watchTime": {"type": ["number", "null"]},
+            "watchTimeSeconds": {"type": ["number", "null"]},
+            "likes": {"type": ["integer", "null"], "minimum": 0},
+            "comments": {"type": ["integer", "null"], "minimum": 0},
+            "shares": {"type": ["integer", "null"], "minimum": 0},
+            "earnings": {"type": ["number", "null"]}
+          }
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"schemaVersion": {"const": 4}}, "required": ["schemaVersion"]},
+      "then": {
+        "properties": {
+          "publishing": {
+            "properties": {
+              "tiktok": {"properties": {"hashtags": {"minItems": 4, "maxItems": 6}}},
+              "youtube": {"properties": {"hashtags": {"minItems": 3, "maxItems": 5}, "title": {"maxLength": 100}, "description": {"maxLength": 5000}}},
+              "facebook": {"properties": {"hashtags": {"minItems": 3, "maxItems": 5}}}
+            }
+          }
+        }
+      }
+    }
+  ]
 }
