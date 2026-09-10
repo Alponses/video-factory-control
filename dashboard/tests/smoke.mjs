@@ -170,5 +170,13 @@ await new Promise(resolve => server.close(resolve));
 
 const ignored = execFileSync('git', ['check-ignore', 'dashboard/.secrets.json'], { cwd: repoRoot, encoding: 'utf8' }).trim();
 assert.equal(ignored, 'dashboard/.secrets.json');
+const repoSecret = path.join(repoRoot, 'dashboard', '.secrets.json');
+await fs.writeFile(repoSecret, JSON.stringify({ github: { token: 'test-only-not-a-real-token' } }));
+try {
+  const gitStatus = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], { cwd: repoRoot, encoding: 'utf8' });
+  assert.equal(gitStatus.includes('dashboard/.secrets.json'), false);
+} finally {
+  await fs.rm(repoSecret, { force: true });
+}
 
 console.log('Smoke tests V4.1: OK');
