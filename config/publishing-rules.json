@@ -1,6 +1,6 @@
 {
-  "version": 1,
-
+  "version": 2,
+  "scope": "internal-video-factory-rules",
   "global": {
     "originalContent": true,
     "avoidDuplicateCaptions": true,
@@ -9,50 +9,92 @@
     "useNaturalCTA": true,
     "generatePinnedComment": true,
     "generateCover": true,
-    "generateDiscoveryKeywords": true
+    "generateDiscoveryKeywords": true,
+    "brandHashtag": "#PausaConFe",
+    "brandHashtagMax": 1,
+    "blockedAutomaticHashtags": [
+      "#fyp",
+      "#viral",
+      "#parati"
+    ],
+    "hashtagsMustBeRelevant": true,
+    "hashtagsAtEnd": true,
+    "emojiAllowlist": [
+      "🙏",
+      "❤️",
+      "✨",
+      "🌅",
+      "🌙",
+      "🕊️",
+      "💛",
+      "🙌",
+      "🌿",
+      "☀️"
+    ],
+    "maxConsecutiveEmojis": 4
   },
-
   "cover": {
+    "headlineMinWords": 3,
     "headlineMaxWords": 7,
     "subheadlineMaxWords": 6,
     "mustBeReadableOnMobile": true,
     "avoidLongSentences": true,
     "preferEmotionalClarity": true,
     "generateVisualConcept": true,
-    "generateImagePrompt": true
+    "generateImagePrompt": true,
+    "platformSpecificText": true
   },
-
   "tiktok": {
     "enabled": true,
     "generateCaption": true,
     "generateHashtags": true,
     "hashtagsMin": 4,
-    "hashtagsMax": 8,
+    "hashtagsMax": 6,
+    "brandHashtagMax": 1,
+    "emojiMin": 3,
+    "emojiMax": 6,
+    "descriptionTargetMin": 120,
+    "descriptionTargetMax": 600,
+    "titleMaxCharacters": null,
+    "captionLinesMin": 2,
+    "captionLinesMax": 4,
     "generateSearchKeyword": true,
     "generateCoverText": true,
     "generatePinnedComment": true,
     "generateCTA": true
   },
-
   "youtube": {
     "enabled": true,
     "generateTitle": true,
     "generateDescription": true,
     "generateHashtags": true,
     "hashtagsMin": 3,
-    "hashtagsMax": 8,
+    "hashtagsMax": 5,
+    "brandHashtagMax": 1,
+    "emojiMin": 2,
+    "emojiMax": 4,
+    "descriptionTargetMin": 300,
+    "descriptionTargetMax": 700,
+    "titleMaxCharacters": 100,
+    "officialDescriptionMaxCharacters": 5000,
+    "titleEmojiMax": 1,
     "generateTags": true,
     "generateThumbnailText": true,
     "generatePinnedComment": true,
     "generateCTA": true
   },
-
   "facebook": {
     "enabled": true,
     "generateDescription": true,
     "generateHashtags": true,
     "hashtagsMin": 3,
-    "hashtagsMax": 8,
+    "hashtagsMax": 5,
+    "brandHashtagMax": 1,
+    "emojiMin": 3,
+    "emojiMax": 6,
+    "descriptionTargetMin": 250,
+    "descriptionTargetMax": 600,
+    "titleMaxCharacters": null,
     "generateCoverText": true,
     "generatePinnedComment": true,
     "generateCTA": true,
