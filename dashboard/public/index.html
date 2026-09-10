@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Video Factory Admin V4.1</title>
+  <title>Video Factory Admin V4.2</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <aside class="sidebar">
       <div class="brand">
         <img src="/assets/pausa-con-fe-avatar.svg" alt="" class="brand-logo">
-        <div><strong>Video Factory</strong><small>Admin V4.1</small></div>
+        <div><strong>Video Factory</strong><small>Admin V4.2</small></div>
       </div>
       <nav class="nav" aria-label="Administración">
         <button class="nav-item active" data-view="summary">Resumen</button>
@@ -70,7 +70,7 @@
       <section id="integrationsView" class="view">
         <div class="panel-grid three" id="integrationsGrid">
           <article class="panel"><h2>YouTube</h2><p id="youtubeIntegrationStatus" class="muted"></p><label class="field"><span>API key</span><input id="youtubeApiKey" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label></article>
-          <article class="panel"><h2>TikTok</h2><p id="tiktokIntegrationStatus" class="muted"></p><label class="field"><span>Access token</span><input id="tiktokAccessToken" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label></article>
+          <article class="panel"><h2>TikTok</h2><p id="tiktokIntegrationStatus" class="muted"></p><p class="hint">Recomendado: OAuth Desktop con PKCE. Guarda Client Key/Secret y autoriza la cuenta sin copiar tokens manualmente.</p><div class="actions left"><a class="button primary" href="http://127.0.0.1:3455/" target="_blank" rel="noreferrer">Conectar TikTok</a></div><label class="field"><span>Access token manual (opcional)</span><input id="tiktokAccessToken" type="password" autocomplete="off" placeholder="Sólo como fallback manual"></label></article>
           <article class="panel"><h2>Facebook</h2><p id="facebookIntegrationStatus" class="muted"></p><label class="field"><span>Page access token</span><input id="facebookPageToken" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label><label class="field"><span>Graph API version</span><input id="facebookGraphVersion" type="text" placeholder="vXX.X"></label></article>
         </div>
         <div class="panel action-panel"><button id="saveIntegrationsBtn" class="button primary">Guardar integraciones localmente</button><span id="integrationsMessage" class="muted"></span></div>

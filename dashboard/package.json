@@ -1,11 +1,11 @@
 {
   "name": "video-factory-dashboard-v4",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check public/app.js",
+    "start": "node start.mjs",
+    "check": "node --check server.mjs && node --check tiktok-oauth.mjs && node --check start.mjs && node --check public/app.js",
     "test:smoke": "node tests/smoke.mjs",
     "validate:json": "node tests/validate-json.mjs"
   },
