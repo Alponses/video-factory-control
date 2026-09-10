@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Factory V4</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">VF</span><div><strong>Video Factory</strong><small>Admin V4</small></div></div>
+      <nav class="nav"><button class="nav-item active" data-view="videos">Biblioteca de videos</button><button class="nav-item" data-view="summary">Resumen</button></nav>
+      <div class="sidebar-footer"><span id="githubDot" class="status-dot"></span><span id="githubStatusText">GitHub sin revisar</span></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><h1 id="viewTitle">Biblioteca de videos</h1><p id="viewSubtitle">Administra publicación, enlaces y métricas sin tocar los jobs originales.</p></div><button id="refreshBtn" class="button secondary">Actualizar</button></header>
+      <section id="videosView" class="view active">
+        <div class="toolbar card-surface">
+          <label class="field search-field"><span>Buscar</span><input id="searchInput" type="search" placeholder="Título, job ID o categoría"></label>
+          <label class="field"><span>Estado</span><select id="statusFilter"><option value="">Todos</option><option>review</option><option>ready</option><option>scheduled</option><option>published</option><option>needs_changes</option><option>approved</option><option>pending</option><option>failed</option></select></label>
+          <label class="field"><span>Orden</span><select id="sortSelect"><option value="date-desc">Más recientes</option><option value="date-asc">Más antiguos</option><option value="status">Estado</option><option value="views-desc">Más views</option></select></label>
+        </div>
+        <div id="globalError" class="message error hidden"></div><div id="loadingState" class="state-panel">Cargando biblioteca…</div><div id="emptyState" class="state-panel hidden">No hay videos que coincidan con los filtros.</div><div id="videoGrid" class="video-grid hidden"></div>
+      </section>
+      <section id="summaryView" class="view"><div id="summaryCards" class="summary-grid"></div></section>
+    </main>
+  </div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <header class="modal-header"><div><small id="modalJobId"></small><h2 id="modalTitle">Video</h2></div><button id="closeModalBtn" class="icon-button" aria-label="Cerrar">×</button></header>
+      <div id="modalMessage" class="message hidden"></div><nav id="tabs" class="tabs"></nav><div id="modalBody" class="modal-body"></div>
+      <footer class="modal-footer"><div class="save-state"><span id="saveHint">Los cambios se guardan en db/dashboard, nunca en db/jobs.</span></div><div class="actions"><button id="saveLocalBtn" class="button secondary">Guardar local</button><button id="saveGithubBtn" class="button primary">Guardar en GitHub</button></div></footer>
+    </div>
+  </div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
