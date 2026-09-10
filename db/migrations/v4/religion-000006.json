@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 4,
+  "channelId": "religion-es",
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok", "status": "pending",
+      "caption": "Hay días en que incluso lo más sencillo pesa demasiado. 🙏❤️\nNo tienes que resolver todo de una sola vez: cuida lo básico y busca solamente el siguiente paso posible. 🌿✨\nGuarda este mensaje para un día difícil o compártelo con alguien que hoy necesite compañía. 🕊️",
+      "hashtags": ["#MomentosDificiles", "#UnPasoALaVez", "#Reflexion", "#Fe", "#PausaConFe"],
+      "searchKeyword": "qué hacer cuando siento que no puedo más", "coverText": "Ve un paso a la vez",
+      "cta": "Guárdalo para esos días en los que necesites volver a lo esencial.",
+      "pinnedComment": "Hoy no tienes que resolverlo todo. 🌿 ¿Qué pequeño paso sí está a tu alcance?",
+      "videoId": null, "scheduledAt": null, "publishedAt": null, "url": null
+    },
+    "youtube": {
+      "profileId": "religion-es-youtube", "status": "pending",
+      "title": "Cuando sientes que ya no puedes más: ve un paso a la vez",
+      "description": "Esta reflexión para momentos difíciles recuerda algo sencillo: cuando todo se acumula, no necesitas resolver la vida completa en un solo día. 🙏❤️ Puedes distinguir lo urgente, cuidar lo básico, aceptar ayuda y concentrarte en una sola cosa posible.\n\nAvanzar por partes también es avanzar. 🌿 Si hoy estás cansado, guarda este mensaje para volver a lo esencial cuando la presión haga que todo parezca demasiado grande.",
+      "hashtags": ["#MomentosDificiles", "#UnPasoALaVez", "#ReflexionCristiana", "#PausaConFe"],
+      "tags": ["qué hacer cuando no puedo más", "momentos difíciles", "reflexión cristiana", "fe en tiempos difíciles", "agotamiento emocional"],
+      "thumbnailText": "Un paso a la vez", "cta": "Guarda esta reflexión para volver a ella en un día difícil.",
+      "pinnedComment": "¿Cuál es una sola cosa posible que puedes hacer hoy? 🌿",
+      "videoId": null, "scheduledAt": null, "publishedAt": null, "url": null
+    },
+    "facebook": {
+      "profileId": "religion-es-facebook", "status": "pending",
+      "description": "Hay días en que hasta lo más sencillo parece requerir demasiada fuerza. 🙏❤️ En lugar de exigirte resolverlo todo, esta reflexión propone algo más amable: cuidar lo básico, hacer una cosa posible y aceptar compañía cuando haga falta. 🌿🕊️\n\nLlegar hasta aquí también cuenta. ¿Cuál es ese pequeño paso que sí puedes dar hoy? Guarda este mensaje para volver a él cuando lo necesites. ✨",
+      "hashtags": ["#MomentosDificiles", "#PasoAPaso", "#Reflexion", "#PausaConFe"],
+      "coverText": "Hoy, solo un paso", "cta": "Guarda esta reflexión para los días en los que necesites ir paso a paso.",
+      "pinnedComment": "No todo tiene que resolverse hoy. 🌿 ¿Qué sí puedes hacer ahora?",
+      "postId": null, "scheduledAt": null, "publishedAt": null, "url": null, "audience": "public"
+    }
+  },
+  "performance": {
+    "tiktok": {"views": null, "likes": null, "comments": null, "shares": null, "saves": null, "averageWatchTime": null, "completionRate": null},
+    "youtube": {"views": null, "likes": null, "comments": null, "shares": null, "averageViewDuration": null, "averagePercentageViewed": null, "viewedVsSwipedAway": null, "subscribersGained": null},
+    "facebook": {"views": null, "qualifiedViews": null, "watchTime": null, "likes": null, "comments": null, "shares": null, "earnings": null}
+  }
+}
