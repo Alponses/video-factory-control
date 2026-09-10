@@ -2,6 +2,9 @@
 .env.*
 .secrets.json
 **/.secrets.json
+dashboard/uploads/*
+!dashboard/uploads/.gitkeep
+dashboard/dashboard-channels.json
 *.mp4
 *.mov
 *.wav

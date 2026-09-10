@@ -1,28 +1,59 @@
-# Video Factory Dashboard V4
+# Dashboard Admin V4.1
 
-Dashboard administrativo local, sin dependencias externas.
+Aplicación local de administración para Video Factory.
 
-## Ejecutar
+## Inicio
 
 ```bash
 cd dashboard
 npm start
 ```
 
-Abrir `http://127.0.0.1:4173`.
+Abre `http://127.0.0.1:4173`.
 
-## Capas de datos
+## Ventanas
 
-La API local construye cada video mediante deep merge:
+Resumen, Calendario, Canales, Biblioteca de videos, Publicación, Métricas,
+Integraciones, GitHub y Servidores son vistas independientes.
 
-`db/jobs` → `db/migrations/v3` → `db/migrations/v4` → `db/dashboard`.
+## Persistencia
 
-Guardar local escribe únicamente `db/dashboard/<jobId>.json`.
+- Edición editorial: `db/dashboard/<jobId>.json`
+- Calendario: `dashboard/dashboard-schedule.json`
+- Branding subido: `dashboard/uploads/` y `dashboard/dashboard-channels.json`
+- Secretos: `dashboard/.secrets.json`
+
+`db/jobs` nunca se modifica desde el dashboard.
+
+La vista de cada job se construye:
+
+`db/jobs` → `db/migrations/v3` → `db/migrations/v4` → `db/dashboard`
 
 ## GitHub
 
-Copia `.secrets.example.json` a `.secrets.json` dentro de `dashboard/` y configura un Fine-grained PAT con acceso únicamente al repositorio necesario. Para usar **Guardar en GitHub**, el token necesita `Contents: Read and write`.
+Copia `.secrets.example.json` solo si quieres preparar el archivo manualmente.
+También puedes configurar owner, repo, branch y PAT desde la ventana GitHub.
 
-`.secrets.json` está ignorado por Git y el token nunca se entrega al navegador.
+El PAT nunca se devuelve al frontend. Para lectura usa un fine-grained PAT con
+`Contents: Read`. Para "Guardar en GitHub", usa `Contents: Read and write`.
 
-Guardar en GitHub escribe exclusivamente `db/dashboard/<jobId>.json`. Si el token no tiene permiso de escritura, el servidor mostrará el error de GitHub y no modificará `db/jobs`.
+## Servidores
+
+Renderer:
+
+```bash
+cd ~/video-factory/renderer
+pnpm dev
+```
+
+Factory solo se habilita si existe:
+
+`~/video-factory/factory/scripts/run-factory.mjs`
+
+## Validación
+
+```bash
+npm run check
+npm run validate:json
+npm run test:smoke
+```

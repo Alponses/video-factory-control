@@ -1,0 +1,40 @@
+name: Dashboard V4 smoke
+
+on:
+  pull_request:
+    paths:
+      - "dashboard/**"
+      - "db/dashboard/**"
+      - "db/migrations/v4/**"
+      - "config/**"
+      - ".github/workflows/dashboard-v4-smoke.yml"
+  push:
+    branches:
+      - video-factory-v4
+    paths:
+      - "dashboard/**"
+      - "db/dashboard/**"
+      - "db/migrations/v4/**"
+      - "config/**"
+      - ".github/workflows/dashboard-v4-smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard-smoke:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: npm run check
+      - name: Validate JSON
+        run: npm run validate:json
+      - name: Smoke tests
+        run: npm run test:smoke

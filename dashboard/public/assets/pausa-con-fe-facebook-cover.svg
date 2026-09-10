@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 624" role="img" aria-labelledby="t">
+<title id="t">Pausa con Fe - Facebook cover</title>
+<defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#efe1c9"/><stop offset=".5" stop-color="#fffaf2"/><stop offset="1" stop-color="#e6c79b"/></linearGradient></defs>
+<rect width="1640" height="624" fill="url(#bg)"/>
+<circle cx="1325" cy="180" r="115" fill="#fff3cf" opacity=".9"/>
+<path d="M0 460c340-120 550-93 760 10 230 113 460 106 880-15v169H0Z" fill="#b69062" opacity=".2"/>
+<text x="600" y="285" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="84" font-weight="700" fill="#674a31">Pausa con Fe</text>
+<text x="600" y="360" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" fill="#80674f">Un momento de calma, esperanza y reflexión</text>
+</svg>
