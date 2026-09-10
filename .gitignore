@@ -1,5 +1,7 @@
 .env
 .env.*
+.secrets.json
+**/.secrets.json
 *.mp4
 *.mov
 *.wav
