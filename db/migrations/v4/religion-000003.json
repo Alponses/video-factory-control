@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 4,
+  "channelId": "religion-es",
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok",
+      "status": "pending",
+      "caption": "Cuando una puerta se cierra, puede sentirse como si todo se hubiera detenido. 🙏✨\nPero quizá todavía exista un paso pequeño que sí puedes dar hoy. ❤️🌿\nGuarda este mensaje o compártelo con alguien que necesite recordar que aún hay camino. 🙌",
+      "hashtags": ["#Esperanza", "#SeguirAdelante", "#MomentosDificiles", "#Fe", "#PausaConFe"],
+      "searchKeyword": "esperanza en momentos difíciles",
+      "coverText": "Todavía hay camino",
+      "cta": "Compártelo con alguien que hoy necesite recordar que todavía hay camino.",
+      "pinnedComment": "No necesitas ver todo el camino. ✨ ¿Cuál es el siguiente paso posible para ti?",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "youtube": {
+      "profileId": "religion-es-youtube",
+      "status": "pending",
+      "title": "Cuando una puerta se cierra, todavía puedes avanzar",
+      "description": "Esta reflexión de esperanza es para esos momentos en que un plan cambia, una respuesta no llega o una oportunidad parece haberse cerrado. ✨🙏 No siempre podemos elegir lo que ocurre, pero sí podemos mirar con calma qué sigue dependiendo de nosotros.\n\nAvanzar no significa tener todo resuelto: a veces basta con encontrar el siguiente paso. 🌿 Si este mensaje te ayudó, guárdalo y compártelo con alguien que esté atravesando una etapa de incertidumbre.",
+      "hashtags": ["#Esperanza", "#SeguirAdelante", "#ReflexionCristiana", "#PausaConFe"],
+      "tags": ["esperanza en momentos difíciles", "seguir adelante", "reflexión cristiana", "puertas cerradas", "fe e incertidumbre"],
+      "thumbnailText": "Todavía puedes avanzar",
+      "cta": "Guarda esta reflexión para recordar que un cierre no siempre es el final.",
+      "pinnedComment": "¿Qué pequeño paso sí puedes dar hoy aunque todavía no veas todo el camino? ✨",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "facebook": {
+      "profileId": "religion-es-facebook",
+      "status": "pending",
+      "description": "Cuando algo no sale como esperabas, un cierre puede sentirse definitivo. 🙏✨ Esta reflexión recuerda que todavía puedes detenerte, mirar nuevas opciones y avanzar poco a poco, sin exigirte tener todas las respuestas hoy. ❤️🌿\n\nA veces el camino cambia, pero no termina. ¿Cuál sería un siguiente paso pequeño y posible para ti? Comparte este mensaje con alguien que necesite ánimo. 🙌",
+      "hashtags": ["#Esperanza", "#ReflexionDelDia", "#SeguirAdelante", "#PausaConFe"],
+      "coverText": "Aún hay un siguiente paso",
+      "cta": "Comparte este mensaje con alguien que hoy necesite un poco de esperanza.",
+      "pinnedComment": "A veces avanzar empieza con algo muy pequeño. ✨ ¿Qué paso puedes dar hoy?",
+      "postId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null,
+      "audience": "public"
+    }
+  },
+  "performance": {
+    "tiktok": {"views": null, "likes": null, "comments": null, "shares": null, "saves": null, "averageWatchTime": null, "completionRate": null},
+    "youtube": {"views": null, "likes": null, "comments": null, "shares": null, "averageViewDuration": null, "averagePercentageViewed": null, "viewedVsSwipedAway": null, "subscribersGained": null},
+    "facebook": {"views": null, "qualifiedViews": null, "watchTime": null, "likes": null, "comments": null, "shares": null, "earnings": null}
+  }
+}

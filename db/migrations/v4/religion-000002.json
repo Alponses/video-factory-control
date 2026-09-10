@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 4,
+  "channelId": "religion-es",
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok",
+      "status": "pending",
+      "caption": "Si hoy terminaste cansado, no tienes que resolverlo todo antes de dormir. 🌙🙏\nHaz una pausa, reconoce lo que te pesó y permite que tu mente descanse un poco. ❤️🕊️\nGuarda esta reflexión para una noche difícil y cuéntame: ¿qué quieres dejar para mañana? ✨",
+      "hashtags": ["#OracionDeLaNoche", "#DormirEnPaz", "#PazInterior", "#ReflexionNocturna", "#PausaConFe"],
+      "searchKeyword": "oración para dormir tranquilo",
+      "coverText": "Suelta el peso de hoy",
+      "cta": "Guarda esta reflexión para volver a ella cuando necesites descansar con más calma.",
+      "pinnedComment": "Esta noche no tienes que resolverlo todo. 🌙 ¿Qué te gustaría dejar en pausa hasta mañana?",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "youtube": {
+      "profileId": "religion-es-youtube",
+      "status": "pending",
+      "title": "Antes de dormir: una reflexión para soltar las preocupaciones",
+      "description": "Esta oración de la noche es una pausa para cuando el día termina pero las preocupaciones siguen despiertas contigo. 🌙🙏 Puedes reconocer lo que te dolió, agradecer algo pequeño y recordar que no todo necesita una respuesta inmediata.\n\nPermítete descansar con más calma y retomar mañana lo que hoy ya pesa demasiado. ❤️ Si esta reflexión te acompañó, guárdala o compártela con alguien que también necesite una noche en paz.",
+      "hashtags": ["#OracionDeLaNoche", "#DormirEnPaz", "#ReflexionCristiana", "#PausaConFe"],
+      "tags": ["oración de la noche", "oración para dormir", "reflexión antes de dormir", "paz interior", "fe cristiana"],
+      "thumbnailText": "Esta noche, descansa",
+      "cta": "Guarda este Short para volver a escucharlo antes de dormir.",
+      "pinnedComment": "¿Qué preocupación puedes dejar para mañana y darte permiso de descansar hoy? 🌙",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "facebook": {
+      "profileId": "religion-es-facebook",
+      "status": "pending",
+      "description": "Si el día terminó pero tu mente sigue repasando pendientes, esta reflexión puede acompañarte a cerrar la noche con más calma. 🌙🙏 No necesitas encontrar hoy todas las respuestas. Agradece algo pequeño, respira despacio y deja para mañana lo que puede esperar. ❤️🕊️\n\n¿Hay algo que hoy puedas soltar por unas horas? Si conoces a alguien que lo necesite, comparte este mensaje. ✨",
+      "hashtags": ["#BuenasNoches", "#OracionDeLaNoche", "#PazInterior", "#PausaConFe"],
+      "coverText": "Hoy puedes soltarlo",
+      "cta": "Comparte esta reflexión con alguien que necesite descansar con más calma.",
+      "pinnedComment": "¿Qué te ayudaría a terminar este día con un poco más de paz? 🌙",
+      "postId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null,
+      "audience": "public"
+    }
+  },
+  "performance": {
+    "tiktok": {"views": null, "likes": null, "comments": null, "shares": null, "saves": null, "averageWatchTime": null, "completionRate": null},
+    "youtube": {"views": null, "likes": null, "comments": null, "shares": null, "averageViewDuration": null, "averagePercentageViewed": null, "viewedVsSwipedAway": null, "subscribersGained": null},
+    "facebook": {"views": null, "qualifiedViews": null, "watchTime": null, "likes": null, "comments": null, "shares": null, "earnings": null}
+  }
+}

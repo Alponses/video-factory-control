@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Factory Admin V4.1</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/assets/pausa-con-fe-avatar.svg" alt="" class="brand-logo">
+        <div><strong>Video Factory</strong><small>Admin V4.1</small></div>
+      </div>
+      <nav class="nav" aria-label="Administración">
+        <button class="nav-item active" data-view="summary">Resumen</button>
+        <button class="nav-item" data-view="calendar">Calendario</button>
+        <button class="nav-item" data-view="channels">Canales</button>
+        <button class="nav-item" data-view="videos">Biblioteca de videos</button>
+        <button class="nav-item" data-view="publishing">Publicación</button>
+        <button class="nav-item" data-view="metrics">Métricas</button>
+        <button class="nav-item" data-view="integrations">Integraciones</button>
+        <button class="nav-item" data-view="github">GitHub</button>
+        <button class="nav-item" data-view="servers">Servidores</button>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="githubDot" class="status-dot"></span>
+        <span id="githubStatusText">GitHub sin revisar</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="viewTitle">Resumen</h1>
+          <p id="viewSubtitle">Estado general de Video Factory.</p>
+        </div>
+        <button id="refreshBtn" class="button secondary">Actualizar</button>
+      </header>
+
+      <div id="globalError" class="message error hidden"></div>
+
+      <section id="summaryView" class="view active">
+        <div id="summaryCards" class="summary-grid"></div>
+        <div class="panel-grid two">
+          <article class="panel"><div class="panel-heading"><div><h2>Próximas publicaciones</h2><p>Eventos programados del calendario.</p></div></div><div id="summarySchedule"></div></article>
+          <article class="panel"><div class="panel-heading"><div><h2>Estado de plataformas</h2><p>Enlaces y métricas conocidas.</p></div></div><div id="summaryPlatforms"></div></article>
+        </div>
+      </section>
+
+      <section id="calendarView" class="view">
+        <div class="panel">
+          <div class="panel-heading calendar-heading"><div><h2>Calendario mensual</h2><p>Planeación independiente de los jobs originales.</p></div><div class="calendar-actions"><button id="prevMonthBtn" class="button secondary">Anterior</button><strong id="calendarMonthLabel"></strong><button id="nextMonthBtn" class="button secondary">Siguiente</button><button id="newScheduleBtn" class="button primary">Crear evento</button></div></div>
+          <div class="calendar-weekdays"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span></div><div id="calendarGrid" class="calendar-grid"></div>
+        </div>
+      </section>
+
+      <section id="channelsView" class="view"><div id="channelGrid" class="channel-grid"></div></section>
+
+      <section id="videosView" class="view">
+        <div class="toolbar panel"><label class="field search-field"><span>Buscar</span><input id="searchInput" type="search" placeholder="Título, job ID o categoría"></label><label class="field"><span>Estado</span><select id="statusFilter"><option value="">Todos</option><option>review</option><option>ready</option><option>scheduled</option><option>published</option><option>needs_changes</option><option>approved</option><option>pending</option><option>failed</option></select></label><label class="field"><span>Orden</span><select id="sortSelect"><option value="date-desc">Más recientes</option><option value="date-asc">Más antiguos</option><option value="status">Estado</option><option value="views-desc">Más views</option></select></label></div>
+        <div id="loadingState" class="state-panel">Cargando biblioteca…</div><div id="emptyState" class="state-panel hidden">No hay videos que coincidan con los filtros.</div><div id="videoGrid" class="video-grid hidden"></div>
+      </section>
+
+      <section id="publishingView" class="view"><div class="panel"><div class="panel-heading"><div><h2>Centro de publicación</h2><p>Estado por video y plataforma.</p></div></div><div id="publishingTable" class="table-wrap"></div></div></section>
+
+      <section id="metricsView" class="view"><div class="panel"><div class="panel-heading"><div><h2>Centro de métricas</h2><p>Solo datos conocidos. Los valores ausentes se muestran como —.</p></div></div><label class="field compact"><span>Video</span><select id="metricsJobSelect"></select></label><div id="metricsContent" class="metrics-grid"></div></div></section>
+
+      <section id="integrationsView" class="view">
+        <div class="panel-grid three" id="integrationsGrid">
+          <article class="panel"><h2>YouTube</h2><p id="youtubeIntegrationStatus" class="muted"></p><label class="field"><span>API key</span><input id="youtubeApiKey" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label></article>
+          <article class="panel"><h2>TikTok</h2><p id="tiktokIntegrationStatus" class="muted"></p><label class="field"><span>Access token</span><input id="tiktokAccessToken" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label></article>
+          <article class="panel"><h2>Facebook</h2><p id="facebookIntegrationStatus" class="muted"></p><label class="field"><span>Page access token</span><input id="facebookPageToken" type="password" autocomplete="off" placeholder="No se muestra el valor guardado"></label><label class="field"><span>Graph API version</span><input id="facebookGraphVersion" type="text" placeholder="vXX.X"></label></article>
+        </div>
+        <div class="panel action-panel"><button id="saveIntegrationsBtn" class="button primary">Guardar integraciones localmente</button><span id="integrationsMessage" class="muted"></span></div>
+      </section>
+
+      <section id="githubView" class="view">
+        <div class="panel narrow"><div class="panel-heading"><div><h2>GitHub</h2><p>El PAT vive únicamente en <code>dashboard/.secrets.json</code>.</p></div></div><div class="form-grid"><label class="field"><span>Owner</span><input id="githubOwner" type="text" autocomplete="off"></label><label class="field"><span>Repo</span><input id="githubRepo" type="text" autocomplete="off"></label><label class="field"><span>Branch</span><input id="githubBranch" type="text" autocomplete="off"></label><label class="field full"><span>Fine-grained PAT</span><input id="githubToken" type="password" autocomplete="new-password" placeholder="No se devuelve al navegador"></label></div><div id="githubPanelStatus" class="message neutral"></div><div class="actions left"><button id="saveGithubConfigBtn" class="button primary">Guardar y probar</button><button id="syncGithubBtn" class="button secondary">Sincronizar</button><button id="deleteGithubTokenBtn" class="button danger">Borrar token local</button></div><p class="hint">Lectura: Contents Read. Para “Guardar en GitHub”: Contents Read and write.</p></div>
+      </section>
+
+      <section id="serversView" class="view">
+        <div class="panel-grid two">
+          <article class="panel"><div class="server-title"><div><h2>Renderer</h2><p><code>http://127.0.0.1:3123/health</code></p></div><span id="rendererBadge" class="badge">—</span></div><div id="rendererInfo" class="key-values"></div><div class="actions left"><button id="startRendererBtn" class="button primary">Prender renderer</button><button id="stopRendererBtn" class="button danger">Detener renderer</button></div><pre id="rendererLogs" class="logs"></pre></article>
+          <article class="panel"><div class="server-title"><div><h2>Factory</h2><p><code>~/video-factory/factory/scripts/run-factory.mjs</code></p></div><span id="factoryBadge" class="badge">—</span></div><div id="factoryInfo" class="key-values"></div><div class="actions left"><button id="startFactoryBtn" class="button primary">Ejecutar factory</button><button id="stopFactoryBtn" class="button danger">Detener factory</button></div><pre id="factoryLogs" class="logs"></pre></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="videoModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-card"><header class="modal-header"><div><small id="modalJobId"></small><h2 id="modalTitle">Video</h2></div><button id="closeModalBtn" class="icon-button" aria-label="Cerrar">×</button></header><div id="modalMessage" class="message hidden"></div><nav id="tabs" class="tabs"></nav><div id="modalBody" class="modal-body"></div><footer class="modal-footer"><span id="saveHint">Los cambios se guardan en db/dashboard, nunca en db/jobs.</span><div class="actions"><button id="saveLocalBtn" class="button secondary">Guardar local</button><button id="saveGithubBtn" class="button primary">Guardar en GitHub</button></div></footer></div></div>
+
+  <div id="scheduleModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="scheduleModalTitle"><div class="modal-card small-modal"><header class="modal-header"><h2 id="scheduleModalTitle">Evento</h2><button id="closeScheduleModalBtn" class="icon-button" aria-label="Cerrar">×</button></header><div class="modal-body"><form id="scheduleForm" class="form-grid"><input id="scheduleId" type="hidden"><label class="field full"><span>Job</span><select id="scheduleJobId" required></select></label><label class="field"><span>Plataforma</span><select id="schedulePlatform" required><option value="tiktok">TikTok</option><option value="youtube">YouTube</option><option value="facebook">Facebook</option></select></label><label class="field"><span>Status</span><select id="scheduleStatus" required><option value="pending">pending</option><option value="ready">ready</option><option value="scheduled" selected>scheduled</option><option value="published">published</option><option value="failed">failed</option></select></label><label class="field full"><span>Fecha y hora</span><input id="scheduleAt" type="datetime-local" required></label><label class="field full"><span>Nota</span><textarea id="scheduleNote" rows="3"></textarea></label></form></div><footer class="modal-footer"><button id="deleteScheduleBtn" class="button danger hidden">Eliminar</button><div class="actions"><button id="cancelScheduleBtn" class="button secondary">Cancelar</button><button id="saveScheduleBtn" class="button primary">Guardar evento</button></div></footer></div></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

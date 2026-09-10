@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440" role="img" aria-labelledby="t">
+<title id="t">Pausa con Fe - YouTube banner</title>
+<defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#f5dfba"/><stop offset=".55" stop-color="#fff8ec"/><stop offset="1" stop-color="#f1c98c"/></linearGradient></defs>
+<rect width="2560" height="1440" fill="url(#bg)"/>
+<circle cx="1960" cy="420" r="260" fill="#fff6dd" opacity=".85"/>
+<path d="M0 1080c460-190 720-170 1050-35 310 128 670 120 1510-130v525H0Z" fill="#d7b27e" opacity=".35"/>
+<path d="M0 1180c520-150 910-55 1260 30 390 95 760 70 1300-70v300H0Z" fill="#b88f62" opacity=".22"/>
+<text x="1280" y="665" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="132" font-weight="700" fill="#6c4c2d">PAUSA CON FE</text>
+<text x="1280" y="770" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="48" fill="#7e654c">Reflexiones para comenzar y cerrar el día con calma</text>
+</svg>

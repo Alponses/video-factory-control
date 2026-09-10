@@ -10,7 +10,6 @@
       "facil-de-entender"
     ]
   },
-
   "writing": {
     "useStrongHook": true,
     "useNarrativeProgression": true,
@@ -18,30 +17,36 @@
     "avoidRepetitiveIntroductions": true,
     "avoidGenericTemplates": true,
     "avoidYouthSlang": true,
-    "avoidEmojis": true
+    "avoidEmojis": true,
+    "emojiScope": "narration-only"
   },
-
+  "publishingCopy": {
+    "useEmojis": true,
+    "warm": true,
+    "easyToRead": true,
+    "expressive": true,
+    "positive": true,
+    "human": true,
+    "adaptPerPlatform": true,
+    "avoidSameTextAcrossPlatforms": true
+  },
   "religion": {
     "allowGodReferences": true,
     "allowFaithReferences": true,
     "allowPrayerReferences": true,
-
     "allowExactBibleQuotesWithoutVerification": false,
     "allowInventedBibleVerses": false,
     "allowInventedQuotesFromJesus": false,
     "allowInventedQuotesFromGod": false,
-
     "avoidReligiousAttacks": true,
     "avoidReligiousControversy": true
   },
-
   "claims": {
     "promiseMiracles": false,
     "promiseHealing": false,
     "promiseMoney": false,
     "promiseSupernaturalResults": false
   },
-
   "scenes": {
     "oneIdeaPerScene": true,
     "targetWordsPerSceneMin": 8,
@@ -50,7 +55,6 @@
     "preferConcreteVisualTerms": true,
     "avoidAbstractSearchTerms": true
   },
-
   "originality": {
     "checkPreviousTitles": true,
     "checkPreviousTopics": true,

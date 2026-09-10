@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 4,
+  "channelId": "religion-es",
+  "publishing": {
+    "tiktok": {
+      "profileId": "religion-es-tiktok",
+      "status": "pending",
+      "caption": "No todos los días traen grandes noticias, pero casi siempre dejan algo sencillo que agradecer. 🙏💛\nUna llamada, poder caminar, una comida o unos minutos de calma también cuentan. ☀️🌿\nGuarda este video y escribe hoy tres cosas pequeñas por las que quieras dar gracias. ✨",
+      "hashtags": ["#Gratitud", "#Agradecer", "#ReflexionDiaria", "#VidaCotidiana", "#PausaConFe"],
+      "searchKeyword": "ejercicio de gratitud diaria",
+      "coverText": "Tres razones para agradecer",
+      "cta": "Guarda el video y escribe tus propias tres razones para agradecer hoy.",
+      "pinnedComment": "Lo pequeño también cuenta. 💛 ¿Qué detalle sencillo agradeces hoy?",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "youtube": {
+      "profileId": "religion-es-youtube",
+      "status": "pending",
+      "title": "3 cosas sencillas que puedes agradecer hoy",
+      "description": "Este ejercicio de gratitud diaria propone mirar tres cosas que suelen pasar desapercibidas: una persona que estuvo presente, una capacidad cotidiana y un momento de calma. 🙏💛 No necesitas que el día haya sido perfecto para reconocer algo bueno.\n\nHaz una pausa y piensa en tus propias tres razones para agradecer. ✨ Puedes guardarlas por escrito y volver a ellas cuando la rutina haga difícil ver lo valioso de lo cotidiano.",
+      "hashtags": ["#Gratitud", "#Agradecer", "#ReflexionCristiana", "#PausaConFe"],
+      "tags": ["gratitud diaria", "cosas para agradecer", "reflexión de gratitud", "agradecer a Dios", "ejercicio de gratitud"],
+      "thumbnailText": "3 razones para agradecer",
+      "cta": "Escribe tres razones sencillas para agradecer hoy y guarda este Short.",
+      "pinnedComment": "¿Cuáles son tres cosas pequeñas que hoy sí estuvieron bien? 💛",
+      "videoId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null
+    },
+    "facebook": {
+      "profileId": "religion-es-facebook",
+      "status": "pending",
+      "description": "A veces lo bueno del día fue algo pequeño: una llamada, una comida, poder caminar o unos minutos de tranquilidad. 🙏💛 Esta reflexión invita a mirar de nuevo lo cotidiano y reconocer que también ahí puede haber motivos para agradecer. ☀️🌿\n\nPiensa en tres cosas sencillas que hoy estuvieron presentes. ¿Cuál sería la primera? Si te sirve, comparte este ejercicio con tu familia. ✨",
+      "hashtags": ["#Gratitud", "#Agradecimiento", "#Reflexion", "#PausaConFe"],
+      "coverText": "Lo pequeño también cuenta",
+      "cta": "Comparte este ejercicio con alguien con quien quieras practicar gratitud.",
+      "pinnedComment": "Hoy quiero agradecer por ________. 💛 ¿Qué pondrías tú?",
+      "postId": null,
+      "scheduledAt": null,
+      "publishedAt": null,
+      "url": null,
+      "audience": "public"
+    }
+  },
+  "performance": {
+    "tiktok": {"views": null, "likes": null, "comments": null, "shares": null, "saves": null, "averageWatchTime": null, "completionRate": null},
+    "youtube": {"views": null, "likes": null, "comments": null, "shares": null, "averageViewDuration": null, "averagePercentageViewed": null, "viewedVsSwipedAway": null, "subscribersGained": null},
+    "facebook": {"views": null, "qualifiedViews": null, "watchTime": null, "likes": null, "comments": null, "shares": null, "earnings": null}
+  }
+}
