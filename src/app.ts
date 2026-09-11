@@ -27,7 +27,7 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use(sameOriginCors(config));
   app.use(express.json({ limit: '1mb', strict: true }));
 
-  app.use('/api/health', createHealthRouter(dependencies.prisma));
+  app.use('/api/health', createHealthRouter(dependencies.prisma, config));
 
   const adminAuth = createAdminAuth(config, dependencies.auth);
   const adminReadLimit = fixedWindowRateLimit(120, 60_000);
