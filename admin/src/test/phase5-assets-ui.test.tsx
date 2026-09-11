@@ -71,8 +71,8 @@ describe('Phase 5 Admin durable assets', () => {
     const file = new File([new Uint8Array(1024)], `${kind.toLowerCase()}.bin`, { type: mimeType });
     fireEvent.change(screen.getByLabelText('File'), { target: { files: [file] } });
     fireEvent.click(screen.getByRole('button', { name: `Upload ${kind}` }));
-    expect(await screen.findByText('100%')).toBeInTheDocument();
-    expect(screen.getByText('Ready')).toBeInTheDocument();
+    expect(await screen.findByText('Ready')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('value', '100');
     expect(FakeXHR.sends).toBe(1);
     expect(fetchMock.mock.calls.every((call) => String(call[0]).startsWith('/api/admin/'))).toBe(true);
   });
@@ -109,8 +109,11 @@ describe('Phase 5 Admin durable assets', () => {
     }));
     renderAssetManager();
     fireEvent.click(await screen.findByRole('button', { name: 'Preview / Download' }));
-    const video = await waitFor(() => document.querySelector('video'));
-    expect(video).not.toBeNull();
+    const video = await waitFor(() => {
+      const found = document.querySelector('video');
+      expect(found).not.toBeNull();
+      return found as HTMLVideoElement;
+    });
     expect(video).toHaveAttribute('controls');
     expect(video).toHaveAttribute('src', expect.stringContaining('X-Amz-Signature=fresh'));
   });
@@ -120,9 +123,13 @@ describe('Phase 5 Channels', () => {
   it('renders real channel/profile data and keeps TikTok avatar-only while YouTube/Facebook expose banner slots', async () => {
     setupGlobals();
     const profiles = ['TIKTOK', 'YOUTUBE', 'FACEBOOK'].map((platform) => ({ id: `profile-${platform.toLowerCase()}`, platform, displayName: `${platform} profile`, username: `@${platform.toLowerCase()}`, assets: [] }));
-    vi.stubGlobal('fetch', vi.fn((input: string | URL | Request) => String(input) === '/api/admin/channels'
-      ? json({ items: [{ id: 'channel-other', displayName: 'Other Channel', language: 'es-MX', profiles }] })
-      : json(policy)));
+    vi.stubGlobal('fetch', vi.fn((input: string | URL | Request) => {
+      const url = String(input);
+      if (url === '/api/admin/channels') return json({ items: [{ id: 'channel-other', displayName: 'Other Channel', language: 'es-MX', profiles }] });
+      if (url === '/api/admin/assets/policy') return json(policy);
+      if (/^\/api\/admin\/profiles\/[^/]+\/assets$/.test(url)) return json({ items: [] });
+      return json({ error: { code: 'UNEXPECTED', message: url } }, 500);
+    }));
     const router = createMemoryRouter([{ path: '/channels', element: <ChannelsPage /> }], { initialEntries: ['/channels'] });
     render(<RouterProvider router={router} />);
     expect(await screen.findByText('Other Channel')).toBeInTheDocument();
@@ -131,8 +138,11 @@ describe('Phase 5 Channels', () => {
     const youtube = screen.getByText('YOUTUBE').closest('article');
     const facebook = screen.getByText('FACEBOOK').closest('article');
     expect(tikTok).not.toBeNull(); expect(youtube).not.toBeNull(); expect(facebook).not.toBeNull();
-    expect(within(tikTok!).getAllByRole('option').map((o) => o.textContent)).toEqual(['AVATAR']);
-    expect(within(youtube!).getAllByRole('option').map((o) => o.textContent)).toEqual(['AVATAR', 'BANNER']);
-    expect(within(facebook!).getAllByRole('option').map((o) => o.textContent)).toEqual(['AVATAR', 'BANNER']);
+    await within(tikTok!).findByRole('combobox');
+    await within(youtube!).findByRole('combobox');
+    await within(facebook!).findByRole('combobox');
+    expect(within(tikTok!).getAllByRole('option').map((option) => option.textContent)).toEqual(['AVATAR']);
+    expect(within(youtube!).getAllByRole('option').map((option) => option.textContent)).toEqual(['AVATAR', 'BANNER']);
+    expect(within(facebook!).getAllByRole('option').map((option) => option.textContent)).toEqual(['AVATAR', 'BANNER']);
   });
 });
