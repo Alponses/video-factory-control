@@ -1,4 +1,4 @@
-name: Video Factory V5 Phase 1
+name: Video Factory V5 CI
 
 on:
   pull_request:
@@ -17,6 +17,7 @@ on:
       - 'db/dashboard/**'
       - 'config/factory.json'
       - 'docs/v5-phase1.md'
+      - 'docs/v5-phase2-security.md'
       - '.github/workflows/v5-phase1.yml'
   push:
     branches:
@@ -36,13 +37,14 @@ on:
       - 'db/dashboard/**'
       - 'config/factory.json'
       - 'docs/v5-phase1.md'
+      - 'docs/v5-phase2-security.md'
       - '.github/workflows/v5-phase1.yml'
 
 permissions:
   contents: read
 
 jobs:
-  static-and-unit:
+  static-unit-security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,13 +58,13 @@ jobs:
         run: npm run prisma:generate
       - name: Prisma validate
         env:
-          DATABASE_URL: mysql://phase1:phase1@127.0.0.1:3306/phase1
+          DATABASE_URL: mysql://phase2:phase2@127.0.0.1:3306/phase2
         run: npm run prisma:validate
       - name: Lint
         run: npm run lint
       - name: Typecheck
         run: npm run typecheck
-      - name: Unit tests
+      - name: Unit, JWT and security tests
         run: npm run test
       - name: Build
         run: npm run build
@@ -73,20 +75,20 @@ jobs:
       mariadb:
         image: mariadb:10.11
         env:
-          MARIADB_ROOT_PASSWORD: root-phase1
+          MARIADB_ROOT_PASSWORD: root-phase2
           MARIADB_DATABASE: video_factory_v5
           MARIADB_USER: video_factory
-          MARIADB_PASSWORD: phase1-only
+          MARIADB_PASSWORD: phase2-only
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase1 --silent"
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase2 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
     env:
       NODE_ENV: test
-      DATABASE_URL: mysql://video_factory:phase1-only@127.0.0.1:3306/video_factory_v5
+      DATABASE_URL: mysql://video_factory:phase2-only@127.0.0.1:3306/video_factory_v5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -103,7 +105,7 @@ jobs:
         run: |
           npm run db:migrate
           npx prisma migrate status
-      - name: MariaDB integration tests
+      - name: MariaDB legacy + Admin API integration tests
         run: npm run test:integration
       - name: Reset MariaDB for explicit importer proof
         run: npx prisma migrate reset --force --skip-seed
