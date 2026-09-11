@@ -138,31 +138,32 @@ export function createHealthRouter(prisma: PrismaClient, config: AppConfig) {
 
 export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
   const router = Router();
+  const workerOfflineThresholdSeconds = config.workerOfflineThresholdSeconds ?? 60;
   router.get('/me', (req, res, next) => {
     if (!req.actor) return next(new ApiError(401, 'ADMIN_CONTEXT_MISSING', 'Administrator context is missing'));
     res.json({ email: req.actor.email });
   });
   router.get('/dashboard', asyncRoute(async (_req, res) => res.json(await getDashboard(prisma))));
-  router.get('/workers', asyncRoute(async (_req, res) => res.json(await listWorkers(prisma, config.workerOfflineThresholdSeconds))));
+  router.get('/workers', asyncRoute(async (_req, res) => res.json(await listWorkers(prisma, workerOfflineThresholdSeconds))));
   router.post('/workers', asyncRoute(async (req, res) => {
     const body = parseRequest(z.object({ workerId: workerIdSchema }).strict(), req.body);
     const actor = requireAdmin(req);
-    res.status(201).json(await createWorker(prisma, body.workerId, actor.email, req.requestId, config.workerOfflineThresholdSeconds));
+    res.status(201).json(await createWorker(prisma, body.workerId, actor.email, req.requestId, workerOfflineThresholdSeconds));
   }));
   router.post('/workers/:workerId/rotate-secret', asyncRoute(async (req, res) => {
     const workerId = parseRequest(workerIdSchema, req.params.workerId);
     const actor = requireAdmin(req);
-    res.json(await rotateWorkerSecret(prisma, workerId, actor.email, req.requestId, config.workerOfflineThresholdSeconds));
+    res.json(await rotateWorkerSecret(prisma, workerId, actor.email, req.requestId, workerOfflineThresholdSeconds));
   }));
   router.post('/workers/:workerId/revoke', asyncRoute(async (req, res) => {
     const workerId = parseRequest(workerIdSchema, req.params.workerId);
     const actor = requireAdmin(req);
-    res.json(await revokeWorker(prisma, workerId, actor.email, req.requestId, config.workerOfflineThresholdSeconds));
+    res.json(await revokeWorker(prisma, workerId, actor.email, req.requestId, workerOfflineThresholdSeconds));
   }));
   router.post('/workers/:workerId/enable', asyncRoute(async (req, res) => {
     const workerId = parseRequest(workerIdSchema, req.params.workerId);
     const actor = requireAdmin(req);
-    res.json(await enableWorker(prisma, workerId, actor.email, req.requestId, config.workerOfflineThresholdSeconds));
+    res.json(await enableWorker(prisma, workerId, actor.email, req.requestId, workerOfflineThresholdSeconds));
   }));
   router.get('/videos', asyncRoute(async (req, res) => {
     const query = parseRequest(paginationSchema, req.query);
@@ -220,6 +221,7 @@ export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
 
 export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
   const router = Router();
+  const leaseDurationSeconds = config.leaseDurationSeconds ?? 120;
   router.post('/heartbeat', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
     const body = parseRequest(heartbeatSchema, req.body);
@@ -234,7 +236,7 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
   }));
   router.post('/jobs/claim', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
-    const job = await claimNextJob(prisma, worker.id, config.leaseDurationSeconds);
+    const job = await claimNextJob(prisma, worker.id, leaseDurationSeconds);
     if (!job) return void res.status(204).end();
     res.json(job);
   }));
@@ -247,7 +249,7 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
   router.post('/jobs/:videoId/renew', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
     const videoId = parseRequest(idSchema, req.params.videoId);
-    res.json(await renewLease(prisma, worker.id, videoId, leaseHeader(req), config.leaseDurationSeconds));
+    res.json(await renewLease(prisma, worker.id, videoId, leaseHeader(req), leaseDurationSeconds));
   }));
   router.post('/jobs/:videoId/complete', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
