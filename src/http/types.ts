@@ -8,6 +8,13 @@ declare global {
         type: ActorType;
         email: string;
       };
+      workerAccess?: {
+        subject: string | null;
+      };
+      worker?: {
+        id: string;
+        secretVersion: number;
+      };
     }
   }
 }

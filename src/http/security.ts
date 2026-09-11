@@ -60,7 +60,7 @@ interface Bucket { count: number; resetAt: number }
 export function fixedWindowRateLimit(max: number, windowMs: number) {
   const buckets = new Map<string, Bucket>();
   return (req: Request, res: Response, next: NextFunction): void => {
-    const key = req.actor?.email ?? req.socket.remoteAddress ?? 'unknown';
+    const key = req.actor?.email ?? req.worker?.id ?? req.socket.remoteAddress ?? 'unknown';
     const now = Date.now();
     const current = buckets.get(key);
     const bucket = !current || current.resetAt <= now ? { count: 0, resetAt: now + windowMs } : current;

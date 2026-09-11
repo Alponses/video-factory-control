@@ -44,3 +44,22 @@ export function createAdminAuth(config: AppConfig, dependencies: CloudflareAuthD
     }
   };
 }
+
+export function createWorkerAccessAuth(config: AppConfig, dependencies: CloudflareAuthDependencies = {}) {
+  const issuer = dependencies.issuer ?? config.cloudflareTeamDomain;
+  const audience = dependencies.audience ?? config.cloudflareWorkerAccessAud;
+  const keyResolver = dependencies.keyResolver ?? (config.cloudflareAuthMode === 'remote' && config.cloudflareTeamDomain ? buildRemoteKey(config) : undefined);
+
+  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
+    if (!issuer || !audience || !keyResolver) return next(new ApiError(503, 'WORKER_ACCESS_NOT_CONFIGURED', 'Worker Access validation is not configured'));
+    const token = req.get('cf-access-jwt-assertion');
+    if (!token) return next(new ApiError(401, 'WORKER_ACCESS_JWT_MISSING', 'Cloudflare worker Access token is required'));
+    try {
+      const { payload } = await jwtVerify(token, keyResolver, { issuer, audience });
+      req.workerAccess = { subject: typeof payload.sub === 'string' ? payload.sub : null };
+      next();
+    } catch {
+      next(new ApiError(401, 'WORKER_ACCESS_JWT_INVALID', 'Cloudflare worker Access token is invalid'));
+    }
+  };
+}

@@ -3,15 +3,17 @@ import path from 'node:path';
 import express, { type Express } from 'express';
 import type { PrismaClient } from '@prisma/client';
 import type { AppConfig } from './config.js';
-import { createAdminAuth, type CloudflareAuthDependencies } from './http/auth.js';
+import { createAdminAuth, createWorkerAccessAuth, type CloudflareAuthDependencies } from './http/auth.js';
 import { errorHandler, ApiError } from './http/errors.js';
 import { consoleJsonLogger, requestLogger, type Logger } from './http/logger.js';
-import { createAdminRouter, createHealthRouter } from './http/routes.js';
+import { createAdminRouter, createHealthRouter, createWorkerRouter } from './http/routes.js';
 import { browserMutationGuard, fixedWindowRateLimit, requestContext, sameOriginCors, securityHeaders } from './http/security.js';
+import { createWorkerSecretAuth } from './http/worker-service.js';
 
 export interface AppDependencies {
   prisma: PrismaClient;
   auth?: CloudflareAuthDependencies;
+  workerAuth?: CloudflareAuthDependencies;
   logger?: Logger;
   adminDistPath?: string;
 }
@@ -20,8 +22,7 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   const app = express();
   app.disable('x-powered-by');
   // Trust exactly one hosting reverse-proxy hop. Do not trust arbitrary X-Forwarded-* chains.
-  // Admin throttling keys on the validated actor email, so authorization/rate limits do not
-  // depend on a client-controlled forwarded IP. Revisit only after Hostinger topology is verified.
+  // Authorization never depends on forwarded IP. Revisit only after Hostinger topology is verified.
   app.set('trust proxy', 1);
 
   app.use(requestContext);
@@ -38,7 +39,14 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use('/api/admin', adminAuth);
   app.use('/api/admin', (req, res, next) => (req.method === 'GET' ? adminReadLimit : adminMutationLimit)(req, res, next));
   app.use('/api/admin', browserMutationGuard(config));
-  app.use('/api/admin', createAdminRouter(dependencies.prisma));
+  app.use('/api/admin', createAdminRouter(dependencies.prisma, config));
+
+  const workerAccessAuth = createWorkerAccessAuth(config, dependencies.workerAuth);
+  const workerLimit = fixedWindowRateLimit(360, 60_000);
+  app.use('/api/worker', workerAccessAuth);
+  app.use('/api/worker', createWorkerSecretAuth(dependencies.prisma));
+  app.use('/api/worker', workerLimit);
+  app.use('/api/worker', createWorkerRouter(dependencies.prisma, config));
 
   app.use('/api', (_req, _res, next) => next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found')));
 
