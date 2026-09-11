@@ -1,0 +1,35 @@
+{
+  "name": "video-factory-v5",
+  "version": "5.0.0-phase.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/src/index.js",
+    "lint": "eslint src scripts tests eslint.config.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx tests/unit/**/*.test.ts",
+    "test:integration": "node --test --import tsx tests/integration/**/*.test.ts",
+    "prisma:validate": "prisma validate",
+    "prisma:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "legacy:import": "tsx scripts/legacy-import.ts",
+    "legacy:verify": "tsx scripts/legacy-verify.ts",
+    "phase1:check": "npm run lint && npm run typecheck && npm run test && npm run prisma:validate"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^22.18.0",
+    "eslint": "^9.35.0",
+    "prisma": "6.19.3",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0"
+  }
+}

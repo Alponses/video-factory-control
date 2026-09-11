@@ -1,5 +1,6 @@
 .env
 .env.*
+!.env.example
 .secrets.json
 **/.secrets.json
 dashboard/uploads/*
@@ -10,6 +11,8 @@ dashboard/dashboard-channels.json
 *.wav
 *.mp3
 node_modules/
+dist/
+coverage/
 .DS_Store
 tmp/
 cache/
