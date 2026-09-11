@@ -1,0 +1,117 @@
+name: Video Factory V5 Phase 1
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'eslint.config.js'
+      - 'prisma/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'db/jobs/**'
+      - 'db/migrations/v3/**'
+      - 'db/migrations/v4/**'
+      - 'db/dashboard/**'
+      - 'config/factory.json'
+      - 'docs/v5-phase1.md'
+      - '.github/workflows/v5-phase1.yml'
+  push:
+    branches:
+      - video-factory-v5
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'eslint.config.js'
+      - 'prisma/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'db/jobs/**'
+      - 'db/migrations/v3/**'
+      - 'db/migrations/v4/**'
+      - 'db/dashboard/**'
+      - 'config/factory.json'
+      - 'docs/v5-phase1.md'
+      - '.github/workflows/v5-phase1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+      - name: Prisma validate
+        env:
+          DATABASE_URL: mysql://phase1:phase1@127.0.0.1:3306/phase1
+        run: npm run prisma:validate
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Build
+        run: npm run build
+
+  mariadb-integration:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root-phase1
+          MARIADB_DATABASE: video_factory_v5
+          MARIADB_USER: video_factory
+          MARIADB_PASSWORD: phase1-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase1 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: mysql://video_factory:phase1-only@127.0.0.1:3306/video_factory_v5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+      - name: Prisma validate
+        run: npm run prisma:validate
+      - name: Migration test from empty MariaDB
+        run: |
+          npm run db:migrate
+          npx prisma migrate status
+      - name: MariaDB integration tests
+        run: npm run test:integration
+      - name: Reset MariaDB for explicit importer proof
+        run: npx prisma migrate reset --force --skip-seed
+      - name: Legacy importer run 1
+        run: npm run legacy:import | tee /tmp/legacy-import-1.json
+      - name: Legacy importer run 2
+        run: npm run legacy:import | tee /tmp/legacy-import-2.json
+      - name: Legacy importer run 3
+        run: npm run legacy:import | tee /tmp/legacy-import-3.json
+      - name: Legacy verification
+        run: npm run legacy:verify | tee /tmp/legacy-verify.json

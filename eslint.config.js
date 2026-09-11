@@ -10,6 +10,7 @@ export default tseslint.config(
   {
     files: ['src/**/*.ts', 'scripts/**/*.ts', 'tests/**/*.ts'],
     rules: {
+      'no-undef': 'off',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
