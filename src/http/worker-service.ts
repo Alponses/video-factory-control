@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
-import { ActorType, Prisma, PrismaClient, RenderAttemptStatus, VideoStatus, WorkerStatus } from '@prisma/client';
+import { ActorType, AssetKind, AssetStatus, AssetUploadStatus, Prisma, PrismaClient, RenderAttemptStatus, VideoStatus, WorkerStatus } from '@prisma/client';
 import type {
   QueueRenderResultDto,
   WorkerCompletionResultDto,
@@ -363,6 +363,7 @@ export async function reportProgress(prisma: PrismaClient, workerId: string, vid
 export interface CompleteInput {
   rendererVideoId: string;
   localFile: string;
+  outputAssetId?: string;
   durationSeconds: number;
   width: number;
   height: number;
@@ -377,6 +378,7 @@ export interface CompleteInput {
   };
 }
 
+export interface CompleteOptions { requireDurableOutput?: boolean }
 export interface FailInput { errorCode: string; safeErrorMessage: string }
 
 function idempotencyEnvelope(value: unknown): { requestHash: string; response: unknown } | null {
@@ -398,7 +400,7 @@ function completionScope(workerId: string, videoId: string, operation: 'complete
   return `worker:${workerId}:video:${videoId}:${operation}`;
 }
 
-export async function completeJob(prisma: PrismaClient, workerId: string, videoId: string, leaseToken: string, idempotencyKey: string, input: CompleteInput): Promise<WorkerCompletionResultDto> {
+export async function completeJob(prisma: PrismaClient, workerId: string, videoId: string, leaseToken: string, idempotencyKey: string, input: CompleteInput, options: CompleteOptions = {}): Promise<WorkerCompletionResultDto> {
   const scope = completionScope(workerId, videoId, 'complete');
   const requestHash = payloadHash(input);
   const prior = await existingIdempotency(prisma, scope, idempotencyKey, requestHash);
@@ -413,6 +415,20 @@ export async function completeJob(prisma: PrismaClient, workerId: string, videoI
         return envelope.response as unknown as WorkerCompletionResultDto;
       }
       const context = await requireLease(tx, workerId, videoId, leaseToken, now);
+      if (options.requireDurableOutput) {
+        if (!input.qa.passed || !input.outputAssetId) throw new ApiError(409, 'OUTPUT_ASSET_NOT_READY', 'Durable output asset is required before approval');
+        const asset = await tx.videoAsset.findUnique({
+          where: { id: input.outputAssetId },
+          include: { uploadSessions: { where: { status: AssetUploadStatus.COMPLETED }, orderBy: { completedAt: 'desc' }, take: 1 } },
+        });
+        const upload = asset?.uploadSessions[0];
+        if (!asset || asset.videoId !== videoId || asset.kind !== AssetKind.VIDEO || asset.status !== AssetStatus.READY || asset.storageProvider !== 'R2' || !asset.objectKey) {
+          throw new ApiError(409, 'OUTPUT_ASSET_NOT_READY', 'Durable output asset is not a READY R2 video for this job');
+        }
+        if (!upload || upload.workerId !== workerId || upload.renderAttemptId !== context.attempt.id) {
+          throw new ApiError(409, 'OUTPUT_ASSET_NOT_READY', 'Durable output asset was not finalized by the current worker attempt');
+        }
+      }
       const beforeVideo = await tx.video.findUniqueOrThrow({ where: { id: videoId }, select: { status: true } });
       await tx.renderAttempt.update({ where: { id: context.attempt.id }, data: {
         status: RenderAttemptStatus.SUCCEEDED,
@@ -424,7 +440,7 @@ export async function completeJob(prisma: PrismaClient, workerId: string, videoI
         hasAudio: input.hasAudio,
         localFile: input.localFile,
         error: null,
-        raw: auditJson({ storage: 'WORKER_LOCAL' }),
+        raw: auditJson(options.requireDurableOutput ? { storage: 'R2', outputAssetId: input.outputAssetId } : { storage: 'WORKER_LOCAL' }),
       } });
       await tx.qaResult.upsert({
         where: { videoId_attempt: { videoId, attempt: context.attempt.attempt } },
@@ -434,7 +450,7 @@ export async function completeJob(prisma: PrismaClient, workerId: string, videoI
       const nextStatus = input.qa.passed ? VideoStatus.APPROVED : VideoStatus.FAILED;
       await tx.workerLease.update({ where: { id: context.lease.id }, data: { releasedAt: now } });
       await tx.video.update({ where: { id: videoId }, data: { status: nextStatus, version: { increment: 1 } } });
-      await tx.jobEvent.create({ data: { videoId, type: input.qa.passed ? 'RENDER_COMPLETED' : 'QA_FAILED', fromStatus: beforeVideo.status, toStatus: nextStatus, workerId, payload: auditJson({ attempt: context.attempt.attempt, qaPassed: input.qa.passed }) } });
+      await tx.jobEvent.create({ data: { videoId, type: input.qa.passed ? 'RENDER_COMPLETED' : 'QA_FAILED', fromStatus: beforeVideo.status, toStatus: nextStatus, workerId, payload: auditJson({ attempt: context.attempt.attempt, qaPassed: input.qa.passed, ...(input.outputAssetId ? { outputAssetId: input.outputAssetId } : {}) }) } });
       await tx.worker.updateMany({ where: { id: workerId, currentVideoId: videoId }, data: { currentVideoId: null, progress: null, status: WorkerStatus.ONLINE, lastError: input.qa.passed ? null : 'QA_FAILED' } });
       const response: WorkerCompletionResultDto = { videoId, attempt: context.attempt.attempt, videoStatus: nextStatus === VideoStatus.APPROVED ? 'APPROVED' : 'FAILED', renderStatus: 'SUCCEEDED', qaPassed: input.qa.passed };
       await tx.idempotencyKey.create({ data: { scope, key: idempotencyKey, result: auditJson({ requestHash, response }) } });
