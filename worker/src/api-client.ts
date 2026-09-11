@@ -26,6 +26,17 @@ export interface CompletionPayload {
   };
 }
 
+function retryable(error: unknown): boolean {
+  if (!(error instanceof Error)) return true;
+  if (error.name === 'AbortError' || error.name === 'TimeoutError') return true;
+  if (error instanceof TypeError) return true;
+  return /^HTTP_5\d\d$/.test(error.message) || error.message === 'HTTP_429';
+}
+
+function pause(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export class ControlPlaneClient {
   constructor(private readonly config: WorkerConfig) {}
 
@@ -65,6 +76,24 @@ export class ControlPlaneClient {
     }
   }
 
+  private async finalizationRequest<T>(path: string, leaseToken: string, idempotencyKey: string, body: unknown): Promise<T | null> {
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        return await this.request<T>(path, {
+          method: 'POST',
+          headers: { 'X-Worker-Lease': leaseToken, 'Idempotency-Key': idempotencyKey },
+          body: JSON.stringify(body),
+        });
+      } catch (error) {
+        lastError = error;
+        if (attempt >= 3 || !retryable(error)) throw error;
+        await pause(100 * attempt);
+      }
+    }
+    throw lastError;
+  }
+
   heartbeat(input: { agentVersion: string; rendererVersion: string | null; currentVideoId: string | null; progress: number | null; lastError: string | null }): Promise<unknown> {
     return this.request('/api/worker/heartbeat', { method: 'POST', body: JSON.stringify(input) });
   }
@@ -82,10 +111,10 @@ export class ControlPlaneClient {
   }
 
   complete(videoId: string, leaseToken: string, idempotencyKey: string, payload: CompletionPayload): Promise<unknown> {
-    return this.request(`/api/worker/jobs/${encodeURIComponent(videoId)}/complete`, { method: 'POST', headers: { 'X-Worker-Lease': leaseToken, 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(payload) });
+    return this.finalizationRequest(`/api/worker/jobs/${encodeURIComponent(videoId)}/complete`, leaseToken, idempotencyKey, payload);
   }
 
   fail(videoId: string, leaseToken: string, idempotencyKey: string, errorCode: string, safeErrorMessage: string): Promise<unknown> {
-    return this.request(`/api/worker/jobs/${encodeURIComponent(videoId)}/fail`, { method: 'POST', headers: { 'X-Worker-Lease': leaseToken, 'Idempotency-Key': idempotencyKey }, body: JSON.stringify({ errorCode, safeErrorMessage: safeErrorMessage.slice(0, 1000) }) });
+    return this.finalizationRequest(`/api/worker/jobs/${encodeURIComponent(videoId)}/fail`, leaseToken, idempotencyKey, { errorCode, safeErrorMessage: safeErrorMessage.slice(0, 1000) });
   }
 }
