@@ -65,7 +65,7 @@ describe('Video library', () => {
   it('keeps search/filter state in URL and sends it server-side', async () => {
     const fetchMock = mockFetch(() => jsonResponse({ ...listFixture, page: 2 }));
     renderRoute('/videos?status=APPROVED&category=fe&page=2&q=oracion', '/videos', <VideosPage />);
-    await screen.findByText('Una pausa');
+    expect((await screen.findAllByText('Una pausa')).length).toBeGreaterThan(0);
     expect(fetchMock).toHaveBeenCalled();
     const url = String(fetchMock.mock.calls[0]?.[0]);
     expect(url).toContain('page=2');
