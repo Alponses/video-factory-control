@@ -9,6 +9,7 @@ import { consoleJsonLogger, requestLogger, type Logger } from './http/logger.js'
 import { createAdminRouter, createHealthRouter, createWorkerRouter } from './http/routes.js';
 import { browserMutationGuard, fixedWindowRateLimit, requestContext, sameOriginCors, securityHeaders } from './http/security.js';
 import { createWorkerSecretAuth } from './http/worker-service.js';
+import type { R2Storage } from './storage/r2.js';
 
 export interface AppDependencies {
   prisma: PrismaClient;
@@ -16,6 +17,7 @@ export interface AppDependencies {
   workerAuth?: CloudflareAuthDependencies;
   logger?: Logger;
   adminDistPath?: string;
+  storage?: R2Storage;
 }
 
 export function createApp(config: AppConfig, dependencies: AppDependencies): Express {
@@ -39,14 +41,14 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use('/api/admin', adminAuth);
   app.use('/api/admin', (req, res, next) => (req.method === 'GET' ? adminReadLimit : adminMutationLimit)(req, res, next));
   app.use('/api/admin', browserMutationGuard(config));
-  app.use('/api/admin', createAdminRouter(dependencies.prisma, config));
+  app.use('/api/admin', createAdminRouter(dependencies.prisma, config, dependencies.storage));
 
   const workerAccessAuth = createWorkerAccessAuth(config, dependencies.workerAuth);
   const workerLimit = fixedWindowRateLimit(360, 60_000);
   app.use('/api/worker', workerAccessAuth);
   app.use('/api/worker', createWorkerSecretAuth(dependencies.prisma));
   app.use('/api/worker', workerLimit);
-  app.use('/api/worker', createWorkerRouter(dependencies.prisma, config));
+  app.use('/api/worker', createWorkerRouter(dependencies.prisma, config, dependencies.storage));
 
   app.use('/api', (_req, _res, next) => next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found')));
 
