@@ -33,19 +33,19 @@ jobs:
             if (!valid) throw new ApiError(400, 'ASSET_INVALID_TYPE', 'Asset kind is not valid for this owner');
           }
           '''
-          new = '''function isVideoAssetKind(kind: AssetKind): kind is AssetKind.VIDEO | AssetKind.COVER | AssetKind.THUMBNAIL | AssetKind.AUDIO {
+          new = '''function isVideoAssetKind(kind: AssetKind): kind is Extract<AssetKind, 'VIDEO' | 'COVER' | 'THUMBNAIL' | 'AUDIO'> {
             return kind === AssetKind.VIDEO || kind === AssetKind.COVER || kind === AssetKind.THUMBNAIL || kind === AssetKind.AUDIO;
           }
 
-          function isProfileAssetKind(kind: AssetKind): kind is AssetKind.AVATAR | AssetKind.BANNER {
+          function isProfileAssetKind(kind: AssetKind): kind is Extract<AssetKind, 'AVATAR' | 'BANNER'> {
             return kind === AssetKind.AVATAR || kind === AssetKind.BANNER;
           }
 
-          function isActiveUploadStatus(status: AssetUploadStatus): status is AssetUploadStatus.CREATED | AssetUploadStatus.UPLOADING {
+          function isActiveUploadStatus(status: AssetUploadStatus): status is Extract<AssetUploadStatus, 'CREATED' | 'UPLOADING'> {
             return status === AssetUploadStatus.CREATED || status === AssetUploadStatus.UPLOADING;
           }
 
-          function isDownloadableAssetStatus(status: AssetStatus): status is AssetStatus.READY | AssetStatus.REPLACED {
+          function isDownloadableAssetStatus(status: AssetStatus): status is Extract<AssetStatus, 'READY' | 'REPLACED'> {
             return status === AssetStatus.READY || status === AssetStatus.REPLACED;
           }
 
