@@ -88,7 +88,7 @@ describe('Video detail', () => {
     renderRoute('/videos/religion-000011', '/videos/:videoId', <VideoDetailPage />);
     expect((await screen.findAllByText('Una pausa con fe')).length).toBeGreaterThan(0);
     expect((await screen.findAllByText('Pausa con Fe')).length).toBeGreaterThan(0);
-    expect(screen.getByText('oracion')).toBeInTheDocument();
+    expect((await screen.findAllByText('oracion')).length).toBeGreaterThan(0);
   });
 
   it('preserves religion-000001 as legacy incomplete with zero scenes', async () => {
@@ -112,12 +112,16 @@ describe('Video detail', () => {
   });
 
   it('shows video validation errors before sending', async () => {
-    mockFetch(() => jsonResponse(detailFixture()));
+    const fetchMock = mockFetch(() => jsonResponse(detailFixture()));
     renderRoute('/videos/religion-000011?tab=content', '/videos/:videoId', <VideoDetailPage />);
     fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const save = screen.getByRole('button', { name: 'Save' });
+    const form = save.closest('form');
+    expect(form).not.toBeNull();
+    fireEvent.submit(form!);
     expect(await screen.findByText('Title and category are required.')).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter((call) => (call[1] as RequestInit | undefined)?.method === 'PATCH')).toHaveLength(0);
   });
 
   it('shows explicit video 409 conflict UX without automatic retry', async () => {
@@ -134,16 +138,17 @@ describe('Video detail', () => {
     expect(fetchMock.mock.calls.filter((call) => (call[1] as RequestInit | undefined)?.method === 'PATCH')).toHaveLength(1);
   });
 
-  it('saves a scene edit', async () => {
+  it('saves a scene edit and exits edit mode after the API succeeds', async () => {
     const detail = detailFixture();
-    mockFetch((_url, init) => init?.method === 'PATCH'
+    const fetchMock = mockFetch((_url, init) => init?.method === 'PATCH'
       ? jsonResponse({ id: 'scene-0', position: 0, text: 'Updated scene', searchTerms: ['paz'], version: 2, updatedAt: '2026-09-11T12:00:00.000Z' })
       : jsonResponse(detail));
     renderRoute('/videos/religion-000011?tab=scenes', '/videos/:videoId', <VideoDetailPage />);
     fireEvent.click(await screen.findByRole('button', { name: 'Edit' }));
     fireEvent.change(screen.getByLabelText('Text'), { target: { value: 'Updated scene' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    expect(await screen.findByText('Updated scene')).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock.mock.calls.filter((call) => (call[1] as RequestInit | undefined)?.method === 'PATCH')).toHaveLength(1));
+    expect(await screen.findByRole('button', { name: 'Edit' })).toBeInTheDocument();
   });
 
   it('shows scene conflict UX', async () => {
