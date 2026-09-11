@@ -23,8 +23,8 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
 
   app.use(requestContext);
   app.use(securityHeaders(config));
-  app.use(sameOriginCors(config));
   app.use(requestLogger(dependencies.logger ?? consoleJsonLogger));
+  app.use(sameOriginCors(config));
   app.use(express.json({ limit: '1mb', strict: true }));
 
   app.use('/api/health', createHealthRouter(dependencies.prisma));
