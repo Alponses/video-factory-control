@@ -15,13 +15,17 @@ const videoEditableSelect = {
   version: true,
 } as const;
 
+function auditJson(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+
 export async function getDashboard(prisma: PrismaClient) {
   const [groups, recentVideos, legacyIncomplete] = await Promise.all([
     prisma.video.groupBy({ by: ['status'], _count: { _all: true } }),
     prisma.video.findMany({ orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, slug: true, title: true, category: true, status: true, legacyIncomplete: true, createdAt: true, updatedAt: true } }),
     prisma.video.count({ where: { legacyIncomplete: true } }),
   ]);
-  const totalsByStatus = Object.fromEntries(Object.values(VideoStatus).map((status) => [status, 0]));
+  const totalsByStatus: Record<string, number> = Object.fromEntries(Object.values(VideoStatus).map((status) => [status, 0]));
   for (const group of groups) totalsByStatus[group.status] = group._count._all;
   return { totalsByStatus, recentVideos, legacyIncomplete };
 }
@@ -65,13 +69,14 @@ export async function getVideoDetail(prisma: PrismaClient, id: string) {
     },
   });
   if (!video) throw new ApiError(404, 'VIDEO_NOT_FOUND', 'Video was not found');
+  const { scenes, publications, renderAttempts, qaResults, assets, ...videoData } = video;
   return {
-    video: { ...video, scenes: undefined, publications: undefined, renderAttempts: undefined, qaResults: undefined, assets: undefined },
-    scenes: video.scenes,
-    publications: video.publications,
-    renderAttempts: video.renderAttempts,
-    qa: video.qaResults,
-    legacyAssets: video.assets.map((asset) => ({ ...asset, size: asset.size?.toString() ?? null })),
+    video: videoData,
+    scenes,
+    publications,
+    renderAttempts,
+    qa: qaResults,
+    legacyAssets: assets.map((asset) => ({ ...asset, size: asset.size?.toString() ?? null })),
     legacyIncomplete: video.legacyIncomplete,
   };
 }
@@ -101,8 +106,8 @@ export async function updateVideoWithAudit(prisma: PrismaClient, id: string, inp
       entityType: 'VIDEO',
       entityId: id,
       requestId,
-      beforeData: before,
-      afterData: after,
+      beforeData: auditJson(before),
+      afterData: auditJson(after),
     });
     return after;
   });
@@ -126,9 +131,9 @@ export async function updateSceneWithAudit(prisma: PrismaClient, videoId: string
       entityType: 'VIDEO_SCENE',
       entityId: after.id,
       requestId,
-      beforeData: before,
-      afterData: after,
-      metadata: { videoId, position },
+      beforeData: auditJson(before),
+      afterData: auditJson(after),
+      metadata: auditJson({ videoId, position }),
     });
     return after;
   });
