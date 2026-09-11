@@ -34,8 +34,8 @@ export interface AppConfig {
   cloudflareAdminAccessAud?: string;
   cloudflareWorkerAccessAud?: string;
   adminAllowedEmails: string[];
-  workerOfflineThresholdSeconds: number;
-  leaseDurationSeconds: number;
+  workerOfflineThresholdSeconds?: number;
+  leaseDurationSeconds?: number;
 }
 
 export function isCriticalConfigReady(config: AppConfig): boolean {
@@ -43,7 +43,9 @@ export function isCriticalConfigReady(config: AppConfig): boolean {
   if (config.nodeEnv === 'production' && !config.appBaseUrl.startsWith('https://')) return false;
   if (config.cloudflareAuthMode === 'remote' && (!config.cloudflareTeamDomain || !config.cloudflareAdminAccessAud)) return false;
   if (config.nodeEnv === 'production' && (!config.cloudflareWorkerAccessAud || config.cloudflareAuthMode !== 'remote')) return false;
-  if (config.workerOfflineThresholdSeconds < 15 || config.leaseDurationSeconds < 30) return false;
+  const workerOfflineThresholdSeconds = config.workerOfflineThresholdSeconds ?? 60;
+  const leaseDurationSeconds = config.leaseDurationSeconds ?? 120;
+  if (workerOfflineThresholdSeconds < 15 || leaseDurationSeconds < 30) return false;
   return true;
 }
 
