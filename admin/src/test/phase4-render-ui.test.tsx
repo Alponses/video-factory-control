@@ -69,7 +69,7 @@ describe('Phase 4 render operations UI', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Queue render' }));
     expect(await screen.findByText('This video changed since you loaded it.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reload latest version' })).toBeInTheDocument();
-    expect(fetchMock.mock.calls.filter((call) => String(call[0]).endsWith('/queue-render')).toHaveLength(1);
+    expect(fetchMock.mock.calls.filter((call) => String(call[0]).endsWith('/queue-render'))).toHaveLength(1);
   });
 
   it('shows every historical RenderAttempt with its own QA and error data', async () => {
