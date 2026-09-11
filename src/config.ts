@@ -21,7 +21,27 @@ const baseSchema = z.object({
   ADMIN_ALLOWED_EMAILS: emailListSchema,
   WORKER_OFFLINE_THRESHOLD_SECONDS: z.coerce.number().int().min(15).max(3600).default(60),
   LEASE_DURATION_SECONDS: z.coerce.number().int().min(30).max(3600).default(120),
+  R2_ACCOUNT_ID: z.string().trim().min(1).optional(),
+  R2_ACCESS_KEY_ID: z.string().trim().min(1).optional(),
+  R2_SECRET_ACCESS_KEY: z.string().trim().min(1).optional(),
+  R2_BUCKET: z.string().trim().min(1).max(255).optional(),
+  R2_ENDPOINT: z.string().url().optional(),
+  R2_PRESIGN_TTL_SECONDS: z.coerce.number().int().min(30).max(900).default(300),
+  R2_SINGLE_UPLOAD_THRESHOLD_BYTES: z.coerce.number().int().min(5 * 1024 * 1024).max(5 * 1024 * 1024 * 1024).default(100 * 1024 * 1024),
+  R2_MULTIPART_PART_SIZE_BYTES: z.coerce.number().int().min(5 * 1024 * 1024).max(5 * 1024 * 1024 * 1024).default(16 * 1024 * 1024),
 });
+
+export interface R2Config {
+  accountId: string;
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucket: string;
+  endpoint: string;
+  origin: string;
+  presignTtlSeconds: number;
+  singleUploadThresholdBytes: number;
+  multipartPartSizeBytes: number;
+}
 
 export interface AppConfig {
   nodeEnv: 'development' | 'test' | 'production';
@@ -36,16 +56,21 @@ export interface AppConfig {
   adminAllowedEmails: string[];
   workerOfflineThresholdSeconds?: number;
   leaseDurationSeconds?: number;
+  r2?: R2Config;
 }
 
 export function isCriticalConfigReady(config: AppConfig): boolean {
   if (!config.appBaseUrl || !config.appOrigin || !config.databaseUrl || config.adminAllowedEmails.length === 0) return false;
   if (config.nodeEnv === 'production' && !config.appBaseUrl.startsWith('https://')) return false;
   if (config.cloudflareAuthMode === 'remote' && (!config.cloudflareTeamDomain || !config.cloudflareAdminAccessAud)) return false;
-  if (config.nodeEnv === 'production' && (!config.cloudflareWorkerAccessAud || config.cloudflareAuthMode !== 'remote')) return false;
+  if (config.nodeEnv === 'production' && (!config.cloudflareWorkerAccessAud || config.cloudflareAuthMode !== 'remote' || !config.r2)) return false;
   const workerOfflineThresholdSeconds = config.workerOfflineThresholdSeconds ?? 60;
   const leaseDurationSeconds = config.leaseDurationSeconds ?? 120;
   if (workerOfflineThresholdSeconds < 15 || leaseDurationSeconds < 30) return false;
+  if (config.r2) {
+    if (!config.r2.endpoint.startsWith('https://') || config.r2.presignTtlSeconds < 30 || config.r2.presignTtlSeconds > 900) return false;
+    if (config.r2.multipartPartSizeBytes < 5 * 1024 * 1024 || config.r2.multipartPartSizeBytes > 5 * 1024 * 1024 * 1024) return false;
+  }
   return true;
 }
 
@@ -66,6 +91,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (value.CLOUDFLARE_AUTH_MODE === 'remote' && (!value.CLOUDFLARE_TEAM_DOMAIN || !value.CLOUDFLARE_ADMIN_ACCESS_AUD)) {
     throw new Error('Invalid server configuration: remote Cloudflare auth requires team domain and admin audience');
   }
+
+  const suppliedR2 = [value.R2_ACCOUNT_ID, value.R2_ACCESS_KEY_ID, value.R2_SECRET_ACCESS_KEY, value.R2_BUCKET].filter(Boolean).length;
+  if (suppliedR2 !== 0 && suppliedR2 !== 4) throw new Error('Invalid server configuration: R2 account ID, access key, secret and bucket must be configured together');
+  if (value.NODE_ENV === 'production' && suppliedR2 !== 4) throw new Error('Invalid server configuration: private R2 durable storage is required in production');
+
   const config: AppConfig = {
     nodeEnv: value.NODE_ENV,
     port: value.PORT,
@@ -80,6 +110,22 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (value.CLOUDFLARE_TEAM_DOMAIN) config.cloudflareTeamDomain = value.CLOUDFLARE_TEAM_DOMAIN.replace(/\/$/, '');
   if (value.CLOUDFLARE_ADMIN_ACCESS_AUD) config.cloudflareAdminAccessAud = value.CLOUDFLARE_ADMIN_ACCESS_AUD;
   if (value.CLOUDFLARE_WORKER_ACCESS_AUD) config.cloudflareWorkerAccessAud = value.CLOUDFLARE_WORKER_ACCESS_AUD;
+  if (suppliedR2 === 4) {
+    const endpoint = (value.R2_ENDPOINT ?? `https://${value.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`).replace(/\/$/, '');
+    const endpointUrl = new URL(endpoint);
+    if (endpointUrl.protocol !== 'https:') throw new Error('Invalid server configuration: R2_ENDPOINT must use HTTPS');
+    config.r2 = {
+      accountId: value.R2_ACCOUNT_ID!,
+      accessKeyId: value.R2_ACCESS_KEY_ID!,
+      secretAccessKey: value.R2_SECRET_ACCESS_KEY!,
+      bucket: value.R2_BUCKET!,
+      endpoint,
+      origin: endpointUrl.origin,
+      presignTtlSeconds: value.R2_PRESIGN_TTL_SECONDS,
+      singleUploadThresholdBytes: value.R2_SINGLE_UPLOAD_THRESHOLD_BYTES,
+      multipartPartSizeBytes: value.R2_MULTIPART_PART_SIZE_BYTES,
+    };
+  }
   if (!isCriticalConfigReady(config)) throw new Error('Invalid server configuration: critical configuration is incomplete');
   return config;
 }
