@@ -12,6 +12,7 @@ export interface WorkerJob {
 export interface CompletionPayload {
   rendererVideoId: string;
   localFile: string;
+  outputAssetId: string;
   durationSeconds: number;
   width: number;
   height: number;
@@ -25,6 +26,22 @@ export interface CompletionPayload {
     raw: Record<string, unknown>;
   };
 }
+
+export interface UploadSession {
+  sessionId: string;
+  assetId: string;
+  mode: 'SINGLE' | 'MULTIPART';
+  status: 'CREATED' | 'UPLOADING' | 'FINALIZING' | 'COMPLETED' | 'ABORTED' | 'EXPIRED' | 'FAILED';
+  uploadUrl: string | null;
+  requiredHeaders: Record<string, string>;
+  expiresAt: string;
+  sessionExpiresAt: string;
+  partSizeBytes: number | null;
+}
+
+export interface MultipartPartUrl { partNumber: number; uploadUrl: string; expiresAt: string }
+export interface MultipartParts { sessionId: string; partSizeBytes: number; parts: MultipartPartUrl[] }
+export interface ReadyAsset { id: string; status: string; size: string | null; sha256: string | null }
 
 function retryable(error: unknown): boolean {
   if (!(error instanceof Error)) return true;
@@ -108,6 +125,39 @@ export class ControlPlaneClient {
 
   renew(videoId: string, leaseToken: string): Promise<unknown> {
     return this.request(`/api/worker/jobs/${encodeURIComponent(videoId)}/renew`, { method: 'POST', headers: { 'X-Worker-Lease': leaseToken }, body: '{}' });
+  }
+
+  createOutputUpload(videoId: string, leaseToken: string, idempotencyKey: string, input: { mimeType: string; size: string; sha256: string; originalFilename: string }): Promise<UploadSession> {
+    return this.request<UploadSession>(`/api/worker/jobs/${encodeURIComponent(videoId)}/assets/uploads`, {
+      method: 'POST',
+      headers: { 'X-Worker-Lease': leaseToken, 'Idempotency-Key': idempotencyKey },
+      body: JSON.stringify(input),
+    }).then((result) => {
+      if (!result) throw new Error('UPLOAD_SESSION_EMPTY');
+      return result;
+    });
+  }
+
+  uploadParts(sessionId: string, leaseToken: string, partNumbers: number[]): Promise<MultipartParts> {
+    return this.request<MultipartParts>(`/api/worker/assets/uploads/${encodeURIComponent(sessionId)}/parts`, {
+      method: 'POST',
+      headers: { 'X-Worker-Lease': leaseToken },
+      body: JSON.stringify({ partNumbers }),
+    }).then((result) => {
+      if (!result) throw new Error('UPLOAD_PARTS_EMPTY');
+      return result;
+    });
+  }
+
+  finalizeUpload(sessionId: string, leaseToken: string, idempotencyKey: string, parts: Array<{ partNumber: number; eTag: string }>): Promise<ReadyAsset> {
+    return this.finalizationRequest<ReadyAsset>(`/api/worker/assets/uploads/${encodeURIComponent(sessionId)}/complete`, leaseToken, idempotencyKey, { parts }).then((result) => {
+      if (!result) throw new Error('UPLOAD_FINALIZE_EMPTY');
+      return result;
+    });
+  }
+
+  abortUpload(sessionId: string, leaseToken: string): Promise<unknown> {
+    return this.request(`/api/worker/assets/uploads/${encodeURIComponent(sessionId)}/abort`, { method: 'POST', headers: { 'X-Worker-Lease': leaseToken }, body: '{}' });
   }
 
   complete(videoId: string, leaseToken: string, idempotencyKey: string, payload: CompletionPayload): Promise<unknown> {
