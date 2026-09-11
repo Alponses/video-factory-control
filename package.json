@@ -1,7 +1,7 @@
 {
   "name": "video-factory-v5",
-  "version": "5.0.0-phase.2",
-  "description": "Video Factory V5 secure control-plane foundation",
+  "version": "5.0.0-phase.5",
+  "description": "Video Factory V5 secure control plane with durable private R2 assets",
   "private": true,
   "type": "module",
   "engines": {
@@ -24,9 +24,12 @@
     "db:migrate": "prisma migrate deploy",
     "legacy:import": "tsx scripts/legacy-import.ts",
     "legacy:verify": "tsx scripts/legacy-verify.ts",
-    "phase3:check": "npm run lint && npm run typecheck && npm run test && npm run test:admin && npm run prisma:validate && npm run build"
+    "r2:smoke": "tsx scripts/r2-smoke.ts",
+    "phase5:check": "npm run lint && npm run typecheck && npm run test && npm run test:admin && npm run prisma:validate && npm run build"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1130.0",
+    "@aws-sdk/s3-request-presigner": "3.1130.0",
     "@prisma/client": "6.19.3",
     "express": "^5.1.0",
     "jose": "^6.1.0",
