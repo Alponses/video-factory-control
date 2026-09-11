@@ -223,7 +223,14 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
   router.post('/heartbeat', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
     const body = parseRequest(heartbeatSchema, req.body);
-    res.json(await heartbeatWorker(prisma, worker.id, body));
+    const heartbeat = {
+      ...(body.agentVersion !== undefined ? { agentVersion: body.agentVersion } : {}),
+      ...(body.rendererVersion !== undefined ? { rendererVersion: body.rendererVersion } : {}),
+      ...(body.currentVideoId !== undefined ? { currentVideoId: body.currentVideoId } : {}),
+      ...(body.progress !== undefined ? { progress: body.progress } : {}),
+      ...(body.lastError !== undefined ? { lastError: body.lastError } : {}),
+    };
+    res.json(await heartbeatWorker(prisma, worker.id, heartbeat));
   }));
   router.post('/jobs/claim', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
