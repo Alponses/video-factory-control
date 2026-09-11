@@ -18,6 +18,8 @@ const config: WorkerConfig = {
   rendererTimeoutMs: 1000,
   rendererPollIntervalMs: 1000,
   outputDir: './output',
+  r2UploadMaxRetries: 3,
+  deleteLocalAfterDurableUpload: false,
 };
 
 function timeoutUntilAborted(signal: AbortSignal | null | undefined): Promise<Response> {
@@ -35,6 +37,7 @@ function header(init: RequestInit | undefined, name: string): string | undefined
 const completion: CompletionPayload = {
   rendererVideoId: 'renderer-1',
   localFile: 'worker-output/video.mp4',
+  outputAssetId: 'durable-asset-1',
   durationSeconds: 61,
   width: 1080,
   height: 1920,
@@ -93,6 +96,26 @@ test('non-retryable idempotency conflicts are not retried', async () => {
     const client = new ControlPlaneClient(config);
     await assert.rejects(() => client.complete('religion-000011', 'lease-token', 'conflict-key', completion), /IDEMPOTENCY_CONFLICT/);
     assert.equal(calls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('worker upload session request carries lease + idempotency but no R2 permanent credential', async () => {
+  const originalFetch = globalThis.fetch;
+  let captured: RequestInit | undefined;
+  globalThis.fetch = async (_input, init) => {
+    captured = init;
+    return new Response(JSON.stringify({ sessionId: 'session-1', assetId: 'asset-1', mode: 'SINGLE', status: 'UPLOADING', uploadUrl: 'https://r2.example/object?X-Amz-Signature=short', requiredHeaders: { 'Content-Type': 'video/mp4' }, expiresAt: new Date().toISOString(), sessionExpiresAt: new Date().toISOString(), partSizeBytes: null }), { status: 201, headers: { 'content-type': 'application/json' } });
+  };
+  try {
+    const client = new ControlPlaneClient(config);
+    await client.createOutputUpload('video-1', 'lease-1', 'asset-create-stable', { mimeType: 'video/mp4', size: '1024', sha256: 'a'.repeat(64), originalFilename: 'video.mp4' });
+    assert.equal(header(captured, 'X-Worker-Lease'), 'lease-1');
+    assert.equal(header(captured, 'Idempotency-Key'), 'asset-create-stable');
+    const serialized = JSON.stringify(captured);
+    assert.equal(serialized.includes('R2_ACCESS_KEY_ID'), false);
+    assert.equal(serialized.includes('R2_SECRET_ACCESS_KEY'), false);
   } finally {
     globalThis.fetch = originalFetch;
   }
