@@ -1,6 +1,6 @@
 {
   "name": "video-factory-v5",
-  "version": "5.0.0-phase.1",
+  "version": "5.0.0-phase.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,19 +12,23 @@
     "lint": "eslint src scripts tests eslint.config.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test --import tsx tests/unit/**/*.test.ts",
-    "test:integration": "node --test --import tsx tests/integration/**/*.test.ts",
+    "test:integration": "node --test --test-concurrency=1 --import tsx tests/integration/**/*.test.ts",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "legacy:import": "tsx scripts/legacy-import.ts",
     "legacy:verify": "tsx scripts/legacy-verify.ts",
-    "phase1:check": "npm run lint && npm run typecheck && npm run test && npm run prisma:validate"
+    "phase2:check": "npm run lint && npm run typecheck && npm run test && npm run prisma:validate && npm run build"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3"
+    "@prisma/client": "6.19.3",
+    "express": "^5.1.0",
+    "jose": "^6.1.0",
+    "zod": "^4.1.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@types/express": "^5.0.3",
     "@types/node": "^22.18.0",
     "eslint": "^9.35.0",
     "prisma": "6.19.3",
