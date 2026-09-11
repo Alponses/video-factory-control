@@ -15,6 +15,8 @@ export interface WorkerConfig {
   rendererTimeoutMs: number;
   rendererPollIntervalMs: number;
   outputDir: string;
+  r2UploadMaxRetries: number;
+  deleteLocalAfterDurableUpload: boolean;
 }
 
 function required(env: NodeJS.ProcessEnv, key: string): string {
@@ -29,6 +31,14 @@ function integer(env: NodeJS.ProcessEnv, key: string, fallback: number, min: num
   const value = Number(raw);
   if (!Number.isInteger(value) || value < min || value > max) throw new Error(`Invalid worker configuration: ${key}`);
   return value;
+}
+
+function boolean(env: NodeJS.ProcessEnv, key: string, fallback: boolean): boolean {
+  const raw = env[key]?.trim().toLowerCase();
+  if (!raw) return fallback;
+  if (raw === 'true' || raw === '1') return true;
+  if (raw === 'false' || raw === '0') return false;
+  throw new Error(`Invalid worker configuration: ${key}`);
 }
 
 function httpUrl(value: string, key: string, allowHttpLoopback = false): string {
@@ -61,5 +71,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv = process.env): WorkerCo
     rendererTimeoutMs: integer(env, 'RENDERER_TIMEOUT_MS', 10_000, 1_000, 60_000),
     rendererPollIntervalMs: integer(env, 'RENDERER_POLL_INTERVAL_MS', 2_000, 500, 30_000),
     outputDir: env.OUTPUT_DIR?.trim() || './output',
+    r2UploadMaxRetries: integer(env, 'R2_UPLOAD_MAX_RETRIES', 3, 1, 10),
+    deleteLocalAfterDurableUpload: boolean(env, 'DELETE_LOCAL_AFTER_DURABLE_UPLOAD', false),
   };
 }
