@@ -64,10 +64,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     appOrigin: appUrl.origin,
     databaseUrl: value.DATABASE_URL,
     cloudflareAuthMode: value.CLOUDFLARE_AUTH_MODE,
-    cloudflareTeamDomain: value.CLOUDFLARE_TEAM_DOMAIN?.replace(/\/$/, ''),
-    cloudflareAdminAccessAud: value.CLOUDFLARE_ADMIN_ACCESS_AUD,
     adminAllowedEmails: value.ADMIN_ALLOWED_EMAILS,
   };
+  if (value.CLOUDFLARE_TEAM_DOMAIN) config.cloudflareTeamDomain = value.CLOUDFLARE_TEAM_DOMAIN.replace(/\/$/, '');
+  if (value.CLOUDFLARE_ADMIN_ACCESS_AUD) config.cloudflareAdminAccessAud = value.CLOUDFLARE_ADMIN_ACCESS_AUD;
   if (!isCriticalConfigReady(config)) throw new Error('Invalid server configuration: critical configuration is incomplete');
   return config;
 }
