@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { adminApi } from '../lib/api';
 
-const futureItems = ['Calendario', 'Workers', 'Publicación', 'Métricas', 'Integraciones'];
+const futureItems = ['Calendario', 'Publicación', 'Métricas', 'Integraciones'];
 
 export function AppShell() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -27,6 +27,7 @@ export function AppShell() {
         <nav className="nav-list">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Resumen</NavLink>
           <NavLink to="/videos" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Videos</NavLink>
+          <NavLink to="/workers" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Workers</NavLink>
         </nav>
         <div className="future-nav" aria-label="Future sections">
           <span className="future-label">Próximas fases</span>
