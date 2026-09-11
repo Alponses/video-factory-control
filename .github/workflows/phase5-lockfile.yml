@@ -1,0 +1,33 @@
+name: Phase 5 lockfile generator
+
+on:
+  push:
+    branches: [video-factory-v5]
+    paths:
+      - package.json
+      - .github/workflows/phase5-lockfile.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate locked root dependencies
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit lockfile when changed
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "package-lock.json already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: lock phase5 AWS SDK dependencies"
+          git push origin HEAD:video-factory-v5
