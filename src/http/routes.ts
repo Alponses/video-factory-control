@@ -239,13 +239,13 @@ export function createAdminRouter(prisma: PrismaClient, config: AppConfig, stora
     const videoId = parseRequest(idSchema, req.params.id);
     const body = parseRequest(assetUploadSchema, req.body);
     const actor = requireAdmin(req);
-    res.status(201).json(await createAdminVideoUpload(prisma, requireStorage(storage), config, videoId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));
+    res.status(201).json(await createAdminVideoUpload(prisma, requireStorage(storage), config, videoId, actor.email, req.requestId, idempotencyHeader(req), { kind: body.kind as AssetKind, mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));
   }));
   router.post('/profiles/:profileId/assets/uploads', asyncRoute(async (req, res) => {
     const profileId = parseRequest(idSchema, req.params.profileId);
     const body = parseRequest(assetUploadSchema, req.body);
     const actor = requireAdmin(req);
-    res.status(201).json(await createAdminProfileUpload(prisma, requireStorage(storage), config, profileId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));
+    res.status(201).json(await createAdminProfileUpload(prisma, requireStorage(storage), config, profileId, actor.email, req.requestId, idempotencyHeader(req), { kind: body.kind as AssetKind, mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));
   }));
   router.post('/assets/uploads/:sessionId/parts', asyncRoute(async (req, res) => {
     const sessionId = parseRequest(idSchema, req.params.sessionId);
@@ -348,7 +348,7 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig, stor
     const worker = requireWorker(req);
     const videoId = parseRequest(idSchema, req.params.videoId);
     const body = parseRequest(workerAssetUploadSchema, req.body);
-    res.status(201).json(await createWorkerVideoUpload(prisma, requireStorage(storage), config, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), body));
+    res.status(201).json(await createWorkerVideoUpload(prisma, requireStorage(storage), config, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), { mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));
   }));
   router.post('/assets/uploads/:sessionId/parts', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
@@ -373,8 +373,13 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig, stor
     const videoId = parseRequest(idSchema, req.params.videoId);
     const body = parseRequest(completeSchema, req.body);
     const leaseToken = leaseHeader(req);
-    if (body.qa.passed) await assertWorkerOutputAsset(prisma, requireStorage(storage), worker.id, videoId, leaseToken, body.outputAssetId!);
-    res.json(await completeJob(prisma, worker.id, videoId, leaseToken, idempotencyHeader(req), body, { requireDurableOutput: body.qa.passed }));
+    const { outputAssetId, ...completion } = body;
+    if (body.qa.passed) {
+      if (!outputAssetId) throw new ApiError(400, 'VALIDATION_ERROR', 'Durable outputAssetId is required when QA passes');
+      await assertWorkerOutputAsset(prisma, requireStorage(storage), worker.id, videoId, leaseToken, outputAssetId);
+    }
+    const completeInput = { ...completion, ...(outputAssetId !== undefined ? { outputAssetId } : {}) };
+    res.json(await completeJob(prisma, worker.id, videoId, leaseToken, idempotencyHeader(req), completeInput, { requireDurableOutput: body.qa.passed }));
   }));
   router.post('/jobs/:videoId/fail', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);

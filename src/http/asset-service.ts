@@ -115,10 +115,24 @@ async function profileOwner(prisma: PrismaClient, profileId: string): Promise<Ow
   return { type: 'profile', id: profile.id, channelId: profile.channelId, platform: profile.platform };
 }
 
+function isVideoAssetKind(kind: AssetKind): kind is Extract<AssetKind, 'VIDEO' | 'COVER' | 'THUMBNAIL' | 'AUDIO'> {
+  return kind === AssetKind.VIDEO || kind === AssetKind.COVER || kind === AssetKind.THUMBNAIL || kind === AssetKind.AUDIO;
+}
+
+function isProfileAssetKind(kind: AssetKind): kind is Extract<AssetKind, 'AVATAR' | 'BANNER'> {
+  return kind === AssetKind.AVATAR || kind === AssetKind.BANNER;
+}
+
+function isActiveUploadStatus(status: AssetUploadStatus): status is Extract<AssetUploadStatus, 'CREATED' | 'UPLOADING'> {
+  return status === AssetUploadStatus.CREATED || status === AssetUploadStatus.UPLOADING;
+}
+
+function isDownloadableAssetStatus(status: AssetStatus): status is Extract<AssetStatus, 'READY' | 'REPLACED'> {
+  return status === AssetStatus.READY || status === AssetStatus.REPLACED;
+}
+
 function assertOwnerKind(owner: Owner, kind: AssetKind): void {
-  const valid = owner.type === 'video'
-    ? [AssetKind.VIDEO, AssetKind.COVER, AssetKind.THUMBNAIL, AssetKind.AUDIO].includes(kind)
-    : [AssetKind.AVATAR, AssetKind.BANNER].includes(kind);
+  const valid = owner.type === 'video' ? isVideoAssetKind(kind) : isProfileAssetKind(kind);
   if (!valid) throw new ApiError(400, 'ASSET_INVALID_TYPE', 'Asset kind is not valid for this owner');
 }
 
@@ -324,7 +338,7 @@ async function sessionForActor(prisma: PrismaClient, sessionId: string, actor: {
 async function presignParts(prisma: PrismaClient, storage: R2Storage, config: AppConfig, sessionId: string, partNumbers: number[], actor: { type: 'admin'; id: string } | { type: 'worker'; id: string; leaseToken: string }): Promise<MultipartPartsDto> {
   const session = await sessionForActor(prisma, sessionId, actor);
   if (session.mode !== AssetUploadMode.MULTIPART || !session.r2UploadId) throw new ApiError(409, 'MULTIPART_INVALID_PART', 'Upload session is not an active multipart upload');
-  if (![AssetUploadStatus.UPLOADING, AssetUploadStatus.CREATED].includes(session.status)) throw new ApiError(409, 'UPLOAD_SESSION_EXPIRED', 'Upload session cannot accept more parts');
+  if (!isActiveUploadStatus(session.status)) throw new ApiError(409, 'UPLOAD_SESSION_EXPIRED', 'Upload session cannot accept more parts');
   if (partNumbers.length < 1 || partNumbers.length > MAX_PART_PRESIGNS_PER_REQUEST) throw new ApiError(400, 'MULTIPART_INVALID_PART', 'Invalid number of multipart presign requests');
   const expected = expectedPartCount(session.expectedSize, r2Config(config).multipartPartSizeBytes);
   const unique = [...new Set(partNumbers)];
@@ -513,7 +527,7 @@ export async function listChannelsWithAssets(prisma: PrismaClient): Promise<Chan
 export async function createDownloadUrl(prisma: PrismaClient, storage: R2Storage, config: AppConfig, assetId: string): Promise<DownloadUrlDto> {
   const asset = await prisma.videoAsset.findUnique({ where: { id: assetId } });
   if (!asset) throw new ApiError(404, 'ASSET_NOT_FOUND', 'Asset was not found');
-  if (![AssetStatus.READY, AssetStatus.REPLACED].includes(asset.status)) throw new ApiError(409, 'ASSET_NOT_READY', 'Only ready or replaced assets can be downloaded');
+  if (!isDownloadableAssetStatus(asset.status)) throw new ApiError(409, 'ASSET_NOT_READY', 'Only ready or replaced assets can be downloaded');
   if (asset.storageProvider !== 'R2' || !asset.objectKey || asset.bucket !== storage.bucket) throw new ApiError(409, 'ASSET_NOT_DURABLE', 'Asset is not stored in configured R2 storage');
   const ttl = Math.min(r2Config(config).presignTtlSeconds, 300);
   const downloadUrl = await storage.presignGet(asset.objectKey, ttl);
