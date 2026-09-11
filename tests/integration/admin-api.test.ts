@@ -18,6 +18,8 @@ const config: AppConfig = {
   databaseUrl: process.env.DATABASE_URL ?? 'mysql://example.invalid/v5',
   cloudflareAuthMode: 'test',
   adminAllowedEmails: [TEST_ALLOWED_EMAIL],
+  workerOfflineThresholdSeconds: 60,
+  leaseDurationSeconds: 120,
 };
 
 const fixture = await createTestAuthFixture();
