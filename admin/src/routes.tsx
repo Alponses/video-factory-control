@@ -4,6 +4,7 @@ import { AppShell } from './components/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { VideoDetailPage } from './pages/VideoDetailPage';
 import { VideosPage } from './pages/VideosPage';
+import { WorkersPage } from './pages/WorkersPage';
 
 function NotFoundPage() {
   return <section className="page-section"><p className="eyebrow">404</p><h1>Page not found</h1><p>The requested admin page does not exist.</p><Link className="button secondary" to="/">Back to dashboard</Link></section>;
@@ -16,6 +17,7 @@ export const adminRoutes: RouteObject[] = [{
     { index: true, element: <DashboardPage /> },
     { path: 'videos', element: <VideosPage /> },
     { path: 'videos/:videoId', element: <VideoDetailPage /> },
+    { path: 'workers', element: <WorkersPage /> },
     { path: '*', element: <NotFoundPage /> },
   ],
 }];
