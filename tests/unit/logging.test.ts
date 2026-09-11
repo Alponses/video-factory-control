@@ -27,6 +27,7 @@ test('structured request logging includes safe request and actor fields', async 
 
   assert.equal(entries.length, 1);
   const entry = entries[0];
+  assert.ok(entry);
   assert.equal(entry.level, 'info');
   assert.equal(entry.method, 'GET');
   assert.equal(entry.statusCode, 200);
