@@ -2,6 +2,11 @@ export const VIDEO_STATUSES = ['DRAFT', 'READY', 'QUEUED', 'RENDERING', 'QA', 'A
 export type VideoStatusDto = typeof VIDEO_STATUSES[number];
 export const PLATFORMS = ['TIKTOK', 'YOUTUBE', 'FACEBOOK'] as const;
 export type PlatformDto = typeof PLATFORMS[number];
+export const ASSET_KINDS = ['VIDEO', 'COVER', 'THUMBNAIL', 'AUDIO', 'AVATAR', 'BANNER', 'OTHER'] as const;
+export type AssetKindDto = typeof ASSET_KINDS[number];
+export type AssetStatusDto = 'PENDING' | 'READY' | 'REPLACED' | 'FAILED' | 'DELETED';
+export type UploadModeDto = 'SINGLE' | 'MULTIPART';
+export type UploadStatusDto = 'CREATED' | 'UPLOADING' | 'FINALIZING' | 'COMPLETED' | 'ABORTED' | 'EXPIRED' | 'FAILED';
 
 export interface AdminMeDto { email: string }
 export interface DashboardVideoDto { id: string; title: string; category: string; status: VideoStatusDto; legacyIncomplete: boolean; createdAt: string; updatedAt: string }
@@ -77,6 +82,57 @@ export interface RenderAttemptDto {
 export interface QaDto { id: string; attempt: number; passed: boolean | null; durationPassed: boolean | null; resolutionPassed: boolean | null; audioPassed: boolean | null; captionsPassed: boolean | null; createdAt: string }
 export interface LegacyAssetDto { id: string; kind: string; status: string; storageProvider: string; localPath: string | null; mimeType: string | null; size: string | null; createdAt: string }
 export interface VideoDetailDto { video: VideoDto; channel: ChannelDto; scenes: SceneDto[]; publications: PublicationDto[]; renderAttempts: RenderAttemptDto[]; qa: QaDto[]; legacyAssets: LegacyAssetDto[] }
+
+export interface AssetDto {
+  id: string;
+  videoId: string | null;
+  profileId: string | null;
+  kind: AssetKindDto;
+  status: AssetStatusDto;
+  platform: PlatformDto | null;
+  storageProvider: string;
+  mimeType: string | null;
+  size: string | null;
+  sha256: string | null;
+  source: string | null;
+  hashSource: string | null;
+  originalFilename: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface AssetListDto { items: AssetDto[] }
+export interface AssetUploadRequestDto { kind: AssetKindDto; mimeType: string; size: string; sha256?: string | null; originalFilename?: string | null }
+export interface UploadSessionDto {
+  sessionId: string;
+  assetId: string;
+  mode: UploadModeDto;
+  status: UploadStatusDto;
+  uploadUrl: string | null;
+  requiredHeaders: Record<string, string>;
+  expiresAt: string;
+  sessionExpiresAt: string;
+  partSizeBytes: number | null;
+}
+export interface MultipartPartUrlDto { partNumber: number; uploadUrl: string; expiresAt: string }
+export interface MultipartPartsDto { sessionId: string; partSizeBytes: number; parts: MultipartPartUrlDto[] }
+export interface MultipartCompletedPartDto { partNumber: number; eTag: string }
+export interface DownloadUrlDto { assetId: string; downloadUrl: string; expiresAt: string }
+export interface AssetPolicyDto {
+  presignTtlSeconds: number;
+  singleUploadThresholdBytes: string;
+  multipartPartSizeBytes: number;
+  limits: { videoBytes: string; imageBytes: string; audioBytes: string };
+  mimeTypes: { VIDEO: string[]; IMAGE: string[]; AUDIO: string[] };
+}
+export interface ChannelProfileAssetsDto {
+  id: string;
+  platform: PlatformDto;
+  displayName: string | null;
+  username: string | null;
+  assets: AssetDto[];
+}
+export interface ChannelAssetsItemDto { id: string; displayName: string | null; language: string; profiles: ChannelProfileAssetsDto[] }
+export interface ChannelAssetsDto { items: ChannelAssetsItemDto[] }
 
 export interface VideoPatchDto {
   expectedVersion: number;
