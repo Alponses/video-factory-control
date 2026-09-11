@@ -12,6 +12,7 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'admin/**'
+      - 'worker/**'
       - 'db/jobs/**'
       - 'db/migrations/v3/**'
       - 'db/migrations/v4/**'
@@ -20,6 +21,7 @@ on:
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
       - 'docs/v5-phase3-admin.md'
+      - 'docs/v5-phase4-workers.md'
       - '.github/workflows/v5-phase1.yml'
   push:
     branches:
@@ -34,6 +36,7 @@ on:
       - 'scripts/**'
       - 'tests/**'
       - 'admin/**'
+      - 'worker/**'
       - 'db/jobs/**'
       - 'db/migrations/v3/**'
       - 'db/migrations/v4/**'
@@ -42,13 +45,14 @@ on:
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
       - 'docs/v5-phase3-admin.md'
+      - 'docs/v5-phase4-workers.md'
       - '.github/workflows/v5-phase1.yml'
 
 permissions:
   contents: read
 
 jobs:
-  static-unit-security-admin:
+  static-unit-security-admin-worker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,15 +60,21 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            admin/package-lock.json
+            worker/package-lock.json
       - name: Install locked server dependencies
         run: npm ci --no-audit --no-fund
-      - name: Install Admin V5 dependencies
-        run: npm --prefix admin install --no-audit --no-fund --package-lock=false
+      - name: Install locked Admin V5 dependencies
+        run: npm --prefix admin ci --no-audit --no-fund
+      - name: Install locked worker dependencies
+        run: npm --prefix worker ci --no-audit --no-fund
       - name: Generate Prisma client
         run: npm run prisma:generate
       - name: Prisma validate
         env:
-          DATABASE_URL: mysql://phase3:phase3@127.0.0.1:3306/phase3
+          DATABASE_URL: mysql://phase4:phase4@127.0.0.1:3306/phase4
         run: npm run prisma:validate
       - name: Server lint
         run: npm run lint
@@ -74,6 +84,12 @@ jobs:
         run: npm run test
       - name: Admin frontend tests
         run: npm run test:admin
+      - name: Worker typecheck
+        run: npm --prefix worker run typecheck
+      - name: Worker QA, renderer and agent tests
+        run: npm --prefix worker run test
+      - name: Worker build
+        run: npm --prefix worker run build
       - name: Production server + admin build
         run: npm run build
 
@@ -83,30 +99,33 @@ jobs:
       mariadb:
         image: mariadb:10.11
         env:
-          MARIADB_ROOT_PASSWORD: root-phase3
+          MARIADB_ROOT_PASSWORD: root-phase4
           MARIADB_DATABASE: video_factory_v5
           MARIADB_USER: video_factory
-          MARIADB_PASSWORD: phase3-only
+          MARIADB_PASSWORD: phase4-only
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase3 --silent"
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase4 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
     env:
       NODE_ENV: test
-      DATABASE_URL: mysql://video_factory:phase3-only@127.0.0.1:3306/video_factory_v5
+      DATABASE_URL: mysql://video_factory:phase4-only@127.0.0.1:3306/video_factory_v5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            admin/package-lock.json
       - name: Install locked server dependencies
         run: npm ci --no-audit --no-fund
-      - name: Install Admin V5 dependencies
-        run: npm --prefix admin install --no-audit --no-fund --package-lock=false
+      - name: Install locked Admin V5 dependencies
+        run: npm --prefix admin ci --no-audit --no-fund
       - name: Generate Prisma client
         run: npm run prisma:generate
       - name: Prisma validate
@@ -117,7 +136,7 @@ jobs:
         run: |
           npm run db:migrate
           npx prisma migrate status
-      - name: MariaDB legacy + Admin API integration tests
+      - name: MariaDB Phase 1-4 integration tests
         run: npm run test:integration
       - name: Reset MariaDB for explicit importer proof
         run: npx prisma migrate reset --force --skip-seed
