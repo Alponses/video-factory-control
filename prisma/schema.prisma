@@ -72,6 +72,21 @@ enum AssetStatus {
   DELETED
 }
 
+enum AssetUploadMode {
+  SINGLE
+  MULTIPART
+}
+
+enum AssetUploadStatus {
+  CREATED
+  UPLOADING
+  FINALIZING
+  COMPLETED
+  ABORTED
+  EXPIRED
+  FAILED
+}
+
 enum ActorType {
   ADMIN
   WORKER
@@ -109,7 +124,8 @@ model Profile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  channel Channel @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  channel Channel      @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  assets  VideoAsset[]
 
   @@unique([channelId, platform])
   @@index([platform])
@@ -182,6 +198,7 @@ model VideoScene {
 model VideoAsset {
   id              String      @id @default(uuid()) @db.VarChar(36)
   videoId         String?     @db.VarChar(191)
+  profileId       String?     @db.VarChar(191)
   kind            AssetKind
   status          AssetStatus @default(PENDING)
   platform        Platform?
@@ -196,10 +213,45 @@ model VideoAsset {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
-  video Video? @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  video          Video?                @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  profile        Profile?              @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  uploadSessions AssetUploadSession[]
 
   @@index([videoId, kind])
+  @@index([profileId, kind])
+  @@index([status, kind])
   @@map("video_assets")
+}
+
+model AssetUploadSession {
+  id               String            @id @default(uuid()) @db.VarChar(36)
+  assetId          String            @db.VarChar(36)
+  actorType        ActorType
+  actor            String            @db.VarChar(255)
+  workerId         String?           @db.VarChar(191)
+  renderAttemptId  String?           @db.VarChar(36)
+  mode             AssetUploadMode
+  status           AssetUploadStatus @default(CREATED)
+  expectedMimeType String            @db.VarChar(191)
+  expectedSize     BigInt
+  expectedSha256   String?           @db.VarChar(64)
+  r2UploadId       String?           @db.Text
+  expiresAt        DateTime
+  completedAt      DateTime?
+  failedAt         DateTime?
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  asset         VideoAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  worker        Worker?        @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  renderAttempt RenderAttempt? @relation(fields: [renderAttemptId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, status])
+  @@index([workerId, status])
+  @@index([renderAttemptId])
+  @@index([expiresAt, status])
+  @@map("asset_upload_sessions")
 }
 
 model Publication {
@@ -310,6 +362,7 @@ model Worker {
 
   leases         WorkerLease[]
   renderAttempts RenderAttempt[]
+  uploadSessions AssetUploadSession[]
 
   @@map("workers")
 }
@@ -351,8 +404,9 @@ model RenderAttempt {
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
-  video  Video   @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  worker Worker? @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  video          Video                @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  worker         Worker?              @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  uploadSessions AssetUploadSession[]
 
   @@unique([videoId, attempt])
   @@index([workerId])
