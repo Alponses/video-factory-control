@@ -1,6 +1,7 @@
 {
   "name": "video-factory-v5",
   "version": "5.0.0-phase.2",
+  "description": "Video Factory V5 Phase 2 secure API foundation",
   "private": true,
   "type": "module",
   "engines": {
