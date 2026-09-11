@@ -33,6 +33,35 @@
     ],
     "maxConsecutiveEmojis": 4
   },
+  "engagement": {
+    "enabled": true,
+    "primaryCtaRequired": true,
+    "secondaryCtaOptional": true,
+    "maxInteractionRequestsPerPublication": 2,
+    "recentJobsWindow": 5,
+    "avoidExactCtaRepeatWithinRecentJobs": true,
+    "allowPartialPhraseReuse": true,
+    "platformCopyMustDiffer": true,
+    "allowedActions": [
+      "comment",
+      "share",
+      "save",
+      "answer-question"
+    ],
+    "allowedCommentConcepts": [
+      "paz",
+      "fe",
+      "esperanza",
+      "gratitud",
+      "familia",
+      "amén"
+    ],
+    "sharePromptMustBeContextual": true,
+    "commentPromptMustBeMeaningful": true,
+    "avoidRewardOrCoercion": true,
+    "avoidEngagementOnlyContent": true,
+    "avoidRepeatedAmenDependency": true
+  },
   "cover": {
     "headlineMinWords": 3,
     "headlineMaxWords": 7,
