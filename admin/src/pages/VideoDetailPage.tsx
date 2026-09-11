@@ -4,6 +4,7 @@ import type { HistoryItemDto, PublicationEditResultDto, SceneEditResultDto, Vide
 import { EmptyState, ErrorState, FieldValue, LoadingState } from '../components/States';
 import { LifecycleProgress, StatusBadge } from '../components/Status';
 import { PublicationCard, SceneCard, VideoEditForm } from '../components/EditForms';
+import { AssetManager } from '../components/AssetManager';
 import { AdminApiError, adminApi } from '../lib/api';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 
@@ -39,8 +40,10 @@ function SummaryTab({ data }: { data: VideoDetailDto }) {
 }
 
 function AssetsTab({ data }: { data: VideoDetailDto }) {
-  if (data.legacyAssets.length === 0) return <div className="tab-stack"><EmptyState title="No legacy assets recorded" /><div className="info-banner">Cloud asset management will be enabled in Phase 5.</div></div>;
-  return <div className="tab-stack"><div className="info-banner">Read-only legacy references. Cloud asset management will be enabled in Phase 5.</div><div className="asset-grid">{data.legacyAssets.map((asset) => <article className="asset-card" key={asset.id}><strong>{asset.kind}</strong><span>{asset.storageProvider}</span><dl><div><dt>Status</dt><dd>{asset.status}</dd></div><div><dt>Path</dt><dd>{asset.localPath ?? 'No disponible'}</dd></div><div><dt>MIME</dt><dd>{asset.mimeType ?? 'No disponible'}</dd></div><div><dt>Size</dt><dd>{asset.size ?? 'No disponible'}</dd></div></dl></article>)}</div></div>;
+  return <div className="tab-stack">
+    <AssetManager owner={{ type: 'video', id: data.video.id }} allowedKinds={['VIDEO', 'COVER', 'THUMBNAIL']} />
+    <section className="panel"><h2>Legacy local references</h2><p className="muted">Historical LEGACY_LOCAL records are preserved and are not migrated or deleted automatically.</p>{data.legacyAssets.length ? <div className="asset-grid">{data.legacyAssets.map((asset) => <article className="asset-card" key={asset.id}><strong>{asset.kind}</strong><span>{asset.storageProvider}</span><dl><div><dt>Status</dt><dd>{asset.status}</dd></div><div><dt>Path</dt><dd>{asset.localPath ?? 'No disponible'}</dd></div><div><dt>MIME</dt><dd>{asset.mimeType ?? 'No disponible'}</dd></div><div><dt>Size</dt><dd>{asset.size ?? 'No disponible'}</dd></div></dl></article>)}</div> : <EmptyState title="No legacy assets recorded" />}</section>
+  </div>;
 }
 
 function RenderQaTab({ data, onReload }: { data: VideoDetailDto; onReload: () => Promise<void> }) {
