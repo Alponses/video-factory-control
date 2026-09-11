@@ -26,8 +26,8 @@ export class RendererClient {
       return await this.withTimeout(async (signal) => {
         const response = await this.fetch('/health', signal);
         if (!response.ok) return { healthy: false, version: null };
-        const body = await response.json().catch(() => ({})) as Record<string, unknown>;
-        return { healthy: true, version: typeof body.version === 'string' ? body.version : null };
+        const body = await response.json() as Record<string, unknown>;
+        return { healthy: body.status === 'ok', version: typeof body.version === 'string' ? body.version : null };
       });
     } catch {
       return { healthy: false, version: null };
