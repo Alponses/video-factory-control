@@ -32,6 +32,14 @@ export interface AppConfig {
   adminAllowedEmails: string[];
 }
 
+export function isCriticalConfigReady(config: AppConfig): boolean {
+  if (!config.appBaseUrl || !config.appOrigin || !config.databaseUrl || config.adminAllowedEmails.length === 0) return false;
+  if (config.nodeEnv === 'production' && !config.appBaseUrl.startsWith('https://')) return false;
+  if (config.cloudflareAuthMode === 'remote' && (!config.cloudflareTeamDomain || !config.cloudflareAdminAccessAud)) return false;
+  if (config.nodeEnv === 'production' && config.cloudflareAuthMode !== 'remote') return false;
+  return true;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = baseSchema.safeParse(env);
   if (!parsed.success) {
@@ -49,7 +57,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   if (value.CLOUDFLARE_AUTH_MODE === 'remote' && (!value.CLOUDFLARE_TEAM_DOMAIN || !value.CLOUDFLARE_ADMIN_ACCESS_AUD)) {
     throw new Error('Invalid server configuration: remote Cloudflare auth requires team domain and audience');
   }
-  return {
+  const config: AppConfig = {
     nodeEnv: value.NODE_ENV,
     port: value.PORT,
     appBaseUrl: appUrl.toString().replace(/\/$/, ''),
@@ -60,4 +68,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     cloudflareAdminAccessAud: value.CLOUDFLARE_ADMIN_ACCESS_AUD,
     adminAllowedEmails: value.ADMIN_ALLOWED_EMAILS,
   };
+  if (!isCriticalConfigReady(config)) throw new Error('Invalid server configuration: critical configuration is incomplete');
+  return config;
 }
