@@ -1,9 +1,26 @@
 import { Router, type NextFunction, type Request, type Response } from 'express';
-import { VideoStatus, type PrismaClient } from '@prisma/client';
+import { AssetKind, VideoStatus, type PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import type { AppConfig } from '../config.js';
 import { isCriticalConfigReady } from '../config.js';
+import type { R2Storage } from '../storage/r2.js';
+import { AUDIO_MAX_BYTES, IMAGE_MAX_BYTES, VIDEO_MAX_BYTES } from '../storage/asset-policy.js';
 import { ApiError } from './errors.js';
+import {
+  abortAdminUpload,
+  abortWorkerUpload,
+  assertWorkerOutputAsset,
+  createAdminProfileUpload,
+  createAdminVideoUpload,
+  createDownloadUrl,
+  createWorkerVideoUpload,
+  finalizeAdminUpload,
+  finalizeWorkerUpload,
+  listChannelsWithAssets,
+  listVideoAssets,
+  presignAdminParts,
+  presignWorkerParts,
+} from './asset-service.js';
 import {
   getDashboard,
   getVideoDetail,
@@ -74,6 +91,7 @@ const progressSchema = z.object({ progress: z.number().int().min(0).max(100), ph
 const completeSchema = z.object({
   rendererVideoId: z.string().trim().min(1).max(255),
   localFile: z.string().trim().min(1).max(2048),
+  outputAssetId: idSchema.optional(),
   durationSeconds: z.number().finite().nonnegative().max(86400),
   width: z.number().int().positive().max(16384),
   height: z.number().int().positive().max(16384),
@@ -89,9 +107,27 @@ const completeSchema = z.object({
 }).strict().superRefine((value, ctx) => {
   const expected = value.qa.durationPassed && value.qa.resolutionPassed && value.qa.audioPassed && value.qa.captionsPassed !== false;
   if (value.qa.passed !== expected) ctx.addIssue({ code: 'custom', path: ['qa', 'passed'], message: 'QA passed value is inconsistent with individual checks' });
+  if (value.qa.passed && !value.outputAssetId) ctx.addIssue({ code: 'custom', path: ['outputAssetId'], message: 'Durable outputAssetId is required when QA passes' });
 });
 const failSchema = z.object({ errorCode: z.string().trim().min(1).max(64).regex(/^[A-Z0-9_:-]+$/), safeErrorMessage: z.string().trim().min(1).max(1000) }).strict();
 const idempotencySchema = z.string().trim().min(8).max(191).regex(/^[A-Za-z0-9._:-]+$/);
+const assetKindSchema = z.enum(['VIDEO', 'COVER', 'THUMBNAIL', 'AUDIO', 'AVATAR', 'BANNER']);
+const byteSizeSchema = z.union([
+  z.string().regex(/^[1-9][0-9]{0,19}$/),
+  z.number().int().positive().safe(),
+]).transform((value) => BigInt(value));
+const assetUploadSchema = z.object({
+  kind: assetKindSchema,
+  mimeType: z.string().trim().min(1).max(191),
+  size: byteSizeSchema,
+  sha256: z.string().trim().regex(/^[a-fA-F0-9]{64}$/).nullable().optional(),
+  originalFilename: z.string().trim().max(500).nullable().optional(),
+}).strict();
+const workerAssetUploadSchema = assetUploadSchema.omit({ kind: true });
+const partsRequestSchema = z.object({ partNumbers: z.array(z.number().int()).min(1).max(100) }).strict();
+const completedPartSchema = z.object({ partNumber: z.number().int().min(1).max(10000), eTag: z.string().trim().min(1).max(255) }).strict();
+const finalizeUploadSchema = z.object({ parts: z.array(completedPartSchema).max(10000).default([]) }).strict();
+const emptyBodySchema = z.object({}).strict();
 
 function asyncRoute(handler: (req: Request, res: Response) => Promise<unknown>) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -107,6 +143,11 @@ function requireAdmin(req: Request) {
 function requireWorker(req: Request) {
   if (!req.worker) throw new ApiError(401, 'WORKER_CONTEXT_MISSING', 'Worker context is missing');
   return req.worker;
+}
+
+function requireStorage(storage?: R2Storage): R2Storage {
+  if (!storage) throw new ApiError(503, 'R2_NOT_CONFIGURED', 'Durable R2 storage is not configured');
+  return storage;
 }
 
 function leaseHeader(req: Request): string {
@@ -136,7 +177,7 @@ export function createHealthRouter(prisma: PrismaClient, config: AppConfig) {
   return router;
 }
 
-export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
+export function createAdminRouter(prisma: PrismaClient, config: AppConfig, storage?: R2Storage) {
   const router = Router();
   const workerOfflineThresholdSeconds = config.workerOfflineThresholdSeconds ?? 60;
   router.get('/me', (req, res, next) => {
@@ -144,6 +185,18 @@ export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
     res.json({ email: req.actor.email });
   });
   router.get('/dashboard', asyncRoute(async (_req, res) => res.json(await getDashboard(prisma))));
+  router.get('/channels', asyncRoute(async (_req, res) => res.json(await listChannelsWithAssets(prisma))));
+  router.get('/assets/policy', asyncRoute(async (_req, res) => {
+    const r2 = config.r2;
+    if (!r2) throw new ApiError(503, 'R2_NOT_CONFIGURED', 'Durable R2 storage is not configured');
+    res.json({
+      presignTtlSeconds: r2.presignTtlSeconds,
+      singleUploadThresholdBytes: String(r2.singleUploadThresholdBytes),
+      multipartPartSizeBytes: r2.multipartPartSizeBytes,
+      limits: { videoBytes: VIDEO_MAX_BYTES.toString(), imageBytes: IMAGE_MAX_BYTES.toString(), audioBytes: AUDIO_MAX_BYTES.toString() },
+      mimeTypes: { VIDEO: ['video/mp4'], IMAGE: ['image/jpeg', 'image/png', 'image/webp'], AUDIO: ['audio/mpeg', 'audio/wav', 'audio/x-wav'] },
+    });
+  }));
   router.get('/workers', asyncRoute(async (_req, res) => res.json(await listWorkers(prisma, workerOfflineThresholdSeconds))));
   router.post('/workers', asyncRoute(async (req, res) => {
     const body = parseRequest(z.object({ workerId: workerIdSchema }).strict(), req.body);
@@ -177,6 +230,46 @@ export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
   router.get('/videos/:id/history', asyncRoute(async (req, res) => {
     const id = parseRequest(idSchema, req.params.id);
     res.json(await getVideoHistory(prisma, id));
+  }));
+  router.get('/videos/:id/assets', asyncRoute(async (req, res) => {
+    const id = parseRequest(idSchema, req.params.id);
+    res.json(await listVideoAssets(prisma, id));
+  }));
+  router.post('/videos/:id/assets/uploads', asyncRoute(async (req, res) => {
+    const videoId = parseRequest(idSchema, req.params.id);
+    const body = parseRequest(assetUploadSchema, req.body);
+    const actor = requireAdmin(req);
+    res.status(201).json(await createAdminVideoUpload(prisma, requireStorage(storage), config, videoId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));
+  }));
+  router.post('/profiles/:profileId/assets/uploads', asyncRoute(async (req, res) => {
+    const profileId = parseRequest(idSchema, req.params.profileId);
+    const body = parseRequest(assetUploadSchema, req.body);
+    const actor = requireAdmin(req);
+    res.status(201).json(await createAdminProfileUpload(prisma, requireStorage(storage), config, profileId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));
+  }));
+  router.post('/assets/uploads/:sessionId/parts', asyncRoute(async (req, res) => {
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    const body = parseRequest(partsRequestSchema, req.body);
+    const actor = requireAdmin(req);
+    res.json(await presignAdminParts(prisma, requireStorage(storage), config, sessionId, actor.email, body.partNumbers));
+  }));
+  router.post('/assets/uploads/:sessionId/complete', asyncRoute(async (req, res) => {
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    const body = parseRequest(finalizeUploadSchema, req.body);
+    const actor = requireAdmin(req);
+    res.json(await finalizeAdminUpload(prisma, requireStorage(storage), config, sessionId, actor.email, req.requestId, idempotencyHeader(req), body.parts));
+  }));
+  router.post('/assets/uploads/:sessionId/abort', asyncRoute(async (req, res) => {
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    parseRequest(emptyBodySchema, req.body);
+    const actor = requireAdmin(req);
+    res.json(await abortAdminUpload(prisma, requireStorage(storage), sessionId, actor.email, req.requestId));
+  }));
+  router.post('/assets/:assetId/download-url', asyncRoute(async (req, res) => {
+    const assetId = parseRequest(idSchema, req.params.assetId);
+    parseRequest(emptyBodySchema, req.body);
+    requireAdmin(req);
+    res.json(await createDownloadUrl(prisma, requireStorage(storage), config, assetId));
   }));
   router.get('/videos/:id', asyncRoute(async (req, res) => {
     const id = parseRequest(idSchema, req.params.id);
@@ -219,7 +312,7 @@ export function createAdminRouter(prisma: PrismaClient, config: AppConfig) {
   return router;
 }
 
-export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
+export function createWorkerRouter(prisma: PrismaClient, config: AppConfig, storage?: R2Storage) {
   const router = Router();
   const leaseDurationSeconds = config.leaseDurationSeconds ?? 120;
   router.post('/heartbeat', asyncRoute(async (req, res) => {
@@ -251,11 +344,37 @@ export function createWorkerRouter(prisma: PrismaClient, config: AppConfig) {
     const videoId = parseRequest(idSchema, req.params.videoId);
     res.json(await renewLease(prisma, worker.id, videoId, leaseHeader(req), leaseDurationSeconds));
   }));
+  router.post('/jobs/:videoId/assets/uploads', asyncRoute(async (req, res) => {
+    const worker = requireWorker(req);
+    const videoId = parseRequest(idSchema, req.params.videoId);
+    const body = parseRequest(workerAssetUploadSchema, req.body);
+    res.status(201).json(await createWorkerVideoUpload(prisma, requireStorage(storage), config, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), body));
+  }));
+  router.post('/assets/uploads/:sessionId/parts', asyncRoute(async (req, res) => {
+    const worker = requireWorker(req);
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    const body = parseRequest(partsRequestSchema, req.body);
+    res.json(await presignWorkerParts(prisma, requireStorage(storage), config, sessionId, worker.id, leaseHeader(req), body.partNumbers));
+  }));
+  router.post('/assets/uploads/:sessionId/complete', asyncRoute(async (req, res) => {
+    const worker = requireWorker(req);
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    const body = parseRequest(finalizeUploadSchema, req.body);
+    res.json(await finalizeWorkerUpload(prisma, requireStorage(storage), config, sessionId, worker.id, leaseHeader(req), idempotencyHeader(req), body.parts));
+  }));
+  router.post('/assets/uploads/:sessionId/abort', asyncRoute(async (req, res) => {
+    const worker = requireWorker(req);
+    const sessionId = parseRequest(idSchema, req.params.sessionId);
+    parseRequest(emptyBodySchema, req.body);
+    res.json(await abortWorkerUpload(prisma, requireStorage(storage), sessionId, worker.id, leaseHeader(req)));
+  }));
   router.post('/jobs/:videoId/complete', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
     const videoId = parseRequest(idSchema, req.params.videoId);
     const body = parseRequest(completeSchema, req.body);
-    res.json(await completeJob(prisma, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), body));
+    const leaseToken = leaseHeader(req);
+    if (body.qa.passed) await assertWorkerOutputAsset(prisma, requireStorage(storage), worker.id, videoId, leaseToken, body.outputAssetId!);
+    res.json(await completeJob(prisma, worker.id, videoId, leaseToken, idempotencyHeader(req), body, { requireDurableOutput: body.qa.passed }));
   }));
   router.post('/jobs/:videoId/fail', asyncRoute(async (req, res) => {
     const worker = requireWorker(req);
