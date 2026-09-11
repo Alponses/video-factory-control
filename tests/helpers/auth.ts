@@ -1,13 +1,15 @@
-import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT, type KeyLike } from 'jose';
+import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 
 export const TEST_ISSUER = 'https://unit.cloudflareaccess.com';
 export const TEST_AUDIENCE = 'video-factory-admin-test';
 export const TEST_ALLOWED_EMAIL = 'admin@example.com';
 
+type GeneratedPrivateKey = Awaited<ReturnType<typeof generateKeyPair>>['privateKey'];
+
 export interface TestAuthFixture {
   keyResolver: ReturnType<typeof createLocalJWKSet>;
-  privateKey: KeyLike;
-  sign(input?: { email?: string; issuer?: string; audience?: string; expiresInSeconds?: number; privateKey?: KeyLike }): Promise<string>;
+  privateKey: GeneratedPrivateKey;
+  sign(input?: { email?: string; issuer?: string; audience?: string; expiresInSeconds?: number; privateKey?: GeneratedPrivateKey }): Promise<string>;
 }
 
 export async function createTestAuthFixture(): Promise<TestAuthFixture> {
