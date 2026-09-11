@@ -85,6 +85,8 @@ export interface VideoPatchDto {
 }
 export interface ScenePatchDto { expectedVersion: number; text?: string; searchTerms?: string[] }
 export interface PublicationPatchDto { expectedVersion: number; title?: string | null; caption?: string | null; description?: string | null; hashtags?: string[]; cta?: string | null; pinnedComment?: string | null }
+export interface QueueRenderRequestDto { expectedVersion: number }
+export interface QueueRenderResultDto { id: string; status: 'QUEUED'; version: number }
 export interface VideoEditResultDto { title: string; category: string; primaryKeyword: string | null; searchIntent: string | null; hookText: string | null; hookType: string | null; closing: string | null; cta: string | null; question: string | null; pinnedComment: string | null; version: number }
 export interface SceneEditResultDto { id: string; position: number; text: string; searchTerms: string[]; version: number; updatedAt: string }
 export interface PublicationEditResultDto { id: string; videoId: string; platform: PlatformDto; title: string | null; caption: string | null; description: string | null; hashtags: string[]; cta: string | null; pinnedComment: string | null; version: number; updatedAt: string }
