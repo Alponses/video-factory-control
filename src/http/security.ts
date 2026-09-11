@@ -9,10 +9,18 @@ export function requestContext(req: Request, res: Response, next: NextFunction):
   next();
 }
 
+export function productionCsp(config: AppConfig): string {
+  const r2Origin = config.r2?.origin;
+  const connect = ["'self'", ...(r2Origin ? [r2Origin] : [])].join(' ');
+  const images = ["'self'", 'data:', ...(r2Origin ? [r2Origin] : [])].join(' ');
+  const media = ["'self'", ...(r2Origin ? [r2Origin] : [])].join(' ');
+  return `default-src 'self'; script-src 'self'; style-src 'self'; img-src ${images}; media-src ${media}; connect-src ${connect}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+}
+
 export function securityHeaders(config: AppConfig) {
   return (_req: Request, res: Response, next: NextFunction): void => {
     const csp = config.nodeEnv === 'production'
-      ? "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      ? productionCsp(config)
       : "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
     res.setHeader('Content-Security-Policy', csp);
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -34,7 +42,7 @@ export function sameOriginCors(config: AppConfig) {
       res.setHeader('Access-Control-Allow-Origin', config.appOrigin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cf-Access-Jwt-Assertion');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cf-Access-Jwt-Assertion, Idempotency-Key, X-Worker-Lease');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     }
     if (req.method === 'OPTIONS') return void res.status(204).end();
