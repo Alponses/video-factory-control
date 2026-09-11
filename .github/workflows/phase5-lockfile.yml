@@ -1,33 +1,123 @@
-name: Phase 5 lockfile generator
+name: Phase 5 typing fix gate
 
 on:
   push:
     branches: [video-factory-v5]
     paths:
-      - package.json
       - .github/workflows/phase5-lockfile.yml
 
 permissions:
   contents: write
 
 jobs:
-  generate:
+  fix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Regenerate locked root dependencies
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-      - name: Commit lockfile when changed
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Apply narrow Phase 5 typing corrections
         run: |
-          if git diff --quiet -- package-lock.json; then
-            echo "package-lock.json already current"
-            exit 0
-          fi
+          python3 <<'PY'
+          from pathlib import Path
+
+          asset = Path('src/http/asset-service.ts')
+          text = asset.read_text()
+          old = '''function assertOwnerKind(owner: Owner, kind: AssetKind): void {
+            const valid = owner.type === 'video'
+              ? [AssetKind.VIDEO, AssetKind.COVER, AssetKind.THUMBNAIL, AssetKind.AUDIO].includes(kind)
+              : [AssetKind.AVATAR, AssetKind.BANNER].includes(kind);
+            if (!valid) throw new ApiError(400, 'ASSET_INVALID_TYPE', 'Asset kind is not valid for this owner');
+          }
+          '''
+          new = '''function isVideoAssetKind(kind: AssetKind): kind is AssetKind.VIDEO | AssetKind.COVER | AssetKind.THUMBNAIL | AssetKind.AUDIO {
+            return kind === AssetKind.VIDEO || kind === AssetKind.COVER || kind === AssetKind.THUMBNAIL || kind === AssetKind.AUDIO;
+          }
+
+          function isProfileAssetKind(kind: AssetKind): kind is AssetKind.AVATAR | AssetKind.BANNER {
+            return kind === AssetKind.AVATAR || kind === AssetKind.BANNER;
+          }
+
+          function isActiveUploadStatus(status: AssetUploadStatus): status is AssetUploadStatus.CREATED | AssetUploadStatus.UPLOADING {
+            return status === AssetUploadStatus.CREATED || status === AssetUploadStatus.UPLOADING;
+          }
+
+          function isDownloadableAssetStatus(status: AssetStatus): status is AssetStatus.READY | AssetStatus.REPLACED {
+            return status === AssetStatus.READY || status === AssetStatus.REPLACED;
+          }
+
+          function assertOwnerKind(owner: Owner, kind: AssetKind): void {
+            const valid = owner.type === 'video' ? isVideoAssetKind(kind) : isProfileAssetKind(kind);
+            if (!valid) throw new ApiError(400, 'ASSET_INVALID_TYPE', 'Asset kind is not valid for this owner');
+          }
+          '''
+          if old not in text:
+            raise SystemExit('assertOwnerKind source snippet not found')
+          text = text.replace(old, new, 1)
+          old = "if (![AssetUploadStatus.UPLOADING, AssetUploadStatus.CREATED].includes(session.status)) throw new ApiError(409, 'UPLOAD_SESSION_EXPIRED', 'Upload session cannot accept more parts');"
+          new = "if (!isActiveUploadStatus(session.status)) throw new ApiError(409, 'UPLOAD_SESSION_EXPIRED', 'Upload session cannot accept more parts');"
+          if old not in text:
+            raise SystemExit('active upload status snippet not found')
+          text = text.replace(old, new, 1)
+          old = "if (![AssetStatus.READY, AssetStatus.REPLACED].includes(asset.status)) throw new ApiError(409, 'ASSET_NOT_READY', 'Only ready or replaced assets can be downloaded');"
+          new = "if (!isDownloadableAssetStatus(asset.status)) throw new ApiError(409, 'ASSET_NOT_READY', 'Only ready or replaced assets can be downloaded');"
+          if old not in text:
+            raise SystemExit('downloadable status snippet not found')
+          text = text.replace(old, new, 1)
+          asset.write_text(text)
+
+          routes = Path('src/http/routes.ts')
+          text = routes.read_text()
+          old = "res.status(201).json(await createAdminVideoUpload(prisma, requireStorage(storage), config, videoId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));"
+          new = "res.status(201).json(await createAdminVideoUpload(prisma, requireStorage(storage), config, videoId, actor.email, req.requestId, idempotencyHeader(req), { kind: body.kind as AssetKind, mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));"
+          if old not in text:
+            raise SystemExit('admin video upload snippet not found')
+          text = text.replace(old, new, 1)
+          old = "res.status(201).json(await createAdminProfileUpload(prisma, requireStorage(storage), config, profileId, actor.email, req.requestId, idempotencyHeader(req), { ...body, kind: body.kind as AssetKind }));"
+          new = "res.status(201).json(await createAdminProfileUpload(prisma, requireStorage(storage), config, profileId, actor.email, req.requestId, idempotencyHeader(req), { kind: body.kind as AssetKind, mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));"
+          if old not in text:
+            raise SystemExit('admin profile upload snippet not found')
+          text = text.replace(old, new, 1)
+          old = "res.status(201).json(await createWorkerVideoUpload(prisma, requireStorage(storage), config, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), body));"
+          new = "res.status(201).json(await createWorkerVideoUpload(prisma, requireStorage(storage), config, worker.id, videoId, leaseHeader(req), idempotencyHeader(req), { mimeType: body.mimeType, size: body.size, ...(body.sha256 !== undefined ? { sha256: body.sha256 } : {}), ...(body.originalFilename !== undefined ? { originalFilename: body.originalFilename } : {}) }));"
+          if old not in text:
+            raise SystemExit('worker upload snippet not found')
+          text = text.replace(old, new, 1)
+          old = '''    const body = parseRequest(completeSchema, req.body);
+              const leaseToken = leaseHeader(req);
+              if (body.qa.passed) await assertWorkerOutputAsset(prisma, requireStorage(storage), worker.id, videoId, leaseToken, body.outputAssetId!);
+              res.json(await completeJob(prisma, worker.id, videoId, leaseToken, idempotencyHeader(req), body, { requireDurableOutput: body.qa.passed }));
+          '''
+          new = '''    const body = parseRequest(completeSchema, req.body);
+              const leaseToken = leaseHeader(req);
+              const { outputAssetId, ...completion } = body;
+              if (body.qa.passed) {
+                if (!outputAssetId) throw new ApiError(400, 'VALIDATION_ERROR', 'Durable outputAssetId is required when QA passes');
+                await assertWorkerOutputAsset(prisma, requireStorage(storage), worker.id, videoId, leaseToken, outputAssetId);
+              }
+              const completeInput = { ...completion, ...(outputAssetId !== undefined ? { outputAssetId } : {}) };
+              res.json(await completeJob(prisma, worker.id, videoId, leaseToken, idempotencyHeader(req), completeInput, { requireDurableOutput: body.qa.passed }));
+          '''
+          if old not in text:
+            raise SystemExit('worker complete snippet not found')
+          text = text.replace(old, new, 1)
+          routes.write_text(text)
+          PY
+      - name: Install locked root dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+      - name: Typecheck gate
+        run: npm run typecheck
+      - name: Lint gate
+        run: npm run lint
+      - name: Commit validated typing corrections
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore: lock phase5 AWS SDK dependencies"
+          git add src/http/asset-service.ts src/http/routes.ts
+          git commit -m "fix: satisfy strict phase5 asset typing"
           git push origin HEAD:video-factory-v5
