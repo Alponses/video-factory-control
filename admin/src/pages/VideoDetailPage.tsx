@@ -4,7 +4,7 @@ import type { HistoryItemDto, PublicationEditResultDto, SceneEditResultDto, Vide
 import { EmptyState, ErrorState, FieldValue, LoadingState } from '../components/States';
 import { LifecycleProgress, StatusBadge } from '../components/Status';
 import { PublicationCard, SceneCard, VideoEditForm } from '../components/EditForms';
-import { adminApi } from '../lib/api';
+import { AdminApiError, adminApi } from '../lib/api';
 import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 
 const tabs = ['summary', 'content', 'scenes', 'assets', 'render', 'publication', 'metrics', 'history'] as const;
@@ -43,8 +43,30 @@ function AssetsTab({ data }: { data: VideoDetailDto }) {
   return <div className="tab-stack"><div className="info-banner">Read-only legacy references. Cloud asset management will be enabled in Phase 5.</div><div className="asset-grid">{data.legacyAssets.map((asset) => <article className="asset-card" key={asset.id}><strong>{asset.kind}</strong><span>{asset.storageProvider}</span><dl><div><dt>Status</dt><dd>{asset.status}</dd></div><div><dt>Path</dt><dd>{asset.localPath ?? 'No disponible'}</dd></div><div><dt>MIME</dt><dd>{asset.mimeType ?? 'No disponible'}</dd></div><div><dt>Size</dt><dd>{asset.size ?? 'No disponible'}</dd></div></dl></article>)}</div></div>;
 }
 
-function RenderQaTab({ data }: { data: VideoDetailDto }) {
-  return <div className="tab-stack"><section className="panel"><div className="section-toolbar"><h2>Render attempts</h2><span className="future-note">Re-render disponible en Fase 4</span></div>{data.renderAttempts.length === 0 ? <EmptyState title="No render attempts recorded" /> : <div className="card-grid">{data.renderAttempts.map((attempt) => <article className="data-card" key={attempt.id}><div className="data-card-heading"><strong>Attempt {attempt.attempt}</strong><StatusBadge status={attempt.status} /></div><dl><div><dt>Worker</dt><dd>{attempt.workerLabel ?? attempt.workerId ?? 'No disponible'}</dd></div><div><dt>Renderer video ID</dt><dd>{attempt.rendererVideoId ?? 'No disponible'}</dd></div><div><dt>Started</dt><dd>{attempt.startedAt ? new Date(attempt.startedAt).toLocaleString() : 'No disponible'}</dd></div><div><dt>Finished</dt><dd>{attempt.finishedAt ? new Date(attempt.finishedAt).toLocaleString() : 'No disponible'}</dd></div><div><dt>Duration</dt><dd>{attempt.durationSeconds === null ? 'No disponible' : `${attempt.durationSeconds}s`}</dd></div><div><dt>Resolution</dt><dd>{attempt.width && attempt.height ? `${attempt.width}×${attempt.height}` : 'No disponible'}</dd></div><div><dt>Audio</dt><dd>{attempt.hasAudio === null ? 'No disponible' : attempt.hasAudio ? 'Yes' : 'No'}</dd></div><div><dt>Error</dt><dd>{attempt.error ?? 'None'}</dd></div></dl></article>)}</div>}</section><section className="panel"><h2>QA</h2>{data.qa.length === 0 ? <EmptyState title="No QA results recorded" /> : <div className="card-grid">{data.qa.map((qa) => <article className="data-card" key={qa.id}><div className="data-card-heading"><strong>Attempt {qa.attempt}</strong><span>{qa.passed === null ? 'Not evaluated' : qa.passed ? '✓ Passed' : '✕ Failed'}</span></div><dl><div><dt>Duration</dt><dd>{qa.durationPassed === null ? 'No disponible' : qa.durationPassed ? '✓' : '✕'}</dd></div><div><dt>Resolution</dt><dd>{qa.resolutionPassed === null ? 'No disponible' : qa.resolutionPassed ? '✓' : '✕'}</dd></div><div><dt>Audio</dt><dd>{qa.audioPassed === null ? 'No disponible' : qa.audioPassed ? '✓' : '✕'}</dd></div><div><dt>Captions</dt><dd>{qa.captionsPassed === null ? 'No disponible' : qa.captionsPassed ? '✓' : '✕'}</dd></div></dl></article>)}</div>}</section></div>;
+function RenderQaTab({ data, onReload }: { data: VideoDetailDto; onReload: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [conflict, setConflict] = useState(false);
+  const status = data.video.status;
+  const action = status === 'DRAFT' || status === 'READY' ? 'queue' : status === 'FAILED' || status === 'APPROVED' ? 'rerender' : null;
+
+  const perform = async () => {
+    if (!action) return;
+    if (!window.confirm(`${action === 'queue' ? 'Queue render' : 'Re-render'} for ${data.video.id}?`)) return;
+    setBusy(true);
+    setConflict(false);
+    try {
+      if (action === 'queue') await adminApi.queueRender(data.video.id, data.video.version);
+      else await adminApi.rerender(data.video.id, data.video.version);
+      await onReload();
+    } catch (caught) {
+      if (caught instanceof AdminApiError && caught.status === 409) setConflict(true);
+      else throw caught;
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return <div className="tab-stack"><section className="panel"><div className="section-toolbar"><div><h2>Render operations</h2><p className="muted">Versioned operations never overwrite a newer server state.</p></div>{action ? <button className="button" type="button" disabled={busy} onClick={() => void perform()}>{busy ? 'Working…' : action === 'queue' ? 'Queue render' : 'Re-render'}</button> : null}</div>{!action ? <div className="info-banner">No render action is valid while the video is {status}.</div> : null}{conflict ? <div className="warning-banner" role="alert"><strong>This video changed since you loaded it.</strong><p>Reload the latest server version before deciding again.</p><div className="action-cluster"><button className="button secondary" type="button" onClick={() => void onReload()}>Reload latest version</button><button className="button secondary" type="button" onClick={() => setConflict(false)}>Cancel</button></div></div> : null}</section><section className="panel"><div className="section-toolbar"><h2>Render attempts</h2><span>{data.renderAttempts.length} total</span></div>{data.renderAttempts.length === 0 ? <EmptyState title="No render attempts recorded" /> : <div className="card-grid">{data.renderAttempts.map((attempt) => { const qa = data.qa.find((item) => item.attempt === attempt.attempt); return <article className="data-card" key={attempt.id}><div className="data-card-heading"><strong>Render Attempt #{attempt.attempt}</strong><StatusBadge status={attempt.status} /></div><dl><div><dt>Worker</dt><dd>{attempt.workerLabel ?? attempt.workerId ?? 'No disponible'}</dd></div><div><dt>Renderer video ID</dt><dd>{attempt.rendererVideoId ?? 'No disponible'}</dd></div><div><dt>Started</dt><dd>{attempt.startedAt ? new Date(attempt.startedAt).toLocaleString() : 'No disponible'}</dd></div><div><dt>Finished</dt><dd>{attempt.finishedAt ? new Date(attempt.finishedAt).toLocaleString() : 'No disponible'}</dd></div><div><dt>Duration</dt><dd>{attempt.durationSeconds === null ? 'No disponible' : `${attempt.durationSeconds}s`}</dd></div><div><dt>Resolution</dt><dd>{attempt.width && attempt.height ? `${attempt.width}×${attempt.height}` : 'No disponible'}</dd></div><div><dt>Audio</dt><dd>{attempt.hasAudio === null ? 'No disponible' : attempt.hasAudio ? 'Yes' : 'No'}</dd></div><div><dt>QA</dt><dd>{qa?.passed === null || qa?.passed === undefined ? 'Not evaluated' : qa.passed ? 'Passed' : 'Failed'}</dd></div><div><dt>QA duration</dt><dd>{qa?.durationPassed === null || qa?.durationPassed === undefined ? 'Unknown' : qa.durationPassed ? 'Passed' : 'Failed'}</dd></div><div><dt>QA resolution</dt><dd>{qa?.resolutionPassed === null || qa?.resolutionPassed === undefined ? 'Unknown' : qa.resolutionPassed ? 'Passed' : 'Failed'}</dd></div><div><dt>QA audio</dt><dd>{qa?.audioPassed === null || qa?.audioPassed === undefined ? 'Unknown' : qa.audioPassed ? 'Passed' : 'Failed'}</dd></div><div><dt>QA captions</dt><dd>{qa?.captionsPassed === null || qa?.captionsPassed === undefined ? 'Unknown' : qa.captionsPassed ? 'Passed' : 'Failed'}</dd></div><div><dt>Error</dt><dd>{attempt.error ?? 'None'}</dd></div></dl></article>; })}</div>}</section></div>;
 }
 
 function MetricsTab({ data }: { data: VideoDetailDto }) {
@@ -86,7 +108,7 @@ export function VideoDetailPage() {
       {tab === 'content' ? <VideoEditForm video={video} onSaved={onVideoSaved} onReload={load} onDirtyChange={onDirtyChange} /> : null}
       {tab === 'scenes' ? (data.scenes.length === 0 ? <div className="warning-banner"><strong>Legacy incomplete</strong><p>No historical scenes exist. Video Factory does not fabricate missing scene data.</p></div> : <div className="scene-list">{data.scenes.map((scene) => <SceneCard videoId={video.id} scene={scene} onSaved={onSceneSaved} onReload={load} onDirtyChange={onDirtyChange} key={scene.id} />)}</div>) : null}
       {tab === 'assets' ? <AssetsTab data={data} /> : null}
-      {tab === 'render' ? <RenderQaTab data={data} /> : null}
+      {tab === 'render' ? <RenderQaTab data={data} onReload={load} /> : null}
       {tab === 'publication' ? <div className="publication-list">{data.publications.length ? data.publications.map((publication) => <PublicationCard publication={publication} onSaved={onPublicationSaved} onReload={load} onDirtyChange={onDirtyChange} key={publication.id} />) : <EmptyState title="No publication metadata available" />}</div> : null}
       {tab === 'metrics' ? <MetricsTab data={data} /> : null}
       {tab === 'history' ? <HistoryPanel videoId={video.id} /> : null}

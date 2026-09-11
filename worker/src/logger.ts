@@ -1,12 +1,12 @@
 export type LogLevel = 'info' | 'warn' | 'error';
 export interface LogFields {
-  workerId?: string;
-  event?: string;
-  videoId?: string;
-  attempt?: number;
-  progress?: number;
-  durationMs?: number;
-  errorCode?: string;
+  workerId?: string | undefined;
+  event?: string | undefined;
+  videoId?: string | undefined;
+  attempt?: number | undefined;
+  progress?: number | undefined;
+  durationMs?: number | undefined;
+  errorCode?: string | undefined;
 }
 
 export function log(level: LogLevel, fields: LogFields): void {
