@@ -16,7 +16,9 @@ export interface AppDependencies {
 export function createApp(config: AppConfig, dependencies: AppDependencies): Express {
   const app = express();
   app.disable('x-powered-by');
-  // Trust exactly one hosting reverse-proxy hop, never arbitrary X-Forwarded-* chains.
+  // Trust exactly one hosting reverse-proxy hop. Do not trust arbitrary X-Forwarded-* chains.
+  // Admin throttling keys on the validated actor email, so authorization/rate limits do not
+  // depend on a client-controlled forwarded IP. Revisit only after Hostinger topology is verified.
   app.set('trust proxy', 1);
 
   app.use(requestContext);
@@ -28,8 +30,10 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use('/api/health', createHealthRouter(dependencies.prisma));
 
   const adminAuth = createAdminAuth(config, dependencies.auth);
+  const adminReadLimit = fixedWindowRateLimit(120, 60_000);
+  const adminMutationLimit = fixedWindowRateLimit(60, 60_000);
   app.use('/api/admin', adminAuth);
-  app.use('/api/admin', (req, res, next) => req.method === 'GET' ? fixedWindowRateLimit(120, 60_000)(req, res, next) : fixedWindowRateLimit(60, 60_000)(req, res, next));
+  app.use('/api/admin', (req, res, next) => (req.method === 'GET' ? adminReadLimit : adminMutationLimit)(req, res, next));
   app.use('/api/admin', browserMutationGuard(config));
   app.use('/api/admin', createAdminRouter(dependencies.prisma));
 
