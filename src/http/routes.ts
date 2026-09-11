@@ -88,7 +88,10 @@ export function createAdminRouter(prisma: PrismaClient) {
   }));
   router.get('/videos/:id', asyncRoute(async (req, res) => {
     const id = parseRequest(idSchema, req.params.id);
-    res.json(await getVideoDetail(prisma, id));
+    const detail = await getVideoDetail(prisma, id);
+    // Preserve the Phase 2 top-level compatibility field while the explicit V5 DTO keeps
+    // canonical video metadata under `video`.
+    res.json({ ...detail, legacyIncomplete: detail.video.legacyIncomplete });
   }));
   router.patch('/videos/:id', asyncRoute(async (req, res) => {
     const id = parseRequest(idSchema, req.params.id);
