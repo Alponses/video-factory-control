@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
-const SENSITIVE_KEY = /(authorization|cookie|cf-access-jwt-assertion|token|accessToken|refreshToken|clientSecret|database.?url)/i;
+const SENSITIVE_KEY = /(authorization|cookie|cf-access-jwt-assertion|token|secret|password|database.?url)/i;
 const SENSITIVE_URL = /^(mysql|mariadb):\/\//i;
 
 export function redact(value: unknown): unknown {
