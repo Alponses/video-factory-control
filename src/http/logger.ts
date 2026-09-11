@@ -1,14 +1,28 @@
 import type { NextFunction, Request, Response } from 'express';
 
-const SENSITIVE_KEY = /(authorization|cookie|cf-access-jwt-assertion|token|secret|password|database.?url)/i;
+const SENSITIVE_KEY = /(authorization|cookie|cf-access-jwt-assertion|token|secret|password|database.?url|presigned.?url|upload.?url|download.?url|x-amz-signature|x-amz-credential|x-amz-security-token)/i;
 const SENSITIVE_URL = /^(mysql|mariadb):\/\//i;
+const SIGNED_QUERY = /[?&](?:X-Amz-(?:Algorithm|Credential|Date|Expires|Signature|SignedHeaders|Security-Token))=/i;
+
+function redactString(value: string): string {
+  if (SENSITIVE_URL.test(value)) return '[REDACTED]';
+  if (SIGNED_QUERY.test(value)) {
+    try {
+      const url = new URL(value);
+      return `${url.origin}${url.pathname}?[REDACTED_PRESIGNED_QUERY]`;
+    } catch {
+      return '[REDACTED_PRESIGNED_URL]';
+    }
+  }
+  return value;
+}
 
 export function redact(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === 'object') {
     return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, SENSITIVE_KEY.test(key) ? '[REDACTED]' : redact(item)]));
   }
-  if (typeof value === 'string' && SENSITIVE_URL.test(value)) return '[REDACTED]';
+  if (typeof value === 'string') return redactString(value);
   return value;
 }
 
