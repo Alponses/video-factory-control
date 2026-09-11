@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,7 +16,7 @@ function mockFetch(handler: (url: string, init?: RequestInit) => Promise<Respons
   return fn;
 }
 
-function renderPage(path: string, element: React.ReactNode) {
+function renderPage(path: string, element: ReactNode) {
   const router = createMemoryRouter([{ path, element }], { initialEntries: [path] });
   render(<RouterProvider router={router} />);
   return router;
@@ -92,9 +93,13 @@ describe('Workers admin UI', () => {
 
   it('creates worker and shows one-time secret only in memory until closed', async () => {
     const secret = 'vfws_test_one_time_secret_012345678901234567890';
+    let created = false;
     mockFetch((url, init) => {
-      if (url.endsWith('/api/admin/workers') && init?.method === 'POST') return jsonResponse({ worker: workerFixture('imac-01', 'OFFLINE'), secret }, 201);
-      return jsonResponse({ ...workerListFixture, items: [workerFixture('imac-01', 'OFFLINE')] });
+      if (url.endsWith('/api/admin/workers') && init?.method === 'POST') {
+        created = true;
+        return jsonResponse({ worker: workerFixture('imac-01', 'OFFLINE'), secret }, 201);
+      }
+      return jsonResponse({ ...workerListFixture, items: created ? [workerFixture('imac-01', 'OFFLINE')] : [] });
     });
     const storageSpy = vi.spyOn(Storage.prototype, 'setItem');
     renderPage('/workers', <WorkersPage />);
