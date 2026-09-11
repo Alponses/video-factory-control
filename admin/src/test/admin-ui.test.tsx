@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { DashboardPage } from '../pages/DashboardPage';
 import { VideosPage } from '../pages/VideosPage';
 import { VideoDetailPage } from '../pages/VideoDetailPage';
-import { dashboardFixture, detailFixture, listFixture } from './fixtures';
+import { dashboardFixture, detailFixture, listFixture, workerListFixture } from './fixtures';
 
 function jsonResponse(body: unknown, status = 200, headers: Record<string, string> = {}) {
   return Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } }));
@@ -25,10 +25,13 @@ function renderRoute(path: string, routePath: string, element: ReactNode, extraR
 
 describe('Dashboard', () => {
   it('renders real API counts including zero values', async () => {
-    mockFetch(() => jsonResponse(dashboardFixture));
+    mockFetch((url) => jsonResponse(url.includes('/api/admin/workers') ? workerListFixture : dashboardFixture));
     renderRoute('/', '/', <DashboardPage />);
     expect(await screen.findByText('11')).toBeInTheDocument();
     expect(screen.getByText('QUEUED').parentElement).toHaveTextContent('0');
+    expect(screen.getByText('Workers online').parentElement).toHaveTextContent('0');
+    expect(screen.getByText('Workers busy').parentElement).toHaveTextContent('0');
+    expect(screen.getByText('No worker errors recorded')).toBeInTheDocument();
     expect(screen.getByText('Legacy incomplete').parentElement).toHaveTextContent('1');
   });
 
