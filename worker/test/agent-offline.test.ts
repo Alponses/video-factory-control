@@ -21,6 +21,8 @@ const config: WorkerConfig = {
   rendererTimeoutMs: 1000,
   rendererPollIntervalMs: 1000,
   outputDir: './output',
+  r2UploadMaxRetries: 3,
+  deleteLocalAfterDurableUpload: false,
 };
 
 function wait(ms: number): Promise<void> {
