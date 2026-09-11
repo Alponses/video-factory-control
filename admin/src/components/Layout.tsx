@@ -27,6 +27,7 @@ export function AppShell() {
         <nav className="nav-list">
           <NavLink to="/" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Resumen</NavLink>
           <NavLink to="/videos" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Videos</NavLink>
+          <NavLink to="/channels" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Canales</NavLink>
           <NavLink to="/workers" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>Workers</NavLink>
         </nav>
         <div className="future-nav" aria-label="Future sections">
