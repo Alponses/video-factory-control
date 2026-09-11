@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 import { VideoStatus, type PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { ApiError } from './errors.js';
@@ -25,8 +25,10 @@ const scenePatchSchema = z.object({
   searchTerms: z.array(z.string().trim().min(1).max(200)).max(30).optional(),
 }).strict().refine((value) => value.text !== undefined || value.searchTerms !== undefined, 'At least one editable field is required');
 
-function asyncRoute(handler: (req: any, res: any) => Promise<unknown>) {
-  return (req: any, res: any, next: any) => Promise.resolve(handler(req, res)).catch(next);
+function asyncRoute(handler: (req: Request, res: Response) => Promise<unknown>) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    void Promise.resolve(handler(req, res)).catch(next);
+  };
 }
 
 export function createHealthRouter(prisma: PrismaClient) {
