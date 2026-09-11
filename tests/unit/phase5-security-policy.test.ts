@@ -46,7 +46,7 @@ test('production fails closed without full R2 credentials and rejects non-HTTPS 
 });
 
 test('untrusted original filenames never influence the immutable object key', () => {
-  const names = ['../../evil.mp4', '../foo', 'foo/bar.mp4', '%2e%2e', 'áéí_日本語.mp4', 'quote\"name.mp4', "single'name.mp4", '..\\..\\evil.mp4'];
+  const names = ['../../evil.mp4', '../foo', 'foo/bar.mp4', '%2e%2e', 'áéí_日本語.mp4', 'quote"name.mp4', "single'name.mp4", '..\\..\\evil.mp4'];
   const expected = videoObjectKey('channel-id', 'video-id', 'asset-id', AssetKind.VIDEO, 'video/mp4');
   assert.equal(expected, 'channels/channel-id/videos/video-id/assets/asset-id/video.mp4');
   for (const name of names) {
