@@ -12,6 +12,7 @@ import type {
   VideoListDto,
   VideoPatchDto,
 } from '@contracts';
+import type { QueueRenderView, WorkerListView, WorkerMutationView, WorkerSecretView } from '../types/worker';
 
 export class AdminApiError extends Error {
   constructor(public status: number, public code: string, message: string, public requestId?: string) {
@@ -48,9 +49,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const adminApi = {
   me: () => request<AdminMeDto>('/api/admin/me'),
   dashboard: () => request<AdminDashboardDto>('/api/admin/dashboard'),
+  workers: () => request<WorkerListView>('/api/admin/workers'),
+  createWorker: (workerId: string) => request<WorkerSecretView>('/api/admin/workers', { method: 'POST', body: JSON.stringify({ workerId }) }),
+  rotateWorkerSecret: (workerId: string) => request<WorkerSecretView>(`/api/admin/workers/${encodeURIComponent(workerId)}/rotate-secret`, { method: 'POST', body: '{}' }),
+  revokeWorker: (workerId: string) => request<WorkerMutationView>(`/api/admin/workers/${encodeURIComponent(workerId)}/revoke`, { method: 'POST', body: '{}' }),
+  enableWorker: (workerId: string) => request<WorkerMutationView>(`/api/admin/workers/${encodeURIComponent(workerId)}/enable`, { method: 'POST', body: '{}' }),
   videos: (query: URLSearchParams) => request<VideoListDto>(`/api/admin/videos?${query.toString()}`),
   video: (id: string) => request<VideoDetailDto>(`/api/admin/videos/${encodeURIComponent(id)}`),
   history: (id: string) => request<VideoHistoryDto>(`/api/admin/videos/${encodeURIComponent(id)}/history`),
+  queueRender: (id: string, expectedVersion: number) => request<QueueRenderView>(`/api/admin/videos/${encodeURIComponent(id)}/queue-render`, { method: 'POST', body: JSON.stringify({ expectedVersion }) }),
+  rerender: (id: string, expectedVersion: number) => request<QueueRenderView>(`/api/admin/videos/${encodeURIComponent(id)}/rerender`, { method: 'POST', body: JSON.stringify({ expectedVersion }) }),
   updateVideo: (id: string, body: VideoPatchDto) => request<VideoEditResultDto>(`/api/admin/videos/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
   updateScene: (id: string, position: number, body: ScenePatchDto) => request<SceneEditResultDto>(`/api/admin/videos/${encodeURIComponent(id)}/scenes/${position}`, { method: 'PATCH', body: JSON.stringify(body) }),
   updatePublication: (id: string, body: PublicationPatchDto) => request<PublicationEditResultDto>(`/api/admin/publications/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
