@@ -28,16 +28,28 @@ test('admin allowlist rejects wildcards', () => {
   }), /Invalid server configuration/);
 });
 
-test('redaction removes secret-bearing fields and database URLs', () => {
+test('redaction removes phase4 secrets, lease material, access assertions and database URLs', () => {
   const value = redact({
     authorization: 'Bearer hidden',
     cookie: 'session=hidden',
+    workerSecret: 'vfws_hidden',
+    secretHash: 'worker-hash-hidden',
+    leaseToken: 'vfl_hidden',
+    leaseTokenHash: 'lease-hash-hidden',
+    'CF-Access-Client-Secret': 'cloudflare-service-secret',
+    'Cf-Access-Jwt-Assertion': 'cloudflare-access-jwt',
     nested: { accessToken: 'hidden', refreshToken: 'hidden', clientSecret: 'hidden', safe: 'ok' },
     databaseUrl: 'mysql://example.invalid/v5',
     value: 'mysql://example.invalid/v5',
   }) as Record<string, unknown>;
   assert.equal(value.authorization, '[REDACTED]');
   assert.equal(value.cookie, '[REDACTED]');
+  assert.equal(value.workerSecret, '[REDACTED]');
+  assert.equal(value.secretHash, '[REDACTED]');
+  assert.equal(value.leaseToken, '[REDACTED]');
+  assert.equal(value.leaseTokenHash, '[REDACTED]');
+  assert.equal(value['CF-Access-Client-Secret'], '[REDACTED]');
+  assert.equal(value['Cf-Access-Jwt-Assertion'], '[REDACTED]');
   assert.equal(value.databaseUrl, '[REDACTED]');
   assert.equal(value.value, '[REDACTED]');
   assert.deepEqual(value.nested, { accessToken: '[REDACTED]', refreshToken: '[REDACTED]', clientSecret: '[REDACTED]', safe: 'ok' });
