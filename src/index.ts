@@ -2,8 +2,8 @@ import { createApp } from './app.js';
 import { loadConfig } from './config.js';
 import { getPrisma } from './db/prisma.js';
 
-export const VIDEO_FACTORY_VERSION = '5.0.0-phase.2';
-export const VIDEO_FACTORY_PHASE = 2 as const;
+export const VIDEO_FACTORY_VERSION = '5.0.0-phase.3';
+export const VIDEO_FACTORY_PHASE = 3 as const;
 
 export function runtimeDescriptor() {
   return { name: 'video-factory-v5' as const, phase: VIDEO_FACTORY_PHASE, nodeMajor: 22 as const };

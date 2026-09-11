@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import express, { type Express } from 'express';
 import type { PrismaClient } from '@prisma/client';
 import type { AppConfig } from './config.js';
@@ -11,6 +13,7 @@ export interface AppDependencies {
   prisma: PrismaClient;
   auth?: CloudflareAuthDependencies;
   logger?: Logger;
+  adminDistPath?: string;
 }
 
 export function createApp(config: AppConfig, dependencies: AppDependencies): Express {
@@ -38,6 +41,18 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use('/api/admin', createAdminRouter(dependencies.prisma));
 
   app.use('/api', (_req, _res, next) => next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found')));
+
+  if (config.nodeEnv === 'production') {
+    const adminDist = dependencies.adminDistPath ?? path.resolve(process.cwd(), 'admin/dist');
+    const indexFile = path.join(adminDist, 'index.html');
+    if (!existsSync(indexFile)) throw new Error(`Admin production build is missing: ${indexFile}`);
+    app.use(express.static(adminDist, { index: false, fallthrough: true }));
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+      res.sendFile(indexFile, (error) => { if (error) next(error); });
+    });
+  }
+
   app.use(errorHandler(config.nodeEnv));
   return app;
 }

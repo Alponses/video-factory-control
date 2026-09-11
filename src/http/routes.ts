@@ -4,7 +4,15 @@ import { z } from 'zod';
 import type { AppConfig } from '../config.js';
 import { isCriticalConfigReady } from '../config.js';
 import { ApiError } from './errors.js';
-import { getDashboard, getVideoDetail, listVideos, updateSceneWithAudit, updateVideoWithAudit } from './admin-service.js';
+import {
+  getDashboard,
+  getVideoDetail,
+  getVideoHistory,
+  listVideos,
+  updatePublicationWithAudit,
+  updateSceneWithAudit,
+  updateVideoWithAudit,
+} from './admin-service.js';
 import { idSchema, paginationSchema, parseRequest, positiveVersionSchema } from './validation.js';
 
 const videoPatchSchema = z.object({
@@ -26,6 +34,16 @@ const scenePatchSchema = z.object({
   text: z.string().min(1).max(20000).optional(),
   searchTerms: z.array(z.string().trim().min(1).max(200)).max(30).optional(),
 }).strict().refine((value) => value.text !== undefined || value.searchTerms !== undefined, 'At least one editable field is required');
+
+const publicationPatchSchema = z.object({
+  expectedVersion: positiveVersionSchema,
+  title: z.string().trim().max(500).nullable().optional(),
+  caption: z.string().trim().max(20000).nullable().optional(),
+  description: z.string().trim().max(30000).nullable().optional(),
+  hashtags: z.array(z.string().trim().min(1).max(120)).max(30).optional(),
+  cta: z.string().trim().max(10000).nullable().optional(),
+  pinnedComment: z.string().trim().max(10000).nullable().optional(),
+}).strict().refine((value) => Object.keys(value).some((key) => key !== 'expectedVersion'), 'At least one editable field is required');
 
 function asyncRoute(handler: (req: Request, res: Response) => Promise<unknown>) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -50,6 +68,10 @@ export function createHealthRouter(prisma: PrismaClient, config: AppConfig) {
 
 export function createAdminRouter(prisma: PrismaClient) {
   const router = Router();
+  router.get('/me', (req, res, next) => {
+    if (!req.actor) return next(new ApiError(401, 'ADMIN_CONTEXT_MISSING', 'Administrator context is missing'));
+    res.json({ email: req.actor.email });
+  });
   router.get('/dashboard', asyncRoute(async (_req, res) => res.json(await getDashboard(prisma))));
   router.get('/videos', asyncRoute(async (req, res) => {
     const query = parseRequest(paginationSchema, req.query);
@@ -59,6 +81,10 @@ export function createAdminRouter(prisma: PrismaClient) {
       status = query.status as VideoStatus;
     }
     res.json(await listVideos(prisma, { ...query, status }));
+  }));
+  router.get('/videos/:id/history', asyncRoute(async (req, res) => {
+    const id = parseRequest(idSchema, req.params.id);
+    res.json(await getVideoHistory(prisma, id));
   }));
   router.get('/videos/:id', asyncRoute(async (req, res) => {
     const id = parseRequest(idSchema, req.params.id);
@@ -79,6 +105,14 @@ export function createAdminRouter(prisma: PrismaClient) {
     const actor = req.actor;
     if (!actor) throw new ApiError(401, 'ADMIN_CONTEXT_MISSING', 'Administrator context is missing');
     res.json(await updateSceneWithAudit(prisma, id, position, body, actor.email, req.requestId));
+  }));
+  router.patch('/publications/:id', asyncRoute(async (req, res) => {
+    const id = parseRequest(idSchema, req.params.id);
+    const body = parseRequest(publicationPatchSchema, req.body);
+    const { expectedVersion, ...changes } = body;
+    const actor = req.actor;
+    if (!actor) throw new ApiError(401, 'ADMIN_CONTEXT_MISSING', 'Administrator context is missing');
+    res.json(await updatePublicationWithAudit(prisma, id, { expectedVersion, changes }, actor.email, req.requestId));
   }));
   return router;
 }

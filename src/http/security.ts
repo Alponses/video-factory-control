@@ -11,7 +11,10 @@ export function requestContext(req: Request, res: Response, next: NextFunction):
 
 export function securityHeaders(config: AppConfig) {
   return (_req: Request, res: Response, next: NextFunction): void => {
-    res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
+    const csp = config.nodeEnv === 'production'
+      ? "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+      : "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
+    res.setHeader('Content-Security-Policy', csp);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');

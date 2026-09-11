@@ -1,25 +1,30 @@
 {
   "name": "video-factory-v5",
   "version": "5.0.0-phase.2",
-  "description": "Video Factory V5 Phase 2 secure API foundation",
+  "description": "Video Factory V5 secure control-plane foundation",
   "private": true,
   "type": "module",
   "engines": {
     "node": "22.x"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "dev:server": "tsx watch src/index.ts",
+    "dev:admin": "npm --prefix admin run dev",
+    "build:server": "tsc -p tsconfig.json",
+    "build:admin": "npm --prefix admin run build",
+    "build": "npm run build:server && npm run build:admin",
     "start": "node dist/src/index.js",
     "lint": "eslint src scripts tests eslint.config.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --test --import tsx tests/unit/**/*.test.ts",
+    "test:admin": "npm --prefix admin run test",
     "test:integration": "node --test --test-concurrency=1 --import tsx tests/integration/**/*.test.ts",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "legacy:import": "tsx scripts/legacy-import.ts",
     "legacy:verify": "tsx scripts/legacy-verify.ts",
-    "phase2:check": "npm run lint && npm run typecheck && npm run test && npm run prisma:validate && npm run build"
+    "phase3:check": "npm run lint && npm run typecheck && npm run test && npm run test:admin && npm run prisma:validate && npm run build"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

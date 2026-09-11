@@ -11,6 +11,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'admin/**'
       - 'db/jobs/**'
       - 'db/migrations/v3/**'
       - 'db/migrations/v4/**'
@@ -18,6 +19,7 @@ on:
       - 'config/factory.json'
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
+      - 'docs/v5-phase3-admin.md'
       - '.github/workflows/v5-phase1.yml'
   push:
     branches:
@@ -31,6 +33,7 @@ on:
       - 'src/**'
       - 'scripts/**'
       - 'tests/**'
+      - 'admin/**'
       - 'db/jobs/**'
       - 'db/migrations/v3/**'
       - 'db/migrations/v4/**'
@@ -38,13 +41,14 @@ on:
       - 'config/factory.json'
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
+      - 'docs/v5-phase3-admin.md'
       - '.github/workflows/v5-phase1.yml'
 
 permissions:
   contents: read
 
 jobs:
-  static-unit-security:
+  static-unit-security-admin:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -52,21 +56,25 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Install locked dependencies
+      - name: Install locked server dependencies
         run: npm ci --no-audit --no-fund
+      - name: Install Admin V5 dependencies
+        run: npm --prefix admin install --no-audit --no-fund --package-lock=false
       - name: Generate Prisma client
         run: npm run prisma:generate
       - name: Prisma validate
         env:
-          DATABASE_URL: mysql://phase2:phase2@127.0.0.1:3306/phase2
+          DATABASE_URL: mysql://phase3:phase3@127.0.0.1:3306/phase3
         run: npm run prisma:validate
-      - name: Lint
+      - name: Server lint
         run: npm run lint
-      - name: Typecheck
+      - name: Server typecheck
         run: npm run typecheck
       - name: Unit, JWT and security tests
         run: npm run test
-      - name: Build
+      - name: Admin frontend tests
+        run: npm run test:admin
+      - name: Production server + admin build
         run: npm run build
 
   mariadb-integration:
@@ -75,32 +83,36 @@ jobs:
       mariadb:
         image: mariadb:10.11
         env:
-          MARIADB_ROOT_PASSWORD: root-phase2
+          MARIADB_ROOT_PASSWORD: root-phase3
           MARIADB_DATABASE: video_factory_v5
           MARIADB_USER: video_factory
-          MARIADB_PASSWORD: phase2-only
+          MARIADB_PASSWORD: phase3-only
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase2 --silent"
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase3 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
     env:
       NODE_ENV: test
-      DATABASE_URL: mysql://video_factory:phase2-only@127.0.0.1:3306/video_factory_v5
+      DATABASE_URL: mysql://video_factory:phase3-only@127.0.0.1:3306/video_factory_v5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Install locked dependencies
+      - name: Install locked server dependencies
         run: npm ci --no-audit --no-fund
+      - name: Install Admin V5 dependencies
+        run: npm --prefix admin install --no-audit --no-fund --package-lock=false
       - name: Generate Prisma client
         run: npm run prisma:generate
       - name: Prisma validate
         run: npm run prisma:validate
+      - name: Build Admin V5 for production static smoke test
+        run: npm run build:admin
       - name: Migration test from empty MariaDB
         run: |
           npm run db:migrate
