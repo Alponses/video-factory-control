@@ -22,7 +22,7 @@ async function putStream(url: string, headers: Record<string, string>, filePath:
 }
 
 async function putPart(url: string, buffer: Uint8Array): Promise<string> {
-  const response = await fetch(url, { method: 'PUT', body: buffer });
+  const response = await fetch(url, { method: 'PUT', body: Buffer.from(buffer) });
   if (!response.ok) throw new Error(`R2_PART_${response.status}`);
   const eTag = response.headers.get('etag');
   if (!eTag) throw new Error('R2_PART_ETAG_MISSING');
