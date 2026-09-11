@@ -155,7 +155,35 @@ Descripción: objetivo interno 250–600 caracteres, párrafos cortos, lenguaje 
 
 ## Engagement
 
-Registrar `engagement.cta`, `engagement.question` y `engagement.pinnedComment`. Variar las llamadas a la acción y evitar depender de frases repetitivas como “Comenta AMÉN”.
+Registrar siempre `engagement.cta`, `engagement.question` y `engagement.pinnedComment`.
+
+Cada publicación debe incluir **1 CTA principal** y puede incluir **1 CTA secundario** cuando se sienta natural. Nunca superar 2 peticiones de interacción en una misma publicación.
+
+Elegir el CTA según el contenido del video y variar entre estas intenciones:
+
+- comentar una palabra o una respuesta breve relacionada con la reflexión;
+- responder una pregunta genuina;
+- compartir con una persona que pueda necesitar el mensaje;
+- guardar la reflexión para volver a verla después.
+
+Los conceptos de comentario pueden incluir de forma contextual palabras como `PAZ`, `FE`, `ESPERANZA`, `GRATITUD`, `FAMILIA` o `AMÉN`, pero no convertir ninguna en una fórmula obligatoria ni usar siempre la misma palabra.
+
+Se permite reutilizar parcialmente una estructura natural, por ejemplo “Si esta reflexión te ayudó…”, siempre que cambien el sentido, el cierre y la acción pedida. Lo que no se permite es copiar exactamente el mismo CTA entre videos recientes.
+
+Antes de generar el CTA, revisar los últimos 5 jobs disponibles y evitar repetir literalmente el mismo `engagement.cta`, `publishing.<platform>.cta` o `pinnedComment`.
+
+TikTok, YouTube y Facebook deben tener CTAs adaptados a su propio copy. No copiar exactamente la misma frase en las tres plataformas.
+
+Ejemplos de intención —no plantillas literales—:
+
+- invitar a escribir una palabra que represente cómo se siente la persona;
+- preguntar qué agradece hoy;
+- sugerir compartir la reflexión con alguien que necesite calma, fe o esperanza;
+- sugerir guardarla para escucharla de nuevo en un momento difícil.
+
+Evitar depender de “Comenta AMÉN”, pedir interacción sin relación con el contenido, ofrecer recompensas, usar presión emocional, prometer resultados espirituales por comentar/compartir o generar contenido cuyo único propósito sea conseguir interacciones.
+
+El CTA debe sentirse como una continuación humana de la reflexión, no como una instrucción de marketing.
 
 ## Analytics V4
 
@@ -185,3 +213,4 @@ Cada video debe sentirse escrito individualmente. Evitar hooks, títulos, descri
 4. Confirmar duración mínima de producción configurada en `factory.json`.
 5. Confirmar que no se inventaron métricas.
 6. Actualizar `db/topics.json` y `db/stats.json` solo al crear jobs nuevos, no al enriquecer históricos mediante migraciones.
+7. Confirmar que existe CTA principal, que no supera 2 peticiones de interacción, que no repite literalmente un CTA reciente y que el copy de cada plataforma mantiene su propia variante.
