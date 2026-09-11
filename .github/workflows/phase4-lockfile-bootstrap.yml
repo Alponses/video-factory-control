@@ -1,0 +1,36 @@
+name: Phase 4 lockfile bootstrap
+
+on:
+  push:
+    branches: [video-factory-v5]
+    paths:
+      - .github/workflows/phase4-lockfile-bootstrap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate-lockfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: video-factory-v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate Admin lockfile
+        run: npm --prefix admin install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Generate worker lockfile
+        run: npm --prefix worker install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit generated lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add admin/package-lock.json worker/package-lock.json
+          if git diff --cached --quiet; then
+            echo "Lockfiles already current"
+            exit 0
+          fi
+          git commit -m "chore: lock phase4 admin and worker dependencies"
+          git push origin HEAD:video-factory-v5
