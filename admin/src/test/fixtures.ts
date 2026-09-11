@@ -1,4 +1,5 @@
 import type { AdminDashboardDto, VideoDetailDto, VideoListDto } from '@contracts';
+import type { WorkerEffectiveStatus, WorkerListView, WorkerView } from '../types/worker';
 
 export const dashboardFixture: AdminDashboardDto = {
   totalVideos: 11,
@@ -6,6 +7,28 @@ export const dashboardFixture: AdminDashboardDto = {
   legacyIncomplete: 1,
   recentVideos: [{ id: 'religion-000011', title: 'Una pausa', category: 'fe', status: 'APPROVED', legacyIncomplete: false, createdAt: '2026-09-10T10:00:00.000Z', updatedAt: '2026-09-10T11:00:00.000Z' }],
   recentEvents: [],
+};
+
+export function workerFixture(id = 'imac-01', effectiveStatus: WorkerEffectiveStatus = 'ONLINE', overrides: Partial<WorkerView> = {}): WorkerView {
+  return {
+    id,
+    effectiveStatus,
+    agentVersion: '5.0.0-phase.4',
+    rendererVersion: 'short-video-maker-local',
+    lastHeartbeatAt: '2026-09-11T20:00:00.000Z',
+    currentVideoId: effectiveStatus === 'BUSY' ? 'religion-000011' : null,
+    progress: effectiveStatus === 'BUSY' ? 42 : null,
+    lastError: null,
+    secretVersion: 1,
+    createdAt: '2026-09-11T19:00:00.000Z',
+    updatedAt: '2026-09-11T20:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export const workerListFixture: WorkerListView = {
+  items: [],
+  offlineThresholdSeconds: 60,
 };
 
 export const listFixture: VideoListDto = {
