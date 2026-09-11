@@ -1,6 +1,8 @@
 import { Router, type NextFunction, type Request, type Response } from 'express';
 import { VideoStatus, type PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import type { AppConfig } from '../config.js';
+import { isCriticalConfigReady } from '../config.js';
 import { ApiError } from './errors.js';
 import { getDashboard, getVideoDetail, listVideos, updateSceneWithAudit, updateVideoWithAudit } from './admin-service.js';
 import { idSchema, paginationSchema, parseRequest, positiveVersionSchema } from './validation.js';
@@ -31,10 +33,11 @@ function asyncRoute(handler: (req: Request, res: Response) => Promise<unknown>) 
   };
 }
 
-export function createHealthRouter(prisma: PrismaClient) {
+export function createHealthRouter(prisma: PrismaClient, config: AppConfig) {
   const router = Router();
   router.get('/live', (_req, res) => res.json({ status: 'ok' }));
   router.get('/ready', asyncRoute(async (_req, res) => {
+    if (!isCriticalConfigReady(config)) throw new ApiError(503, 'SERVICE_NOT_READY', 'Service is not ready');
     try {
       await prisma.$queryRaw`SELECT 1`;
       res.json({ status: 'ok' });
