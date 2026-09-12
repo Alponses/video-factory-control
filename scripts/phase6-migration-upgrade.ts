@@ -9,6 +9,13 @@ async function main() {
   // exact Phase 5 shape, then deploy Phase 6 again without editing old migrations.
   await prisma.$executeRawUnsafe('DROP TABLE `publication_events`');
   await prisma.$executeRawUnsafe('DROP TABLE `publication_dispatches`');
+
+  // Phase 1/5 declared the schedules -> publications FK without an explicit
+  // publicationId index, so InnoDB supplied the supporting index automatically.
+  // After Phase 6 adds (publicationId,status), MariaDB may use that composite for
+  // the FK and discard the generated single-column index. Restore the Phase 5 FK
+  // support first; otherwise MariaDB correctly refuses to drop the Phase 6 index.
+  await prisma.$executeRawUnsafe('CREATE INDEX `schedules_publicationId_fkey` ON `schedules`(`publicationId`)');
   await prisma.$executeRawUnsafe('ALTER TABLE `schedules` DROP INDEX `schedules_status_scheduledAt_idx`, DROP INDEX `schedules_publicationId_status_idx`');
   await prisma.$executeRawUnsafe("ALTER TABLE `schedules` MODIFY COLUMN `status` VARCHAR(64) NOT NULL");
   await prisma.$executeRawUnsafe('CREATE INDEX `schedules_scheduledAt_status_idx` ON `schedules`(`scheduledAt`, `status`)');
@@ -28,7 +35,15 @@ async function main() {
     const statusType = await verify.$queryRawUnsafe<Array<{ columnType: string }>>(
       "SELECT COLUMN_TYPE AS columnType FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'schedules' AND COLUMN_NAME = 'status'",
     );
-    if (Number(dispatchTable[0]?.count ?? 0n) !== 1 || Number(eventTable[0]?.count ?? 0n) !== 1 || !statusType[0]?.columnType.includes('DISPATCHED')) {
+    const publicationIndex = await verify.$queryRawUnsafe<Array<{ count: bigint }>>(
+      "SELECT COUNT(*) AS count FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'schedules' AND INDEX_NAME = 'schedules_publicationId_status_idx' AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'publicationId'",
+    );
+    if (
+      Number(dispatchTable[0]?.count ?? 0n) !== 1
+      || Number(eventTable[0]?.count ?? 0n) !== 1
+      || !statusType[0]?.columnType.includes('DISPATCHED')
+      || Number(publicationIndex[0]?.count ?? 0n) !== 1
+    ) {
       throw new Error('Phase 5 -> Phase 6 migration verification failed');
     }
     process.stdout.write(`${JSON.stringify({ phase5ToPhase6: 'PASS', migration })}\n`);
