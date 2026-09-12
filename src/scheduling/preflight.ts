@@ -112,9 +112,10 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
   const qa = publication.video.qaResults[0] ?? null;
   if (!qa || qa.passed !== true) blockers.push({ code: 'QA_NOT_APPROVED', message: 'Latest QA result must be approved.' });
 
-  if (publication.status === PublicationStatus.PUBLISHED) blockers.push({ code: 'PUBLICATION_ALREADY_PUBLISHED', message: 'Published content cannot be scheduled again in Phase 6.' });
+  if (publication.status === PublicationStatus.PUBLISHED) blockers.push({ code: 'PUBLICATION_ALREADY_PUBLISHED', message: 'Published content cannot be scheduled again.' });
   if (publication.status === PublicationStatus.CANCELLED) blockers.push({ code: 'PUBLICATION_CANCELLED', message: 'Cancelled publication cannot be scheduled.' });
   if (publication.status === PublicationStatus.PUBLISHING) blockers.push({ code: 'PUBLICATION_IN_PROGRESS', message: 'Publication is already being processed.' });
+  if (publication.status === PublicationStatus.NEEDS_ATTENTION) blockers.push({ code: 'PUBLICATION_NEEDS_ATTENTION', message: 'Publication requires reconciliation or operator attention before scheduling.' });
 
   const activeSchedules = publication.schedules.filter((schedule) => schedule.id !== options.ignoreScheduleId);
   if (!options.allowActiveSchedule && activeSchedules.length > 0) blockers.push({ code: 'ACTIVE_SCHEDULE_EXISTS', message: 'Publication already has an active schedule.' });
@@ -124,16 +125,21 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
   const platformRules = publication.platform === Platform.TIKTOK ? ruleSet.tiktok : publication.platform === Platform.YOUTUBE ? ruleSet.youtube : ruleSet.facebook;
   const minHashtags = platformRules?.hashtagsMin ?? 0;
   const maxHashtags = platformRules?.hashtagsMax ?? Number.MAX_SAFE_INTEGER;
-  if (hashtags.length < minHashtags || hashtags.length > maxHashtags) {
-    blockers.push({ code: 'INTERNAL_HASHTAG_RULE', message: `Video Factory internal rule requires ${minHashtags}–${maxHashtags} hashtags for ${publication.platform}.` });
-  }
+  if (hashtags.length < minHashtags || hashtags.length > maxHashtags) blockers.push({ code: 'INTERNAL_HASHTAG_RULE', message: `Video Factory internal rule requires ${minHashtags}–${maxHashtags} hashtags for ${publication.platform}.` });
   if (ruleSet.engagement?.primaryCtaRequired && !text(publication.cta)) blockers.push({ code: 'CTA_REQUIRED', message: 'Video Factory internal rule requires a primary CTA.' });
 
   if (publication.platform === Platform.TIKTOK) {
     if (!text(publication.caption)) blockers.push({ code: 'TIKTOK_CAPTION_REQUIRED', message: 'TikTok publication caption is required.' });
+    if (!text(publication.tiktokPrivacyLevel)) blockers.push({ code: 'TIKTOK_PRIVACY_REQUIRED', message: 'TikTok privacy must be explicitly selected before scheduling.' });
+    if (publication.tiktokAllowComment === null || publication.tiktokAllowDuet === null || publication.tiktokAllowStitch === null) blockers.push({ code: 'TIKTOK_INTERACTIONS_REQUIRED', message: 'TikTok comment, Duet and Stitch choices must be explicit.' });
+    if (publication.tiktokIsAigc === null) blockers.push({ code: 'TIKTOK_AIGC_REQUIRED', message: 'TikTok AIGC disclosure choice must be explicit.' });
   } else if (publication.platform === Platform.YOUTUBE) {
     if (!text(publication.title)) blockers.push({ code: 'YOUTUBE_TITLE_REQUIRED', message: 'YouTube title is required.' });
     if (!text(publication.description)) blockers.push({ code: 'YOUTUBE_DESCRIPTION_REQUIRED', message: 'YouTube description is required.' });
+    if (!text(publication.youtubePrivacyStatus)) blockers.push({ code: 'YOUTUBE_PRIVACY_REQUIRED', message: 'YouTube privacy must be explicitly selected before scheduling.' });
+    if (!text(publication.youtubeCategoryId)) blockers.push({ code: 'YOUTUBE_CATEGORY_REQUIRED', message: 'YouTube category must be explicitly selected before scheduling.' });
+    if (publication.youtubeMadeForKids === null) blockers.push({ code: 'YOUTUBE_MADE_FOR_KIDS_REQUIRED', message: 'YouTube made-for-kids choice must be explicit.' });
+    if (publication.youtubeContainsSyntheticMedia === null) blockers.push({ code: 'YOUTUBE_SYNTHETIC_MEDIA_REQUIRED', message: 'YouTube synthetic-media disclosure choice must be explicit.' });
     const maxTitle = ruleSet.youtube?.titleMaxCharacters;
     if (maxTitle && (publication.title?.length ?? 0) > maxTitle) blockers.push({ code: 'INTERNAL_TITLE_RULE', message: `Video Factory internal rule limits YouTube titles to ${maxTitle} characters.` });
   } else if (publication.platform === Platform.FACEBOOK) {
@@ -146,10 +152,14 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
     if (durationSeconds === null) blockers.push({ code: 'TIKTOK_DURATION_UNKNOWN', message: 'TikTok monetization preflight requires a measured duration.' });
     else if (durationSeconds < 61) blockers.push({ code: 'TIKTOK_INTERNAL_61S_RULE', message: 'Video Factory monetization pipeline requires TikTok videos to be at least 61 seconds.' });
   }
+  if (publication.platform === Platform.FACEBOOK) {
+    if (durationSeconds === null) blockers.push({ code: 'FACEBOOK_DURATION_UNKNOWN', message: 'Facebook Reels compatibility requires a measured duration.' });
+    else if (durationSeconds > 60) blockers.push({ code: 'PLATFORM_ASSET_INCOMPATIBLE', message: 'Configured Facebook Reels capability documents a 60-second maximum. Video Factory will not trim the master automatically.' });
+  }
   if (render && render.status !== RenderAttemptStatus.SUCCEEDED) warnings.push({ code: 'LATEST_RENDER_NOT_SUCCEEDED', message: `Latest render attempt is ${render.status}; QA and durable asset remain authoritative.` });
 
   const profile = publication.video.channel.profiles.find((item) => item.platform === publication.platform) ?? null;
-  if (!profile) warnings.push({ code: 'PROFILE_NOT_CONFIGURED', message: `No relational ${publication.platform} profile is configured for this channel.` });
+  if (!profile) blockers.push({ code: 'PROFILE_NOT_CONFIGURED', message: `A relational ${publication.platform} profile is required for publishing ownership.` });
 
   const activeSchedule = publication.schedules[0] ?? null;
   const latestDispatch = publication.dispatches[0] ?? null;
@@ -167,7 +177,7 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
     coverAssetId: coverAsset?.id ?? null,
     thumbnailAssetId: thumbnailAsset?.id ?? null,
     durationSeconds,
-    internalRuleNotice: 'Hashtag, CTA and TikTok 61-second checks are Video Factory internal pipeline rules, not universal platform limits.',
+    internalRuleNotice: 'Hashtag, CTA and TikTok 61-second checks are Video Factory internal pipeline rules. Facebook duration compatibility is enforced against the configured official Reels capability; no automatic trim occurs.',
   };
   return {
     ready: blockers.length === 0,
