@@ -18,11 +18,14 @@ on:
       - 'db/migrations/v4/**'
       - 'db/dashboard/**'
       - 'config/factory.json'
+      - 'config/publishing-rules.json'
+      - '.env.example'
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
       - 'docs/v5-phase3-admin.md'
       - 'docs/v5-phase4-workers.md'
       - 'docs/v5-phase5-r2.md'
+      - 'docs/v5-phase6-scheduler.md'
       - '.github/workflows/**'
   push:
     branches:
@@ -43,11 +46,14 @@ on:
       - 'db/migrations/v4/**'
       - 'db/dashboard/**'
       - 'config/factory.json'
+      - 'config/publishing-rules.json'
+      - '.env.example'
       - 'docs/v5-phase1.md'
       - 'docs/v5-phase2-security.md'
       - 'docs/v5-phase3-admin.md'
       - 'docs/v5-phase4-workers.md'
       - 'docs/v5-phase5-r2.md'
+      - 'docs/v5-phase6-scheduler.md'
       - '.github/workflows/**'
 
 permissions:
@@ -76,19 +82,19 @@ jobs:
         run: npm run prisma:generate
       - name: Prisma validate
         env:
-          DATABASE_URL: mysql://phase5:phase5@127.0.0.1:3306/phase5
+          DATABASE_URL: mysql://phase6:phase6@127.0.0.1:3306/phase6
         run: npm run prisma:validate
       - name: Server lint
         run: npm run lint
       - name: Server typecheck
         run: npm run typecheck
-      - name: Unit, JWT, security and R2 adapter tests
+      - name: Unit, JWT, security, R2 and scheduler boundary tests
         run: npm run test
-      - name: Admin frontend Phase 1-5 tests
+      - name: Admin frontend Phase 1-6 tests
         run: npm run test:admin
       - name: Worker typecheck
         run: npm --prefix worker run typecheck
-      - name: Worker QA, renderer, agent and durable-storage tests
+      - name: Worker Phase 4-5 regression tests
         run: npm --prefix worker run test
       - name: Worker build
         run: npm --prefix worker run build
@@ -101,20 +107,20 @@ jobs:
       mariadb:
         image: mariadb:10.11
         env:
-          MARIADB_ROOT_PASSWORD: root-phase5
+          MARIADB_ROOT_PASSWORD: root-phase6
           MARIADB_DATABASE: video_factory_v5
           MARIADB_USER: video_factory
-          MARIADB_PASSWORD: phase5-only
+          MARIADB_PASSWORD: phase6-only
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase5 --silent"
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase6 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
     env:
       NODE_ENV: test
-      DATABASE_URL: mysql://video_factory:phase5-only@127.0.0.1:3306/video_factory_v5
+      DATABASE_URL: mysql://video_factory:phase6-only@127.0.0.1:3306/video_factory_v5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -134,13 +140,15 @@ jobs:
         run: npm run prisma:validate
       - name: Build Admin V5 for production static smoke test
         run: npm run build:admin
-      - name: Migration test from empty MariaDB through Phase 5
+      - name: Migration test from empty MariaDB through Phase 6
         run: |
           npm run db:migrate
           npx prisma migrate status
-      - name: Existing Phase 4 database upgrades through Phase 5
+      - name: Existing Phase 4 database upgrades through Phase 5 regression
         run: npx tsx scripts/phase5-migration-upgrade.ts
-      - name: MariaDB Phase 1-5 integration tests
+      - name: Existing Phase 5 database upgrades through Phase 6
+        run: npx tsx scripts/phase6-migration-upgrade.ts
+      - name: MariaDB Phase 1-6 integration tests
         run: npm run test:integration
       - name: Reset MariaDB for explicit importer proof
         run: npx prisma migrate reset --force --skip-seed
