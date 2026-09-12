@@ -34,6 +34,7 @@ enum PublicationStatus {
   PUBLISHING
   PUBLISHED
   FAILED
+  NEEDS_ATTENTION
   CANCELLED
 }
 
@@ -49,7 +50,27 @@ enum PublicationDispatchStatus {
   CLAIMED
   COMPLETED
   FAILED
+  NEEDS_ATTENTION
   CANCELLED
+}
+
+enum PublicationAttemptStatus {
+  RUNNING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+}
+
+enum PublicationAttemptStage {
+  CLAIMED
+  TOKEN_READY
+  INITIALIZED
+  UPLOADING
+  PROCESSING
+  FINALIZING
+  RECONCILING
+  COMPLETED
 }
 
 enum WorkerStatus {
@@ -139,8 +160,10 @@ model Profile {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  channel Channel      @relation(fields: [channelId], references: [id], onDelete: Restrict)
-  assets  VideoAsset[]
+  channel            Channel             @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  assets             VideoAsset[]
+  integrationAccount IntegrationAccount?
+  oauthTransactions  OAuthTransaction[]
 
   @@unique([channelId, platform])
   @@index([platform])
@@ -271,36 +294,46 @@ model AssetUploadSession {
 }
 
 model Publication {
-  id                String            @id @default(uuid()) @db.VarChar(36)
-  videoId           String            @db.VarChar(191)
-  platform          Platform
-  status            PublicationStatus @default(DRAFT)
-  legacyStatus      String?           @db.VarChar(64)
-  version           Int               @default(1)
-  title             String?           @db.VarChar(500)
-  caption           String?           @db.Text
-  description       String?           @db.Text
-  hashtags          Json?
-  tags              Json?
-  searchKeyword     String?           @db.VarChar(500)
-  coverText         String?           @db.Text
-  thumbnailText     String?           @db.Text
-  cta               String?           @db.Text
-  pinnedComment     String?           @db.Text
-  platformId        String?           @db.VarChar(255)
-  url               String?           @db.VarChar(2048)
-  scheduledAt       DateTime?
-  publishedAt       DateTime?
-  lastMetricsSyncAt DateTime?
-  error             String?           @db.Text
-  raw               Json
-  performanceRaw    Json?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id                                String            @id @default(uuid()) @db.VarChar(36)
+  videoId                           String            @db.VarChar(191)
+  platform                          Platform
+  status                            PublicationStatus @default(DRAFT)
+  legacyStatus                      String?           @db.VarChar(64)
+  version                           Int               @default(1)
+  title                             String?           @db.VarChar(500)
+  caption                           String?           @db.Text
+  description                       String?           @db.Text
+  hashtags                          Json?
+  tags                              Json?
+  searchKeyword                     String?           @db.VarChar(500)
+  coverText                         String?           @db.Text
+  thumbnailText                     String?           @db.Text
+  cta                               String?           @db.Text
+  pinnedComment                     String?           @db.Text
+  tiktokPrivacyLevel                String?           @db.VarChar(64)
+  tiktokAllowComment                Boolean?
+  tiktokAllowDuet                   Boolean?
+  tiktokAllowStitch                 Boolean?
+  tiktokIsAigc                      Boolean?
+  youtubePrivacyStatus              String?           @db.VarChar(32)
+  youtubeCategoryId                 String?           @db.VarChar(32)
+  youtubeMadeForKids                Boolean?
+  youtubeContainsSyntheticMedia     Boolean?
+  platformId                        String?           @db.VarChar(255)
+  url                               String?           @db.VarChar(2048)
+  scheduledAt                       DateTime?
+  publishedAt                       DateTime?
+  lastMetricsSyncAt                 DateTime?
+  error                             String?           @db.Text
+  raw                               Json
+  performanceRaw                    Json?
+  createdAt                         DateTime          @default(now())
+  updatedAt                         DateTime          @updatedAt
 
   video      Video                 @relation(fields: [videoId], references: [id], onDelete: Cascade)
   schedules  Schedule[]
   dispatches PublicationDispatch[]
+  attempts   PublicationAttempt[]
   events     PublicationEvent[]
   metrics    PublicationMetric[]
   snapshots  MetricSnapshot[]
@@ -332,7 +365,7 @@ model MetricSnapshot {
   views                   BigInt?
   likes                   BigInt?
   comments                BigInt?
-  shares                  BigInt?
+  shares                   BigInt?
   saves                   BigInt?
   watchTime               Decimal? @db.Decimal(30, 6)
   averageViewDuration     Decimal? @db.Decimal(30, 6)
@@ -373,8 +406,10 @@ model PublicationDispatch {
   assetId         String                    @db.VarChar(36)
   status          PublicationDispatchStatus @default(PENDING)
   notBefore       DateTime
+  nextAttemptAt   DateTime?
   attemptCount    Int                       @default(0)
   lastError       String?                   @db.Text
+  needsAttention  Boolean                   @default(false)
   claimedAt       DateTime?
   claimExpiresAt  DateTime?
   claimedBy       String?                   @db.VarChar(191)
@@ -382,14 +417,43 @@ model PublicationDispatch {
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
 
-  publication Publication        @relation(fields: [publicationId], references: [id], onDelete: Cascade)
-  schedule    Schedule           @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
-  asset       VideoAsset         @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  schedule    Schedule             @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
+  asset       VideoAsset           @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  attempts    PublicationAttempt[]
   events      PublicationEvent[]
 
-  @@index([status, notBefore])
+  @@index([status, nextAttemptAt, notBefore])
   @@index([publicationId, createdAt])
   @@map("publication_dispatches")
+}
+
+model PublicationAttempt {
+  id                     String                  @id @default(uuid()) @db.VarChar(36)
+  dispatchId             String                  @db.VarChar(36)
+  publicationId          String                  @db.VarChar(36)
+  provider               Platform
+  attempt                Int
+  status                 PublicationAttemptStatus
+  stage                  PublicationAttemptStage
+  externalOperationId    String?                 @db.VarChar(512)
+  platformMediaId        String?                 @db.VarChar(255)
+  recoveryStateEncrypted String?                 @db.LongText
+  retryable              Boolean                 @default(false)
+  errorCode              String?                 @db.VarChar(96)
+  safeErrorMessage       String?                 @db.Text
+  startedAt              DateTime
+  finishedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  dispatch    PublicationDispatch @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  publication Publication         @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@unique([dispatchId, attempt])
+  @@index([publicationId, createdAt])
+  @@index([status, stage])
+  @@map("publication_attempts")
 }
 
 model PublicationEvent {
@@ -498,21 +562,51 @@ model QaResult {
 
 model IntegrationAccount {
   id                    String   @id @default(uuid()) @db.VarChar(36)
+  profileId             String?  @unique @db.VarChar(191)
   provider              String   @db.VarChar(64)
   accountId             String   @db.VarChar(255)
   displayName           String?  @db.VarChar(255)
   encryptedAccessToken  String?  @db.LongText
   encryptedRefreshToken String?  @db.LongText
   expiresAt             DateTime?
+  refreshExpiresAt      DateTime?
   scopes                Json?
   status                String   @db.VarChar(64)
+  readiness             String?  @db.VarChar(64)
+  version               Int      @default(1)
   lastRefreshAt         DateTime?
+  refreshClaimedAt      DateTime?
+  refreshClaimExpiresAt DateTime?
+  refreshClaimedBy      String?  @db.VarChar(191)
   metadata              Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
+  profile Profile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+
   @@unique([provider, accountId])
+  @@index([provider, status])
   @@map("integration_accounts")
+}
+
+model OAuthTransaction {
+  id                String   @id @default(uuid()) @db.VarChar(36)
+  profileId         String   @db.VarChar(191)
+  provider          String   @db.VarChar(64)
+  actor             String   @db.VarChar(255)
+  stateHash         String   @unique @db.VarChar(64)
+  redirectUri       String   @db.VarChar(2048)
+  verifierEncrypted String?  @db.LongText
+  expiresAt         DateTime
+  usedAt            DateTime?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([provider, expiresAt])
+  @@index([profileId, createdAt])
+  @@map("oauth_transactions")
 }
 
 model AuditLog {
