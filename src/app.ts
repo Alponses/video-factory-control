@@ -7,6 +7,7 @@ import { createAdminAuth, createWorkerAccessAuth, type CloudflareAuthDependencie
 import { errorHandler, ApiError } from './http/errors.js';
 import { consoleJsonLogger, requestLogger, type Logger } from './http/logger.js';
 import { createAdminRouter, createHealthRouter, createWorkerRouter } from './http/routes.js';
+import { createSchedulingRouter } from './http/scheduling-routes.js';
 import { browserMutationGuard, fixedWindowRateLimit, requestContext, sameOriginCors, securityHeaders } from './http/security.js';
 import { createWorkerSecretAuth } from './http/worker-service.js';
 import type { R2Storage } from './storage/r2.js';
@@ -42,6 +43,7 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Exp
   app.use('/api/admin', (req, res, next) => (req.method === 'GET' ? adminReadLimit : adminMutationLimit)(req, res, next));
   app.use('/api/admin', browserMutationGuard(config));
   app.use('/api/admin', createAdminRouter(dependencies.prisma, config, dependencies.storage));
+  app.use('/api/admin', createSchedulingRouter(dependencies.prisma, config));
 
   const workerAccessAuth = createWorkerAccessAuth(config, dependencies.workerAuth);
   const workerLimit = fixedWindowRateLimit(360, 60_000);

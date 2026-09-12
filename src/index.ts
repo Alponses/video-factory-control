@@ -3,8 +3,8 @@ import { loadConfig } from './config.js';
 import { getPrisma } from './db/prisma.js';
 import { AwsR2Storage } from './storage/r2.js';
 
-export const VIDEO_FACTORY_VERSION = '5.0.0-phase.5';
-export const VIDEO_FACTORY_PHASE = 5 as const;
+export const VIDEO_FACTORY_VERSION = '5.0.0-phase.6';
+export const VIDEO_FACTORY_PHASE = 6 as const;
 
 export function runtimeDescriptor() {
   return { name: 'video-factory-v5' as const, phase: VIDEO_FACTORY_PHASE, nodeMajor: 22 as const };

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidIanaTimeZone } from './scheduling/timezone.js';
 
 const emailListSchema = z.string().transform((value, ctx) => {
   const emails = value.split(',').map((item) => item.trim().toLowerCase()).filter(Boolean);
@@ -8,6 +9,11 @@ const emailListSchema = z.string().transform((value, ctx) => {
   }
   return [...new Set(emails)];
 });
+
+const optionalInteger = (min: number, max: number) => z.preprocess(
+  (value) => value === '' || value === undefined ? undefined : value,
+  z.coerce.number().int().min(min).max(max).optional(),
+);
 
 const baseSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -21,6 +27,12 @@ const baseSchema = z.object({
   ADMIN_ALLOWED_EMAILS: emailListSchema,
   WORKER_OFFLINE_THRESHOLD_SECONDS: z.coerce.number().int().min(15).max(3600).default(60),
   LEASE_DURATION_SECONDS: z.coerce.number().int().min(30).max(3600).default(120),
+  APP_TIMEZONE: z.string().trim().min(1).max(64).default('America/Mexico_City'),
+  SCHEDULER_LEASE_SECONDS: z.coerce.number().int().min(10).max(300).default(55),
+  SCHEDULER_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(50),
+  SCHEDULER_MAX_LATENESS_SECONDS: optionalInteger(1, 7 * 24 * 60 * 60),
+  SCHEDULE_PAST_TOLERANCE_SECONDS: z.coerce.number().int().min(0).max(3600).default(60),
+  SCHEDULE_MIN_LEAD_SECONDS: optionalInteger(0, 3600),
   R2_ACCOUNT_ID: z.string().trim().min(1).optional(),
   R2_ACCESS_KEY_ID: z.string().trim().min(1).optional(),
   R2_SECRET_ACCESS_KEY: z.string().trim().min(1).optional(),
@@ -56,6 +68,12 @@ export interface AppConfig {
   adminAllowedEmails: string[];
   workerOfflineThresholdSeconds?: number;
   leaseDurationSeconds?: number;
+  appTimezone?: string;
+  schedulerLeaseSeconds?: number;
+  schedulerBatchSize?: number;
+  schedulerMaxLatenessSeconds?: number;
+  schedulePastToleranceSeconds?: number;
+  scheduleMinLeadSeconds?: number;
   r2?: R2Config;
 }
 
@@ -67,6 +85,8 @@ export function isCriticalConfigReady(config: AppConfig): boolean {
   const workerOfflineThresholdSeconds = config.workerOfflineThresholdSeconds ?? 60;
   const leaseDurationSeconds = config.leaseDurationSeconds ?? 120;
   if (workerOfflineThresholdSeconds < 15 || leaseDurationSeconds < 30) return false;
+  if (!isValidIanaTimeZone(config.appTimezone ?? 'America/Mexico_City')) return false;
+  if ((config.schedulerLeaseSeconds ?? 55) < 10 || (config.schedulerBatchSize ?? 50) < 1 || (config.schedulePastToleranceSeconds ?? 60) < 0) return false;
   if (config.r2) {
     if (!config.r2.endpoint.startsWith('https://') || config.r2.presignTtlSeconds < 30 || config.r2.presignTtlSeconds > 900) return false;
     if (config.r2.multipartPartSizeBytes < 5 * 1024 * 1024 || config.r2.multipartPartSizeBytes > 5 * 1024 * 1024 * 1024) return false;
@@ -81,6 +101,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   const value = parsed.data;
   const appUrl = new URL(value.APP_BASE_URL);
+  if (!isValidIanaTimeZone(value.APP_TIMEZONE)) throw new Error('Invalid server configuration: APP_TIMEZONE must be a valid IANA time zone');
   if (value.NODE_ENV === 'production') {
     if (appUrl.protocol !== 'https:') throw new Error('Invalid server configuration: APP_BASE_URL must use HTTPS in production');
     if (value.CLOUDFLARE_AUTH_MODE !== 'remote') throw new Error('Invalid server configuration: Cloudflare test mode is forbidden in production');
@@ -106,7 +127,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     adminAllowedEmails: value.ADMIN_ALLOWED_EMAILS,
     workerOfflineThresholdSeconds: value.WORKER_OFFLINE_THRESHOLD_SECONDS,
     leaseDurationSeconds: value.LEASE_DURATION_SECONDS,
+    appTimezone: value.APP_TIMEZONE,
+    schedulerLeaseSeconds: value.SCHEDULER_LEASE_SECONDS,
+    schedulerBatchSize: value.SCHEDULER_BATCH_SIZE,
+    schedulePastToleranceSeconds: value.SCHEDULE_PAST_TOLERANCE_SECONDS,
   };
+  if (value.SCHEDULER_MAX_LATENESS_SECONDS !== undefined) config.schedulerMaxLatenessSeconds = value.SCHEDULER_MAX_LATENESS_SECONDS;
+  if (value.SCHEDULE_MIN_LEAD_SECONDS !== undefined) config.scheduleMinLeadSeconds = value.SCHEDULE_MIN_LEAD_SECONDS;
   if (value.CLOUDFLARE_TEAM_DOMAIN) config.cloudflareTeamDomain = value.CLOUDFLARE_TEAM_DOMAIN.replace(/\/$/, '');
   if (value.CLOUDFLARE_ADMIN_ACCESS_AUD) config.cloudflareAdminAccessAud = value.CLOUDFLARE_ADMIN_ACCESS_AUD;
   if (value.CLOUDFLARE_WORKER_ACCESS_AUD) config.cloudflareWorkerAccessAud = value.CLOUDFLARE_WORKER_ACCESS_AUD;

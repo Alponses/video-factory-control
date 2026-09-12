@@ -2,7 +2,7 @@ import type { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string) {
+  constructor(public status: number, public code: string, message: string, public details?: Record<string, unknown>) {
     super(message);
   }
 }
@@ -26,6 +26,7 @@ export const errorHandler = (nodeEnv: string): ErrorRequestHandler => (error, re
       code: apiError.code,
       message: apiError.message,
       requestId: req.requestId,
+      ...(apiError.details ? { details: apiError.details } : {}),
     },
   };
   if (nodeEnv !== 'production' && error instanceof Error && apiError.code === 'INTERNAL_ERROR') {

@@ -2,6 +2,10 @@ export const VIDEO_STATUSES = ['DRAFT', 'READY', 'QUEUED', 'RENDERING', 'QA', 'A
 export type VideoStatusDto = typeof VIDEO_STATUSES[number];
 export const PLATFORMS = ['TIKTOK', 'YOUTUBE', 'FACEBOOK'] as const;
 export type PlatformDto = typeof PLATFORMS[number];
+export const SCHEDULE_STATUSES = ['SCHEDULED', 'DISPATCHED', 'CANCELLED', 'SUPERSEDED'] as const;
+export type ScheduleStatusDto = typeof SCHEDULE_STATUSES[number];
+export const DISPATCH_STATUSES = ['PENDING', 'CLAIMED', 'COMPLETED', 'FAILED', 'CANCELLED'] as const;
+export type PublicationDispatchStatusDto = typeof DISPATCH_STATUSES[number];
 export const ASSET_KINDS = ['VIDEO', 'COVER', 'THUMBNAIL', 'AUDIO', 'AVATAR', 'BANNER', 'OTHER'] as const;
 export type AssetKindDto = typeof ASSET_KINDS[number];
 export type AssetStatusDto = 'PENDING' | 'READY' | 'REPLACED' | 'FAILED' | 'DELETED';
@@ -153,4 +157,38 @@ export interface HistoryItemDto {
 }
 export interface VideoHistoryDto { items: HistoryItemDto[] }
 
-export interface ApiErrorDto { error: { code: string; message: string; requestId?: string } }
+export interface PreflightMessageDto { code: string; message: string }
+export interface ScheduleDto {
+  id: string;
+  publicationId: string;
+  status: ScheduleStatusDto;
+  version: number;
+  scheduledAtUtc: string;
+  localDateTime: string;
+  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface DispatchSummaryDto { id: string; status: PublicationDispatchStatusDto | string; scheduleId: string; createdAt: string }
+export interface PublicationPreflightDto {
+  ready: boolean;
+  blockers: PreflightMessageDto[];
+  warnings: PreflightMessageDto[];
+  preview: null | {
+    publicationId: string; videoId: string; platform: PlatformDto; profileId: string | null;
+    title: string | null; caption: string | null; description: string | null; hashtags: string[]; cta: string | null;
+    videoAssetId: string | null; coverAssetId: string | null; thumbnailAssetId: string | null; durationSeconds: number | null; internalRuleNotice: string;
+  };
+  activeSchedule: ScheduleDto | null;
+  latestDispatch: DispatchSummaryDto | null;
+}
+export interface ScheduleMutationDto { localDateTime: string; timezone: string; expectedVersion: number }
+export interface ScheduleMutationResultDto { schedule: ScheduleDto; publicationVersion: number; supersededScheduleId?: string; preflight?: PublicationPreflightDto }
+export interface CalendarItemDto {
+  scheduleId: string; publicationId: string; videoId: string; channelId: string; title: string; platform: PlatformDto;
+  status: ScheduleStatusDto; scheduledAtUtc: string; localDateTime: string; timezone: string; publicationStatus: string; version: number;
+  dispatch: { id: string; status: string } | null;
+}
+export interface CalendarDto { items: CalendarItemDto[] }
+
+export interface ApiErrorDto { error: { code: string; message: string; requestId?: string; details?: Record<string, unknown> } }

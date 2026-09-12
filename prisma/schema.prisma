@@ -37,6 +37,21 @@ enum PublicationStatus {
   CANCELLED
 }
 
+enum ScheduleStatus {
+  SCHEDULED
+  DISPATCHED
+  CANCELLED
+  SUPERSEDED
+}
+
+enum PublicationDispatchStatus {
+  PENDING
+  CLAIMED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 enum WorkerStatus {
   ONLINE
   OFFLINE
@@ -216,6 +231,7 @@ model VideoAsset {
   video          Video?                @relation(fields: [videoId], references: [id], onDelete: SetNull)
   profile        Profile?              @relation(fields: [profileId], references: [id], onDelete: SetNull)
   uploadSessions AssetUploadSession[]
+  dispatches     PublicationDispatch[]
 
   @@index([videoId, kind])
   @@index([profileId, kind])
@@ -282,10 +298,12 @@ model Publication {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  video     Video               @relation(fields: [videoId], references: [id], onDelete: Cascade)
-  schedules Schedule[]
-  metrics   PublicationMetric[]
-  snapshots MetricSnapshot[]
+  video      Video                 @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  schedules  Schedule[]
+  dispatches PublicationDispatch[]
+  events     PublicationEvent[]
+  metrics    PublicationMetric[]
+  snapshots  MetricSnapshot[]
 
   @@unique([videoId, platform])
   @@index([platform, status])
@@ -331,19 +349,65 @@ model MetricSnapshot {
 }
 
 model Schedule {
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  publicationId String         @db.VarChar(36)
+  scheduledAt   DateTime
+  timezone      String         @default("America/Mexico_City") @db.VarChar(64)
+  status        ScheduleStatus @default(SCHEDULED)
+  version       Int            @default(1)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  dispatch    PublicationDispatch?
+
+  @@index([status, scheduledAt])
+  @@index([publicationId, status])
+  @@map("schedules")
+}
+
+model PublicationDispatch {
+  id              String                    @id @default(uuid()) @db.VarChar(36)
+  publicationId   String                    @db.VarChar(36)
+  scheduleId      String                    @unique @db.VarChar(36)
+  assetId         String                    @db.VarChar(36)
+  status          PublicationDispatchStatus @default(PENDING)
+  notBefore       DateTime
+  attemptCount    Int                       @default(0)
+  lastError       String?                   @db.Text
+  claimedAt       DateTime?
+  claimExpiresAt  DateTime?
+  claimedBy       String?                   @db.VarChar(191)
+  payloadSnapshot Json
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  publication Publication        @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  schedule    Schedule           @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
+  asset       VideoAsset         @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  events      PublicationEvent[]
+
+  @@index([status, notBefore])
+  @@index([publicationId, createdAt])
+  @@map("publication_dispatches")
+}
+
+model PublicationEvent {
   id            String   @id @default(uuid()) @db.VarChar(36)
   publicationId String   @db.VarChar(36)
-  scheduledAt   DateTime
-  timezone      String   @default("America/Mexico_City") @db.VarChar(64)
-  status        String   @db.VarChar(64)
-  version       Int      @default(1)
+  type          String   @db.VarChar(191)
+  fromStatus    String?  @db.VarChar(64)
+  toStatus      String?  @db.VarChar(64)
+  dispatchId    String?  @db.VarChar(36)
+  payload       Json?
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
 
-  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  dispatch    PublicationDispatch? @relation(fields: [dispatchId], references: [id], onDelete: SetNull)
 
-  @@index([scheduledAt, status])
-  @@map("schedules")
+  @@index([publicationId, createdAt])
+  @@index([dispatchId])
+  @@map("publication_events")
 }
 
 model Worker {
