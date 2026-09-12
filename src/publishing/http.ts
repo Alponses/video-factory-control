@@ -1,7 +1,11 @@
+import { Readable } from 'node:stream';
+
+export type HttpRequestBody = BodyInit | Readable | null;
+
 export interface HttpRequest {
   method: string;
   headers?: Record<string, string>;
-  body?: BodyInit | null;
+  body?: HttpRequestBody;
   timeoutMs?: number;
 }
 
@@ -24,14 +28,20 @@ export class FetchHttpTransport implements HttpTransport {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), init.timeoutMs ?? this.defaultTimeoutMs);
     try {
-      const requestInit: RequestInit = {
+      const requestInit: RequestInit & { duplex?: 'half' } = {
         method: init.method,
-        body: init.body ?? null,
         signal: controller.signal,
       };
       if (init.headers) requestInit.headers = init.headers;
-      const response = await fetch(url, requestInit);
-      return response;
+      if (init.body !== undefined && init.body !== null) {
+        if (init.body instanceof Readable) {
+          requestInit.body = Readable.toWeb(init.body) as unknown as BodyInit;
+          requestInit.duplex = 'half';
+        } else {
+          requestInit.body = init.body;
+        }
+      }
+      return await fetch(url, requestInit);
     } finally {
       clearTimeout(timeout);
     }
