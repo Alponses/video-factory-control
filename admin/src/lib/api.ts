@@ -6,14 +6,18 @@ import type {
   AssetListDto,
   AssetPolicyDto,
   AssetUploadRequestDto,
+  CalendarDto,
   ChannelAssetsDto,
   DownloadUrlDto,
   MultipartCompletedPartDto,
   MultipartPartsDto,
   PublicationEditResultDto,
   PublicationPatchDto,
+  PublicationPreflightDto,
   SceneEditResultDto,
   ScenePatchDto,
+  ScheduleMutationDto,
+  ScheduleMutationResultDto,
   UploadSessionDto,
   VideoDetailDto,
   VideoEditResultDto,
@@ -24,7 +28,7 @@ import type {
 import type { QueueRenderView, WorkerListView, WorkerMutationView, WorkerSecretView } from '../types/worker';
 
 export class AdminApiError extends Error {
-  constructor(public status: number, public code: string, message: string, public requestId?: string) {
+  constructor(public status: number, public code: string, message: string, public requestId?: string, public details?: Record<string, unknown>) {
     super(message);
   }
 }
@@ -50,7 +54,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const code = apiBody?.error?.code ?? `HTTP_${response.status}`;
     const message = apiBody?.error?.message ?? (response.statusText || 'Request failed');
     const requestId = apiBody?.error?.requestId ?? response.headers.get('x-request-id') ?? undefined;
-    throw new AdminApiError(response.status, code, message, requestId);
+    throw new AdminApiError(response.status, code, message, requestId, apiBody?.error?.details);
   }
   return body as T;
 }
@@ -74,6 +78,12 @@ export const adminApi = {
   updateVideo: (id: string, body: VideoPatchDto) => request<VideoEditResultDto>(`/api/admin/videos/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
   updateScene: (id: string, position: number, body: ScenePatchDto) => request<SceneEditResultDto>(`/api/admin/videos/${encodeURIComponent(id)}/scenes/${position}`, { method: 'PATCH', body: JSON.stringify(body) }),
   updatePublication: (id: string, body: PublicationPatchDto) => request<PublicationEditResultDto>(`/api/admin/publications/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  preflightPublication: (id: string) => request<PublicationPreflightDto>(`/api/admin/publications/${encodeURIComponent(id)}/preflight`),
+  schedulePublication: (id: string, body: ScheduleMutationDto) => request<ScheduleMutationResultDto>(`/api/admin/publications/${encodeURIComponent(id)}/schedule`, { method: 'POST', body: JSON.stringify(body) }),
+  rescheduleSchedule: (id: string, body: ScheduleMutationDto) => request<ScheduleMutationResultDto>(`/api/admin/schedules/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  cancelSchedule: (id: string, expectedVersion: number) => request<{ schedule: ScheduleMutationResultDto['schedule']; publicationStatus: string; publicationVersion: number }>(`/api/admin/schedules/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: JSON.stringify({ expectedVersion }) }),
+  cancelPublication: (id: string, expectedVersion: number) => request<{ publicationId: string; status: string; version: number }>(`/api/admin/publications/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: JSON.stringify({ expectedVersion }) }),
+  calendar: (query: URLSearchParams) => request<CalendarDto>(`/api/admin/calendar?${query.toString()}`),
   createVideoUpload: (videoId: string, body: AssetUploadRequestDto, idempotencyKey: string) => request<UploadSessionDto>(`/api/admin/videos/${encodeURIComponent(videoId)}/assets/uploads`, { method: 'POST', headers: { 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(body) }),
   createProfileUpload: (profileId: string, body: AssetUploadRequestDto, idempotencyKey: string) => request<UploadSessionDto>(`/api/admin/profiles/${encodeURIComponent(profileId)}/assets/uploads`, { method: 'POST', headers: { 'Idempotency-Key': idempotencyKey }, body: JSON.stringify(body) }),
   uploadParts: (sessionId: string, partNumbers: number[]) => request<MultipartPartsDto>(`/api/admin/assets/uploads/${encodeURIComponent(sessionId)}/parts`, { method: 'POST', body: JSON.stringify({ partNumbers }) }),

@@ -6,10 +6,12 @@ import {
   Platform,
   PublicationStatus,
   RenderAttemptStatus,
+  ScheduleStatus,
   VideoStatus,
   type Prisma,
   type PrismaClient,
 } from '@prisma/client';
+import { formatInstantInTimeZone } from './timezone.js';
 
 export interface PreflightMessage { code: string; message: string }
 export interface PreflightPreview {
@@ -33,7 +35,7 @@ export interface PreflightResult {
   blockers: PreflightMessage[];
   warnings: PreflightMessage[];
   preview: PreflightPreview | null;
-  activeSchedule: { id: string; status: string; scheduledAtUtc: string; timezone: string; version: number } | null;
+  activeSchedule: { id: string; publicationId: string; status: ScheduleStatus; scheduledAtUtc: string; localDateTime: string; timezone: string; version: number; createdAt: string; updatedAt: string } | null;
   latestDispatch: { id: string; status: string; scheduleId: string; createdAt: string } | null;
 }
 
@@ -88,7 +90,7 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
           channel: { include: { profiles: true } },
         },
       },
-      schedules: { where: { status: 'SCHEDULED' }, orderBy: { createdAt: 'desc' } },
+      schedules: { where: { status: ScheduleStatus.SCHEDULED }, orderBy: { createdAt: 'desc' } },
       dispatches: { orderBy: { createdAt: 'desc' }, take: 1 },
     },
   });
@@ -172,7 +174,17 @@ export async function evaluatePublicationPreflight(db: SchedulingDb, publication
     blockers,
     warnings,
     preview,
-    activeSchedule: activeSchedule ? { id: activeSchedule.id, status: activeSchedule.status, scheduledAtUtc: activeSchedule.scheduledAt.toISOString(), timezone: activeSchedule.timezone, version: activeSchedule.version } : null,
+    activeSchedule: activeSchedule ? {
+      id: activeSchedule.id,
+      publicationId: activeSchedule.publicationId,
+      status: activeSchedule.status,
+      scheduledAtUtc: activeSchedule.scheduledAt.toISOString(),
+      localDateTime: formatInstantInTimeZone(activeSchedule.scheduledAt, activeSchedule.timezone),
+      timezone: activeSchedule.timezone,
+      version: activeSchedule.version,
+      createdAt: activeSchedule.createdAt.toISOString(),
+      updatedAt: activeSchedule.updatedAt.toISOString(),
+    } : null,
     latestDispatch: latestDispatch ? { id: latestDispatch.id, status: latestDispatch.status, scheduleId: latestDispatch.scheduleId, createdAt: latestDispatch.createdAt.toISOString() } : null,
   };
 }

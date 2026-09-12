@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { adminRoutes } from './routes';
 import './styles.css';
 import './phase5.css';
+import './phase6.css';
 
 const router = createBrowserRouter(adminRoutes);
 const root = document.getElementById('root');

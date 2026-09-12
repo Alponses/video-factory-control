@@ -1,6 +1,7 @@
 import type { RouteObject } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { AppShell } from './components/Layout';
+import { CalendarPage } from './pages/CalendarPage';
 import { ChannelsPage } from './pages/ChannelsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { VideoDetailPage } from './pages/VideoDetailPage';
@@ -18,6 +19,7 @@ export const adminRoutes: RouteObject[] = [{
     { index: true, element: <DashboardPage /> },
     { path: 'videos', element: <VideosPage /> },
     { path: 'videos/:videoId', element: <VideoDetailPage /> },
+    { path: 'calendar', element: <CalendarPage /> },
     { path: 'channels', element: <ChannelsPage /> },
     { path: 'workers', element: <WorkersPage /> },
     { path: '*', element: <NotFoundPage /> },
