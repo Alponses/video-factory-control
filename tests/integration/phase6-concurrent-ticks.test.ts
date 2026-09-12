@@ -34,7 +34,7 @@ test('two simultaneous scheduler ticks have one lease winner and still create at
 
   for (let index = 0; index < 10; index += 1) {
     const videoId = `${prefix}${index}`;
-    await prisma.video.create({ data: { id: videoId, channelId, slug: videoId, title: videoId, category: 'phase6', status: VideoStatus.APPROVED, metadata: {} } });
+    await prisma.video.create({ data: { id: videoId, channelId, slug: videoId, title: videoId, category: 'phase6', status: VideoStatus.APPROVED, metadata: {}, createdAt: new Date('2026-09-01T00:00:00Z') } });
     await prisma.renderAttempt.create({ data: { videoId, attempt: 1, status: RenderAttemptStatus.SUCCEEDED, durationSeconds: 75, width: 1080, height: 1920, hasAudio: true, raw: {} } });
     await prisma.qaResult.create({ data: { videoId, attempt: 1, passed: true, durationPassed: true, resolutionPassed: true, audioPassed: true, captionsPassed: null, raw: {} } });
     await prisma.videoAsset.create({ data: { videoId, kind: AssetKind.VIDEO, status: AssetStatus.READY, storageProvider: 'R2', bucket: 'test', objectKey: `${prefix}${index}.mp4`, mimeType: 'video/mp4', size: 1024n } });
