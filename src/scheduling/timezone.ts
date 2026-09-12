@@ -9,6 +9,8 @@ export class TimeZoneError extends Error {
 type LocalParts = { year: number; month: number; day: number; hour: number; minute: number; second: number };
 
 const LOCAL_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+const UTC_ZONE = 'UTC';
+const SUPPORTED_IANA_TIME_ZONES = new Set<string>(Intl.supportedValuesOf('timeZone'));
 
 function parseLocal(value: string): LocalParts {
   const match = LOCAL_PATTERN.exec(value);
@@ -24,13 +26,9 @@ function parseLocal(value: string): LocalParts {
 }
 
 export function isValidIanaTimeZone(timeZone: string): boolean {
-  if (!timeZone || /^GMT[+-]/i.test(timeZone)) return false;
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone }).format(new Date(0));
-    return true;
-  } catch {
-    return false;
-  }
+  if (!timeZone) return false;
+  if (timeZone === UTC_ZONE) return true;
+  return SUPPORTED_IANA_TIME_ZONES.has(timeZone);
 }
 
 function formatter(timeZone: string) {
@@ -68,7 +66,7 @@ function offsetMinutesAt(instant: Date, timeZone: string): number {
 }
 
 export function localDateTimeToUtc(localDateTime: string, timeZone: string): Date {
-  if (!isValidIanaTimeZone(timeZone)) throw new TimeZoneError('INVALID_TIMEZONE', 'timezone must be a valid IANA time zone');
+  if (!isValidIanaTimeZone(timeZone)) throw new TimeZoneError('INVALID_TIMEZONE', 'timezone must be a supported IANA time zone or UTC');
   const local = parseLocal(localDateTime);
   const naiveMs = Date.UTC(local.year, local.month - 1, local.day, local.hour, local.minute, local.second);
 
@@ -91,7 +89,7 @@ export function localDateTimeToUtc(localDateTime: string, timeZone: string): Dat
 }
 
 export function formatInstantInTimeZone(instant: Date, timeZone: string): string {
-  if (!isValidIanaTimeZone(timeZone)) throw new TimeZoneError('INVALID_TIMEZONE', 'timezone must be a valid IANA time zone');
+  if (!isValidIanaTimeZone(timeZone)) throw new TimeZoneError('INVALID_TIMEZONE', 'timezone must be a supported IANA time zone or UTC');
   const parts = localPartsAt(instant, timeZone);
   const pad = (value: number) => String(value).padStart(2, '0');
   return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}T${pad(parts.hour)}:${pad(parts.minute)}:${pad(parts.second)}`;

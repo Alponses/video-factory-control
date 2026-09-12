@@ -12,6 +12,7 @@ import {
 import type { AppConfig } from '../config.js';
 import type { Clock } from './clock.js';
 import { systemClock } from './clock.js';
+import type { SchedulerItemLogFields, SchedulerLogger, SchedulerRunLogFields } from './logging.js';
 import { evaluatePublicationPreflight } from './preflight.js';
 
 const LEASE_NAME = 'publication-dispatcher';
@@ -30,8 +31,39 @@ export interface SchedulerTickResult {
   processed: number;
   dispatched: number;
   alreadyDispatched: number;
+  late: number;
   skipped: number;
   failed: number;
+}
+
+function runLogFields(result: SchedulerTickResult): SchedulerRunLogFields {
+  return {
+    schedulerRunId: result.schedulerRunId,
+    leaseOwner: result.leaseOwner,
+    startedAt: result.startedAt,
+    durationMs: result.durationMs,
+    dueFound: result.dueFound,
+    dispatched: result.dispatched,
+    alreadyDispatched: result.alreadyDispatched,
+    late: result.late,
+    failed: result.failed,
+  };
+}
+
+function safeRunLog(logger: SchedulerLogger | undefined, result: SchedulerTickResult): void {
+  if (!logger) return;
+  try { logger.logRun(runLogFields(result)); } catch { return; }
+}
+
+function safeItemLog(logger: SchedulerLogger | undefined, fields: SchedulerItemLogFields): void {
+  if (!logger) return;
+  try { logger.logItem(fields); } catch { return; }
+}
+
+function failureCode(payload: Prisma.JsonValue | null, schedulerRunId: string): string | undefined {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return undefined;
+  const record = payload as Prisma.JsonObject;
+  return record.schedulerRunId === schedulerRunId && typeof record.errorCode === 'string' ? record.errorCode : undefined;
 }
 
 export async function acquireSchedulerLease(prisma: PrismaClient, owner: string, now: Date, leaseSeconds: number): Promise<boolean> {
@@ -176,7 +208,43 @@ async function recordItemFailure(prisma: PrismaClient, scheduleId: string, sched
   await prisma.publicationEvent.create({ data: { publicationId: schedule.publicationId, type: 'SCHEDULE_DISPATCH_FAILED', payload: json({ scheduleId, schedulerRunId, errorCode }) } });
 }
 
-export async function runSchedulerTick(prisma: PrismaClient, config: AppConfig, options: { clock?: Clock; schedulerRunId?: string } = {}): Promise<SchedulerTickResult> {
+async function logProcessedItem(
+  prisma: PrismaClient,
+  logger: SchedulerLogger | undefined,
+  item: { id: string; publicationId: string; scheduledAt: Date; publication: { platform: import('@prisma/client').Platform } },
+  schedulerRunId: string,
+  now: Date,
+  outcome: DispatchOutcome,
+): Promise<number> {
+  const latenessSeconds = Math.max(0, Math.floor((now.getTime() - item.scheduledAt.getTime()) / 1000));
+  let dispatchId: string | undefined;
+  let errorCode: string | undefined;
+
+  if (outcome === 'dispatched' || outcome === 'alreadyDispatched') {
+    const dispatch = await prisma.publicationDispatch.findUnique({ where: { scheduleId: item.id }, select: { id: true } });
+    dispatchId = dispatch?.id;
+  }
+  if (outcome === 'failed') {
+    const failure = await prisma.publicationEvent.findFirst({
+      where: { publicationId: item.publicationId, type: 'SCHEDULE_DISPATCH_FAILED' },
+      orderBy: { createdAt: 'desc' },
+      select: { payload: true },
+    });
+    errorCode = failureCode(failure?.payload ?? null, schedulerRunId);
+  }
+
+  safeItemLog(logger, {
+    publicationId: item.publicationId,
+    scheduleId: item.id,
+    platform: item.publication.platform,
+    latenessSeconds,
+    ...(dispatchId ? { dispatchId } : {}),
+    ...(errorCode ? { errorCode } : {}),
+  });
+  return latenessSeconds;
+}
+
+export async function runSchedulerTick(prisma: PrismaClient, config: AppConfig, options: { clock?: Clock; schedulerRunId?: string; logger?: SchedulerLogger } = {}): Promise<SchedulerTickResult> {
   const clock = options.clock ?? systemClock;
   const started = clock.now();
   const schedulerRunId = options.schedulerRunId ?? randomUUID();
@@ -184,9 +252,10 @@ export async function runSchedulerTick(prisma: PrismaClient, config: AppConfig, 
   const leaseSeconds = config.schedulerLeaseSeconds ?? 55;
   const batchSize = config.schedulerBatchSize ?? 50;
   const acquired = await acquireSchedulerLease(prisma, leaseOwner, started, leaseSeconds);
-  const result: SchedulerTickResult = { schedulerRunId, leaseOwner, leaseAcquired: acquired, startedAt: started.toISOString(), durationMs: 0, dueFound: 0, processed: 0, dispatched: 0, alreadyDispatched: 0, skipped: 0, failed: 0 };
+  const result: SchedulerTickResult = { schedulerRunId, leaseOwner, leaseAcquired: acquired, startedAt: started.toISOString(), durationMs: 0, dueFound: 0, processed: 0, dispatched: 0, alreadyDispatched: 0, late: 0, skipped: 0, failed: 0 };
   if (!acquired) {
     result.durationMs = Math.max(0, clock.now().getTime() - started.getTime());
+    safeRunLog(options.logger, result);
     return result;
   }
 
@@ -195,25 +264,35 @@ export async function runSchedulerTick(prisma: PrismaClient, config: AppConfig, 
       where: { status: ScheduleStatus.SCHEDULED, scheduledAt: { lte: started } },
       orderBy: [{ scheduledAt: 'asc' }, { createdAt: 'asc' }],
       take: batchSize,
-      select: { id: true },
+      select: { id: true, publicationId: true, scheduledAt: true, publication: { select: { platform: true } } },
     });
     result.dueFound = due.length;
     for (const item of due) {
       result.processed += 1;
+      let outcome: DispatchOutcome;
       try {
-        const outcome = await dispatchDueSchedule(prisma, item.id, schedulerRunId, started, config.schedulerMaxLatenessSeconds);
+        outcome = await dispatchDueSchedule(prisma, item.id, schedulerRunId, started, config.schedulerMaxLatenessSeconds);
         if (outcome === 'dispatched') result.dispatched += 1;
         else if (outcome === 'alreadyDispatched') result.alreadyDispatched += 1;
         else if (outcome === 'skipped') result.skipped += 1;
         else result.failed += 1;
       } catch (error) {
+        outcome = 'failed';
         result.failed += 1;
         await recordItemFailure(prisma, item.id, schedulerRunId, error).catch(() => undefined);
+      }
+
+      try {
+        const latenessSeconds = await logProcessedItem(prisma, options.logger, item, schedulerRunId, started, outcome);
+        if (outcome === 'dispatched' && config.schedulerMaxLatenessSeconds !== undefined && latenessSeconds > config.schedulerMaxLatenessSeconds) result.late += 1;
+      } catch {
+        safeItemLog(options.logger, { publicationId: item.publicationId, scheduleId: item.id, platform: item.publication.platform, errorCode: 'LOG_CONTEXT_UNAVAILABLE' });
       }
     }
     return result;
   } finally {
     await releaseSchedulerLease(prisma, leaseOwner).catch(() => undefined);
     result.durationMs = Math.max(0, clock.now().getTime() - started.getTime());
+    safeRunLog(options.logger, result);
   }
 }

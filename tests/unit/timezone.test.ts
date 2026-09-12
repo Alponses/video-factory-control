@@ -8,6 +8,16 @@ function expectZoneCode(error: unknown, code: string) {
   return true;
 }
 
+test('supported IANA zones plus explicit UTC are accepted while offsets and random values are rejected', () => {
+  for (const zone of ['America/Mexico_City', 'America/New_York', 'Europe/Madrid', 'UTC']) {
+    assert.equal(isValidIanaTimeZone(zone), true, `${zone} should be accepted`);
+  }
+  for (const zone of ['random-string', '+01:00', '-06:00', 'GMT-6']) {
+    assert.equal(isValidIanaTimeZone(zone), false, `${zone} should be rejected`);
+    assert.throws(() => localDateTimeToUtc('2026-09-15T20:30:00', zone), (error) => expectZoneCode(error, 'INVALID_TIMEZONE'));
+  }
+});
+
 test('America/Mexico_City local time converts to the expected UTC instant and round-trips', () => {
   const instant = localDateTimeToUtc('2026-09-15T20:30:00', 'America/Mexico_City');
   assert.equal(instant.toISOString(), '2026-09-16T02:30:00.000Z');
@@ -16,12 +26,6 @@ test('America/Mexico_City local time converts to the expected UTC instant and ro
 
 test('UTC local time remains the same instant', () => {
   assert.equal(localDateTimeToUtc('2026-09-15T20:30:00', 'UTC').toISOString(), '2026-09-15T20:30:00.000Z');
-});
-
-test('invalid timezone is rejected instead of falling back', () => {
-  assert.equal(isValidIanaTimeZone('random-string'), false);
-  assert.equal(isValidIanaTimeZone('GMT-6'), false);
-  assert.throws(() => localDateTimeToUtc('2026-09-15T20:30:00', 'random-string'), (error) => expectZoneCode(error, 'INVALID_TIMEZONE'));
 });
 
 test('DST spring-forward nonexistent local time is rejected', () => {

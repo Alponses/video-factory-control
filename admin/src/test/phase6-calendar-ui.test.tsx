@@ -48,7 +48,7 @@ describe('Phase 6 Calendar UI', () => {
   });
 
   it('keeps view/platform/status/channel filters in URL and sends them server-side', async () => {
-    const fetchMock = vi.fn(() => jsonResponse({ items: [calendarItem] }));
+    const fetchMock = vi.fn((input: string | URL | Request, _init?: RequestInit) => jsonResponse({ items: [calendarItem] }));
     vi.stubGlobal('fetch', fetchMock);
     const router = renderCalendar();
     await screen.findByText(/20:30 · Una pausa con fe/);
