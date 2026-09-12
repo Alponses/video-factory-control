@@ -29,7 +29,7 @@ export class YouTubePublishingProvider implements PublishingProvider {
 
   async initialize(context: ProviderContext): Promise<ProviderOperationState> {
     const existing = recoveryString(context.recovery, 'sessionUri');
-    if (existing) return { status: 'READY_TO_UPLOAD', externalOperationId: existing, recovery: context.recovery ?? undefined };
+    if (existing) return { status: 'READY_TO_UPLOAD', recovery: context.recovery ?? undefined };
     const settings = context.snapshot.youtube;
     if (!settings?.privacyStatus || !settings.categoryId || settings.madeForKids === null || settings.containsSyntheticMedia === null || !context.snapshot.title) throw new PublishingError('PUBLISHING_SETTINGS_REQUIRED', 'YouTube publishing settings are incomplete');
     const url = new URL('https://www.googleapis.com/upload/youtube/v3/videos');
@@ -52,18 +52,21 @@ export class YouTubePublishingProvider implements PublishingProvider {
     } catch {
       throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube resumable-session creation response was lost', false, true);
     }
-    if (!response.ok) throw new PublishingError(response.status >= 500 ? 'PROVIDER_TEMPORARY_UNAVAILABLE' : 'PROVIDER_UPLOAD_FAILED', 'YouTube rejected resumable upload initialization', response.status >= 500, false, response.status);
+    if (!response.ok) {
+      if (response.status >= 500) throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube resumable-session creation may have reached the provider', false, true, response.status);
+      throw new PublishingError('PROVIDER_UPLOAD_FAILED', 'YouTube rejected resumable upload initialization', false, false, response.status);
+    }
     const sessionUri = response.headers.get('location');
     if (!sessionUri) throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube resumable upload session URI was not returned', false, true);
-    return { status: 'READY_TO_UPLOAD', externalOperationId: sessionUri, recovery: { sessionUri, offset: 0 } };
+    return { status: 'READY_TO_UPLOAD', recovery: { sessionUri, offset: 0 } };
   }
 
   async upload(context: ProviderContext, operation: ProviderOperationState): Promise<ProviderOperationState> {
-    const sessionUri = recoveryString(operation.recovery, 'sessionUri') ?? operation.externalOperationId;
+    const sessionUri = recoveryString(operation.recovery, 'sessionUri');
     if (!sessionUri) throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube resumable session is missing', false, true);
     const size = safeIntegerSize(context.asset.size);
     const offset = Math.min(recoveryNumber(operation.recovery, 'offset') ?? 0, size);
-    if (offset >= size) return { ...operation, status: 'PROCESSING', externalOperationId: sessionUri };
+    if (offset >= size) return { ...operation, status: 'PROCESSING' };
     const source = await this.storage.readObject(context.asset.objectKey, { start: offset, end: size - 1 });
     let response;
     try {
@@ -77,23 +80,23 @@ export class YouTubePublishingProvider implements PublishingProvider {
     }
     if (response.status === 308) {
       const next = uploadedOffset(response.headers.get('range'));
-      return { status: 'READY_TO_UPLOAD', externalOperationId: sessionUri, recovery: { ...(operation.recovery ?? {}), sessionUri, offset: next } };
+      return { status: 'READY_TO_UPLOAD', recovery: { ...(operation.recovery ?? {}), sessionUri, offset: next } };
     }
     const body = await requireProviderJson<{ id?: string }>(response);
     if (!body.id) throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube accepted upload bytes but returned no video ID', false, true);
-    return { status: 'PROCESSING', externalOperationId: sessionUri, platformMediaId: body.id, recovery: { ...(operation.recovery ?? {}), sessionUri, offset: size, videoId: body.id } };
+    return { status: 'PROCESSING', externalOperationId: body.id, platformMediaId: body.id, recovery: { ...(operation.recovery ?? {}), sessionUri, offset: size, videoId: body.id } };
   }
 
   async reconcile(context: ProviderContext, operation: ProviderOperationState): Promise<ProviderOperationState> {
-    const sessionUri = recoveryString(operation.recovery, 'sessionUri') ?? operation.externalOperationId;
-    let videoId = operation.platformMediaId ?? recoveryString(operation.recovery, 'videoId');
+    const sessionUri = recoveryString(operation.recovery, 'sessionUri');
+    let videoId = operation.platformMediaId ?? operation.externalOperationId ?? recoveryString(operation.recovery, 'videoId');
     if (!videoId) {
       if (!sessionUri) throw new PublishingError('PROVIDER_STATE_UNKNOWN', 'YouTube resumable session is unavailable', false, true);
       const size = safeIntegerSize(context.asset.size);
       const response = await this.transport.request(sessionUri, { method: 'PUT', headers: { 'Content-Length': '0', 'Content-Range': `bytes */${size}` } });
       if (response.status === 308) {
         const next = uploadedOffset(response.headers.get('range'));
-        return { status: 'READY_TO_UPLOAD', externalOperationId: sessionUri, recovery: { ...(operation.recovery ?? {}), sessionUri, offset: next } };
+        return { status: 'READY_TO_UPLOAD', recovery: { ...(operation.recovery ?? {}), sessionUri, offset: next } };
       }
       const body = await requireProviderJson<{ id?: string }>(response, 'PROVIDER_PROCESSING_FAILED');
       videoId = body.id;
@@ -106,9 +109,9 @@ export class YouTubePublishingProvider implements PublishingProvider {
     const item = body.items?.[0];
     const uploadStatus = item?.status?.uploadStatus;
     if (!item?.id) throw new PublishingError('PROVIDER_PROCESSING_FAILED', 'YouTube video status is unavailable');
-    if (uploadStatus === 'processed') return { status: 'SUCCEEDED', externalOperationId: sessionUri, platformMediaId: item.id, recovery: { ...(operation.recovery ?? {}), sessionUri, videoId: item.id }, publishedUrl: `https://www.youtube.com/watch?v=${item.id}` };
-    if (uploadStatus === 'failed' || uploadStatus === 'rejected' || uploadStatus === 'deleted') return { status: 'FAILED', externalOperationId: sessionUri, platformMediaId: item.id, recovery: operation.recovery, retryable: false, errorCode: 'PROVIDER_PROCESSING_FAILED', safeErrorMessage: `YouTube processing ended with ${uploadStatus}` };
-    return { status: 'PROCESSING', externalOperationId: sessionUri, platformMediaId: item.id, recovery: { ...(operation.recovery ?? {}), sessionUri, videoId: item.id } };
+    if (uploadStatus === 'processed') return { status: 'SUCCEEDED', externalOperationId: item.id, platformMediaId: item.id, recovery: { ...(operation.recovery ?? {}), sessionUri, videoId: item.id }, publishedUrl: `https://www.youtube.com/watch?v=${item.id}` };
+    if (uploadStatus === 'failed' || uploadStatus === 'rejected' || uploadStatus === 'deleted') return { status: 'FAILED', externalOperationId: item.id, platformMediaId: item.id, recovery: operation.recovery, retryable: false, errorCode: 'PROVIDER_PROCESSING_FAILED', safeErrorMessage: `YouTube processing ended with ${uploadStatus}` };
+    return { status: 'PROCESSING', externalOperationId: item.id, platformMediaId: item.id, recovery: { ...(operation.recovery ?? {}), sessionUri, videoId: item.id } };
   }
 
   finalize(context: ProviderContext, operation: ProviderOperationState): Promise<ProviderOperationState> {
