@@ -21,6 +21,10 @@ function json(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
 }
 
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
 export interface SchedulerTickResult {
   schedulerRunId: string;
   leaseOwner: string;
@@ -72,9 +76,9 @@ export async function acquireSchedulerLease(prisma: PrismaClient, owner: string,
     INSERT INTO scheduler_leases (name, owner, leaseExpiresAt, updatedAt)
     VALUES (${LEASE_NAME}, ${owner}, ${expiresAt}, ${now})
     ON DUPLICATE KEY UPDATE
-      owner = IF(leaseExpiresAt <= ${now}, VALUES(owner), owner),
-      leaseExpiresAt = IF(leaseExpiresAt <= ${now}, VALUES(leaseExpiresAt), leaseExpiresAt),
-      updatedAt = IF(leaseExpiresAt <= ${now}, VALUES(updatedAt), updatedAt)
+      owner = IF(leaseExpiresAt <= ${now} OR owner = ${owner}, VALUES(owner), owner),
+      leaseExpiresAt = IF(leaseExpiresAt <= ${now} OR owner = ${owner}, VALUES(leaseExpiresAt), leaseExpiresAt),
+      updatedAt = IF(leaseExpiresAt <= ${now} OR owner = ${owner}, VALUES(updatedAt), updatedAt)
   `);
   const lease = await prisma.schedulerLease.findUnique({ where: { name: LEASE_NAME } });
   return lease?.owner === owner && lease.leaseExpiresAt.getTime() === expiresAt.getTime();
@@ -133,9 +137,10 @@ export async function dispatchDueSchedule(prisma: PrismaClient, scheduleId: stri
     const coverAsset = publication.video.assets.find((asset) => asset.kind === AssetKind.COVER) ?? null;
     const thumbnailAsset = publication.video.assets.find((asset) => asset.kind === AssetKind.THUMBNAIL) ?? null;
     const profile = publication.video.channel.profiles.find((item) => item.platform === publication.platform) ?? null;
-    const hashtags = Array.isArray(publication.hashtags) ? publication.hashtags.filter((item): item is string => typeof item === 'string') : [];
+    const hashtags = stringArray(publication.hashtags);
+    const tags = stringArray(publication.tags);
     const payloadSnapshot = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       publicationId: publication.id,
       publicationVersion: publication.version,
       videoId: publication.videoId,
@@ -145,8 +150,23 @@ export async function dispatchDueSchedule(prisma: PrismaClient, scheduleId: stri
       caption: publication.caption,
       description: publication.description,
       hashtags,
+      tags,
       cta: publication.cta,
       pinnedComment: publication.pinnedComment,
+      durationSeconds: preflight.preview.durationSeconds,
+      tiktok: publication.platform === 'TIKTOK' ? {
+        privacyLevel: publication.tiktokPrivacyLevel,
+        allowComment: publication.tiktokAllowComment,
+        allowDuet: publication.tiktokAllowDuet,
+        allowStitch: publication.tiktokAllowStitch,
+        isAigc: publication.tiktokIsAigc,
+      } : null,
+      youtube: publication.platform === 'YOUTUBE' ? {
+        privacyStatus: publication.youtubePrivacyStatus,
+        categoryId: publication.youtubeCategoryId,
+        madeForKids: publication.youtubeMadeForKids,
+        containsSyntheticMedia: publication.youtubeContainsSyntheticMedia,
+      } : null,
       videoAssetId: videoAsset.id,
       coverAssetId: coverAsset?.id ?? null,
       thumbnailAssetId: thumbnailAsset?.id ?? null,
