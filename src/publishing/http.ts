@@ -24,12 +24,13 @@ export class FetchHttpTransport implements HttpTransport {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), init.timeoutMs ?? this.defaultTimeoutMs);
     try {
-      const response = await fetch(url, {
+      const requestInit: RequestInit = {
         method: init.method,
-        headers: init.headers,
         body: init.body ?? null,
         signal: controller.signal,
-      });
+      };
+      if (init.headers) requestInit.headers = init.headers;
+      const response = await fetch(url, requestInit);
       return response;
     } finally {
       clearTimeout(timeout);
