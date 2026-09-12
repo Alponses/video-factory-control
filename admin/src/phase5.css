@@ -1,0 +1,91 @@
+.asset-upload-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.asset-upload-controls {
+  display: grid;
+  grid-template-columns: minmax(150px, .65fr) minmax(240px, 1.8fr) auto;
+  gap: .85rem;
+  align-items: end;
+}
+
+.asset-upload-controls label {
+  display: grid;
+  gap: .4rem;
+  font-weight: 650;
+}
+
+.asset-upload-controls select,
+.asset-upload-controls input[type="file"] {
+  width: 100%;
+  min-height: 42px;
+}
+
+.upload-progress {
+  display: grid;
+  gap: .55rem;
+}
+
+.upload-progress progress {
+  width: 100%;
+  height: 12px;
+}
+
+.asset-hash {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: .78rem;
+}
+
+.asset-preview {
+  display: grid;
+  gap: .75rem;
+  margin-top: .85rem;
+}
+
+.asset-preview video,
+.asset-preview img {
+  display: block;
+  width: min(100%, 430px);
+  max-height: 560px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #080a0f;
+}
+
+.channel-stack,
+.profile-asset-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile-assets {
+  display: grid;
+  gap: .9rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border, rgba(255,255,255,.12));
+}
+
+.profile-assets:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.profile-assets-heading > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  align-items: baseline;
+}
+
+@media (max-width: 760px) {
+  .asset-upload-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-preview video,
+  .asset-preview img {
+    width: 100%;
+  }
+}

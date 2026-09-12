@@ -1,0 +1,194 @@
+export const VIDEO_STATUSES = ['DRAFT', 'READY', 'QUEUED', 'RENDERING', 'QA', 'APPROVED', 'SCHEDULED', 'PUBLISHING', 'PUBLISHED', 'FAILED', 'CANCELLED'] as const;
+export type VideoStatusDto = typeof VIDEO_STATUSES[number];
+export const PLATFORMS = ['TIKTOK', 'YOUTUBE', 'FACEBOOK'] as const;
+export type PlatformDto = typeof PLATFORMS[number];
+export const SCHEDULE_STATUSES = ['SCHEDULED', 'DISPATCHED', 'CANCELLED', 'SUPERSEDED'] as const;
+export type ScheduleStatusDto = typeof SCHEDULE_STATUSES[number];
+export const DISPATCH_STATUSES = ['PENDING', 'CLAIMED', 'COMPLETED', 'FAILED', 'CANCELLED'] as const;
+export type PublicationDispatchStatusDto = typeof DISPATCH_STATUSES[number];
+export const ASSET_KINDS = ['VIDEO', 'COVER', 'THUMBNAIL', 'AUDIO', 'AVATAR', 'BANNER', 'OTHER'] as const;
+export type AssetKindDto = typeof ASSET_KINDS[number];
+export type AssetStatusDto = 'PENDING' | 'READY' | 'REPLACED' | 'FAILED' | 'DELETED';
+export type UploadModeDto = 'SINGLE' | 'MULTIPART';
+export type UploadStatusDto = 'CREATED' | 'UPLOADING' | 'FINALIZING' | 'COMPLETED' | 'ABORTED' | 'EXPIRED' | 'FAILED';
+
+export interface AdminMeDto { email: string }
+export interface DashboardVideoDto { id: string; title: string; category: string; status: VideoStatusDto; legacyIncomplete: boolean; createdAt: string; updatedAt: string }
+export interface DashboardEventDto { id: string; videoId: string; type: string; fromStatus: string | null; toStatus: string | null; createdAt: string }
+export interface AdminDashboardDto {
+  totalVideos: number;
+  totalsByStatus: Record<VideoStatusDto, number>;
+  legacyIncomplete: number;
+  recentVideos: DashboardVideoDto[];
+  recentEvents: DashboardEventDto[];
+}
+
+export interface PublicationSummaryDto { id: string; platform: PlatformDto; status: string }
+export interface VideoListItemDto {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  status: VideoStatusDto;
+  version: number;
+  legacyIncomplete: boolean;
+  createdAt: string;
+  updatedAt: string;
+  sceneCount: number;
+  durationSeconds: number | null;
+  publications: PublicationSummaryDto[];
+  hasThumbnailReference: boolean;
+}
+export interface VideoListDto { items: VideoListItemDto[]; page: number; pageSize: number; total: number; categories: string[] }
+
+export interface ChannelProfileDto { id: string; platform: PlatformDto; displayName: string | null; username: string | null; description: string | null }
+export interface ChannelDto { id: string; displayName: string | null; language: string; profiles: ChannelProfileDto[] }
+export interface VideoDto {
+  id: string;
+  channelId: string;
+  slug: string;
+  title: string;
+  category: string;
+  status: VideoStatusDto;
+  legacyStatus: string | null;
+  schemaVersion: number | null;
+  legacyIncomplete: boolean;
+  version: number;
+  primaryKeyword: string | null;
+  secondaryKeywords: string[];
+  searchIntent: string | null;
+  hookText: string | null;
+  hookType: string | null;
+  closing: string | null;
+  cta: string | null;
+  question: string | null;
+  pinnedComment: string | null;
+  wordCount: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface SceneDto { id: string; position: number; text: string; searchTerms: string[]; version: number; updatedAt: string }
+export interface PublicationMetricDto { key: string; availability: string; numericValue: string | null; capturedAt: string | null }
+export interface MetricSnapshotDto {
+  id: string; capturedAt: string; views: string | null; likes: string | null; comments: string | null; shares: string | null; saves: string | null;
+  watchTime: string | null; averageViewDuration: string | null; averagePercentageViewed: string | null; completionRate: string | null;
+  followersGained: string | null; revenue: string | null;
+}
+export interface PublicationDto {
+  id: string; platform: PlatformDto; status: string; legacyStatus: string | null; version: number; title: string | null; caption: string | null;
+  description: string | null; hashtags: string[]; cta: string | null; pinnedComment: string | null; platformId: string | null; url: string | null;
+  scheduledAt: string | null; publishedAt: string | null; updatedAt: string; metrics: PublicationMetricDto[]; snapshots: MetricSnapshotDto[];
+}
+export interface RenderAttemptDto {
+  id: string; attempt: number; status: string; workerId: string | null; workerLabel: string | null; rendererVideoId: string | null;
+  startedAt: string | null; finishedAt: string | null; durationSeconds: number | null; width: number | null; height: number | null; hasAudio: boolean | null; error: string | null;
+}
+export interface QaDto { id: string; attempt: number; passed: boolean | null; durationPassed: boolean | null; resolutionPassed: boolean | null; audioPassed: boolean | null; captionsPassed: boolean | null; createdAt: string }
+export interface LegacyAssetDto { id: string; kind: string; status: string; storageProvider: string; localPath: string | null; mimeType: string | null; size: string | null; createdAt: string }
+export interface VideoDetailDto { video: VideoDto; channel: ChannelDto; scenes: SceneDto[]; publications: PublicationDto[]; renderAttempts: RenderAttemptDto[]; qa: QaDto[]; legacyAssets: LegacyAssetDto[] }
+
+export interface AssetDto {
+  id: string;
+  videoId: string | null;
+  profileId: string | null;
+  kind: AssetKindDto;
+  status: AssetStatusDto;
+  platform: PlatformDto | null;
+  storageProvider: string;
+  mimeType: string | null;
+  size: string | null;
+  sha256: string | null;
+  source: string | null;
+  hashSource: string | null;
+  originalFilename: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface AssetListDto { items: AssetDto[] }
+export interface AssetUploadRequestDto { kind: AssetKindDto; mimeType: string; size: string; sha256?: string | null; originalFilename?: string | null }
+export interface UploadSessionDto {
+  sessionId: string;
+  assetId: string;
+  mode: UploadModeDto;
+  status: UploadStatusDto;
+  uploadUrl: string | null;
+  requiredHeaders: Record<string, string>;
+  expiresAt: string;
+  sessionExpiresAt: string;
+  partSizeBytes: number | null;
+}
+export interface MultipartPartUrlDto { partNumber: number; uploadUrl: string; expiresAt: string }
+export interface MultipartPartsDto { sessionId: string; partSizeBytes: number; parts: MultipartPartUrlDto[] }
+export interface MultipartCompletedPartDto { partNumber: number; eTag: string }
+export interface DownloadUrlDto { assetId: string; downloadUrl: string; expiresAt: string }
+export interface AssetPolicyDto {
+  presignTtlSeconds: number;
+  singleUploadThresholdBytes: string;
+  multipartPartSizeBytes: number;
+  limits: { videoBytes: string; imageBytes: string; audioBytes: string };
+  mimeTypes: { VIDEO: string[]; IMAGE: string[]; AUDIO: string[] };
+}
+export interface ChannelProfileAssetsDto {
+  id: string;
+  platform: PlatformDto;
+  displayName: string | null;
+  username: string | null;
+  assets: AssetDto[];
+}
+export interface ChannelAssetsItemDto { id: string; displayName: string | null; language: string; profiles: ChannelProfileAssetsDto[] }
+export interface ChannelAssetsDto { items: ChannelAssetsItemDto[] }
+
+export interface VideoPatchDto {
+  expectedVersion: number;
+  title?: string; category?: string; primaryKeyword?: string | null; searchIntent?: string | null; hookText?: string | null; hookType?: string | null;
+  closing?: string | null; cta?: string | null; question?: string | null; pinnedComment?: string | null;
+}
+export interface ScenePatchDto { expectedVersion: number; text?: string; searchTerms?: string[] }
+export interface PublicationPatchDto { expectedVersion: number; title?: string | null; caption?: string | null; description?: string | null; hashtags?: string[]; cta?: string | null; pinnedComment?: string | null }
+export interface QueueRenderRequestDto { expectedVersion: number }
+export interface QueueRenderResultDto { id: string; status: 'QUEUED'; version: number }
+export interface VideoEditResultDto { title: string; category: string; primaryKeyword: string | null; searchIntent: string | null; hookText: string | null; hookType: string | null; closing: string | null; cta: string | null; question: string | null; pinnedComment: string | null; version: number }
+export interface SceneEditResultDto { id: string; position: number; text: string; searchTerms: string[]; version: number; updatedAt: string }
+export interface PublicationEditResultDto { id: string; videoId: string; platform: PlatformDto; title: string | null; caption: string | null; description: string | null; hashtags: string[]; cta: string | null; pinnedComment: string | null; version: number; updatedAt: string }
+
+export interface HistoryItemDto {
+  id: string; source: 'AUDIT' | 'JOB_EVENT'; timestamp: string; actorType: string; actor: string; action: string; entityType: string; entityId: string | null;
+  summary: string; before: Record<string, unknown> | null; after: Record<string, unknown> | null;
+}
+export interface VideoHistoryDto { items: HistoryItemDto[] }
+
+export interface PreflightMessageDto { code: string; message: string }
+export interface ScheduleDto {
+  id: string;
+  publicationId: string;
+  status: ScheduleStatusDto;
+  version: number;
+  scheduledAtUtc: string;
+  localDateTime: string;
+  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface DispatchSummaryDto { id: string; status: PublicationDispatchStatusDto | string; scheduleId: string; createdAt: string }
+export interface PublicationPreflightDto {
+  ready: boolean;
+  blockers: PreflightMessageDto[];
+  warnings: PreflightMessageDto[];
+  preview: null | {
+    publicationId: string; videoId: string; platform: PlatformDto; profileId: string | null;
+    title: string | null; caption: string | null; description: string | null; hashtags: string[]; cta: string | null;
+    videoAssetId: string | null; coverAssetId: string | null; thumbnailAssetId: string | null; durationSeconds: number | null; internalRuleNotice: string;
+  };
+  activeSchedule: ScheduleDto | null;
+  latestDispatch: DispatchSummaryDto | null;
+}
+export interface ScheduleMutationDto { localDateTime: string; timezone: string; expectedVersion: number }
+export interface ScheduleMutationResultDto { schedule: ScheduleDto; publicationVersion: number; supersededScheduleId?: string; preflight?: PublicationPreflightDto }
+export interface CalendarItemDto {
+  scheduleId: string; publicationId: string; videoId: string; channelId: string; title: string; platform: PlatformDto;
+  status: ScheduleStatusDto; scheduledAtUtc: string; localDateTime: string; timezone: string; publicationStatus: string; version: number;
+  dispatch: { id: string; status: string } | null;
+}
+export interface CalendarDto { items: CalendarItemDto[] }
+
+export interface ApiErrorDto { error: { code: string; message: string; requestId?: string; details?: Record<string, unknown> } }

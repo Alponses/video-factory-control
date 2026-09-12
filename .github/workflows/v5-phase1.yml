@@ -1,0 +1,162 @@
+name: Video Factory V5 CI
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'eslint.config.js'
+      - 'prisma/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'admin/**'
+      - 'worker/**'
+      - 'db/jobs/**'
+      - 'db/migrations/v3/**'
+      - 'db/migrations/v4/**'
+      - 'db/dashboard/**'
+      - 'config/factory.json'
+      - 'config/publishing-rules.json'
+      - '.env.example'
+      - 'docs/v5-phase1.md'
+      - 'docs/v5-phase2-security.md'
+      - 'docs/v5-phase3-admin.md'
+      - 'docs/v5-phase4-workers.md'
+      - 'docs/v5-phase5-r2.md'
+      - 'docs/v5-phase6-scheduler.md'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - video-factory-v5
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'eslint.config.js'
+      - 'prisma/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'admin/**'
+      - 'worker/**'
+      - 'db/jobs/**'
+      - 'db/migrations/v3/**'
+      - 'db/migrations/v4/**'
+      - 'db/dashboard/**'
+      - 'config/factory.json'
+      - 'config/publishing-rules.json'
+      - '.env.example'
+      - 'docs/v5-phase1.md'
+      - 'docs/v5-phase2-security.md'
+      - 'docs/v5-phase3-admin.md'
+      - 'docs/v5-phase4-workers.md'
+      - 'docs/v5-phase5-r2.md'
+      - 'docs/v5-phase6-scheduler.md'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  static-unit-security-admin-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            admin/package-lock.json
+            worker/package-lock.json
+      - name: Install locked server dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install locked Admin V5 dependencies
+        run: npm --prefix admin ci --no-audit --no-fund
+      - name: Install locked worker dependencies
+        run: npm --prefix worker ci --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+      - name: Prisma validate
+        env:
+          DATABASE_URL: mysql://phase6:phase6@127.0.0.1:3306/phase6
+        run: npm run prisma:validate
+      - name: Server lint
+        run: npm run lint
+      - name: Server typecheck
+        run: npm run typecheck
+      - name: Unit, JWT, security, R2 and scheduler boundary tests
+        run: npm run test
+      - name: Admin frontend Phase 1-6 tests
+        run: npm run test:admin
+      - name: Worker typecheck
+        run: npm --prefix worker run typecheck
+      - name: Worker Phase 4-5 regression tests
+        run: npm --prefix worker run test
+      - name: Worker build
+        run: npm --prefix worker run build
+      - name: Production server + Admin build
+        run: npm run build
+
+  mariadb-integration:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root-phase6
+          MARIADB_DATABASE: video_factory_v5
+          MARIADB_USER: video_factory
+          MARIADB_PASSWORD: phase6-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot-phase6 --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: mysql://video_factory:phase6-only@127.0.0.1:3306/video_factory_v5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            admin/package-lock.json
+      - name: Install locked server dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install locked Admin V5 dependencies
+        run: npm --prefix admin ci --no-audit --no-fund
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+      - name: Prisma validate
+        run: npm run prisma:validate
+      - name: Build Admin V5 for production static smoke test
+        run: npm run build:admin
+      - name: Migration test from empty MariaDB through Phase 6
+        run: |
+          npm run db:migrate
+          npx prisma migrate status
+      - name: Existing Phase 4 database upgrades through Phase 5 regression
+        run: npx tsx scripts/phase5-migration-upgrade.ts
+      - name: Existing Phase 5 database upgrades through Phase 6
+        run: npx tsx scripts/phase6-migration-upgrade.ts
+      - name: MariaDB Phase 1-6 integration tests
+        run: npm run test:integration
+      - name: Reset MariaDB for explicit importer proof
+        run: npx prisma migrate reset --force --skip-seed
+      - name: Legacy importer run 1
+        run: npm run legacy:import | tee /tmp/legacy-import-1.json
+      - name: Legacy importer run 2
+        run: npm run legacy:import | tee /tmp/legacy-import-2.json
+      - name: Legacy importer run 3
+        run: npm run legacy:import | tee /tmp/legacy-import-3.json
+      - name: Legacy verification
+        run: npm run legacy:verify | tee /tmp/legacy-verify.json

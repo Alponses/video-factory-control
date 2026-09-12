@@ -1,0 +1,691 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum VideoStatus {
+  DRAFT
+  READY
+  QUEUED
+  RENDERING
+  QA
+  APPROVED
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum Platform {
+  TIKTOK
+  YOUTUBE
+  FACEBOOK
+}
+
+enum PublicationStatus {
+  DRAFT
+  READY
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  NEEDS_ATTENTION
+  CANCELLED
+}
+
+enum ScheduleStatus {
+  SCHEDULED
+  DISPATCHED
+  CANCELLED
+  SUPERSEDED
+}
+
+enum PublicationDispatchStatus {
+  PENDING
+  CLAIMED
+  COMPLETED
+  FAILED
+  NEEDS_ATTENTION
+  CANCELLED
+}
+
+enum PublicationAttemptStatus {
+  RUNNING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  UNKNOWN
+}
+
+enum PublicationAttemptStage {
+  CLAIMED
+  TOKEN_READY
+  INITIALIZED
+  UPLOADING
+  PROCESSING
+  FINALIZING
+  RECONCILING
+  COMPLETED
+}
+
+enum WorkerStatus {
+  ONLINE
+  OFFLINE
+  BUSY
+  DEGRADED
+  DISABLED
+}
+
+enum RenderAttemptStatus {
+  QUEUED
+  RUNNING
+  QA
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum AssetKind {
+  VIDEO
+  COVER
+  THUMBNAIL
+  AUDIO
+  AVATAR
+  BANNER
+  OTHER
+}
+
+enum AssetStatus {
+  PENDING
+  READY
+  REPLACED
+  FAILED
+  DELETED
+}
+
+enum AssetUploadMode {
+  SINGLE
+  MULTIPART
+}
+
+enum AssetUploadStatus {
+  CREATED
+  UPLOADING
+  FINALIZING
+  COMPLETED
+  ABORTED
+  EXPIRED
+  FAILED
+}
+
+enum ActorType {
+  ADMIN
+  WORKER
+  SYSTEM
+}
+
+enum MetricAvailability {
+  AVAILABLE
+  NOT_AUTHORIZED
+  NOT_SUPPORTED
+  NOT_COLLECTED
+}
+
+model Channel {
+  id          String   @id @db.VarChar(191)
+  displayName String?  @db.VarChar(255)
+  language    String   @default("es-MX") @db.VarChar(32)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profiles Profile[]
+  videos   Video[]
+
+  @@map("channels")
+}
+
+model Profile {
+  id          String   @id @db.VarChar(191)
+  channelId   String   @db.VarChar(191)
+  platform    Platform
+  displayName String?  @db.VarChar(255)
+  username    String?  @db.VarChar(255)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channel            Channel             @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  assets             VideoAsset[]
+  integrationAccount IntegrationAccount?
+  oauthTransactions  OAuthTransaction[]
+
+  @@unique([channelId, platform])
+  @@index([platform])
+  @@map("profiles")
+}
+
+model Video {
+  id                String      @id @db.VarChar(191)
+  channelId         String      @db.VarChar(191)
+  slug              String      @db.VarChar(255)
+  title             String      @db.VarChar(500)
+  category          String      @db.VarChar(191)
+  status            VideoStatus
+  legacyStatus      String?     @db.VarChar(64)
+  schemaVersion     Int?
+  legacyIncomplete  Boolean     @default(false)
+  version           Int         @default(1)
+
+  primaryKeyword    String?     @db.VarChar(500)
+  secondaryKeywords Json?
+  searchIntent      String?     @db.Text
+  hookText          String?     @db.Text
+  hookType          String?     @db.VarChar(64)
+  closing           String?     @db.Text
+  cta               String?     @db.Text
+  question          String?     @db.Text
+  pinnedComment     String?     @db.Text
+  wordCount         Int?
+
+  cover             Json?
+  renderConfig      Json?
+  engagement        Json?
+  metadata          Json
+  createdAt         DateTime
+  updatedAt         DateTime    @updatedAt
+
+  channel        Channel         @relation(fields: [channelId], references: [id], onDelete: Restrict)
+  scenes         VideoScene[]
+  assets         VideoAsset[]
+  publications   Publication[]
+  renderAttempts RenderAttempt[]
+  qaResults      QaResult[]
+  leases         WorkerLease[]
+  events         JobEvent[]
+  legacyImport   LegacyImport?
+
+  @@unique([channelId, slug])
+  @@index([status, createdAt])
+  @@index([category])
+  @@map("videos")
+}
+
+model VideoScene {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  videoId     String   @db.VarChar(191)
+  position    Int
+  text        String   @db.Text
+  searchTerms Json
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, position])
+  @@index([videoId])
+  @@map("video_scenes")
+}
+
+model VideoAsset {
+  id              String      @id @default(uuid()) @db.VarChar(36)
+  videoId         String?     @db.VarChar(191)
+  profileId       String?     @db.VarChar(191)
+  kind            AssetKind
+  status          AssetStatus @default(PENDING)
+  platform        Platform?
+  storageProvider String      @default("R2") @db.VarChar(32)
+  bucket          String?     @db.VarChar(255)
+  objectKey       String?     @unique @db.VarChar(512)
+  localPath       String?     @db.VarChar(2048)
+  mimeType        String?     @db.VarChar(191)
+  size            BigInt?
+  sha256          String?     @db.VarChar(64)
+  metadata        Json?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  video          Video?                @relation(fields: [videoId], references: [id], onDelete: SetNull)
+  profile        Profile?              @relation(fields: [profileId], references: [id], onDelete: SetNull)
+  uploadSessions AssetUploadSession[]
+  dispatches     PublicationDispatch[]
+
+  @@index([videoId, kind])
+  @@index([profileId, kind])
+  @@index([status, kind])
+  @@map("video_assets")
+}
+
+model AssetUploadSession {
+  id               String            @id @default(uuid()) @db.VarChar(36)
+  assetId          String            @db.VarChar(36)
+  actorType        ActorType
+  actor            String            @db.VarChar(255)
+  workerId         String?           @db.VarChar(191)
+  renderAttemptId  String?           @db.VarChar(36)
+  mode             AssetUploadMode
+  status           AssetUploadStatus @default(CREATED)
+  expectedMimeType String            @db.VarChar(191)
+  expectedSize     BigInt
+  expectedSha256   String?           @db.VarChar(64)
+  r2UploadId       String?           @db.Text
+  expiresAt        DateTime
+  completedAt      DateTime?
+  failedAt         DateTime?
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  asset         VideoAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  worker        Worker?        @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  renderAttempt RenderAttempt? @relation(fields: [renderAttemptId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, status])
+  @@index([workerId, status])
+  @@index([renderAttemptId])
+  @@index([expiresAt, status])
+  @@map("asset_upload_sessions")
+}
+
+model Publication {
+  id                                String            @id @default(uuid()) @db.VarChar(36)
+  videoId                           String            @db.VarChar(191)
+  platform                          Platform
+  status                            PublicationStatus @default(DRAFT)
+  legacyStatus                      String?           @db.VarChar(64)
+  version                           Int               @default(1)
+  title                             String?           @db.VarChar(500)
+  caption                           String?           @db.Text
+  description                       String?           @db.Text
+  hashtags                          Json?
+  tags                              Json?
+  searchKeyword                     String?           @db.VarChar(500)
+  coverText                         String?           @db.Text
+  thumbnailText                     String?           @db.Text
+  cta                               String?           @db.Text
+  pinnedComment                     String?           @db.Text
+  tiktokPrivacyLevel                String?           @db.VarChar(64)
+  tiktokAllowComment                Boolean?
+  tiktokAllowDuet                   Boolean?
+  tiktokAllowStitch                 Boolean?
+  tiktokIsAigc                      Boolean?
+  youtubePrivacyStatus              String?           @db.VarChar(32)
+  youtubeCategoryId                 String?           @db.VarChar(32)
+  youtubeMadeForKids                Boolean?
+  youtubeContainsSyntheticMedia     Boolean?
+  platformId                        String?           @db.VarChar(255)
+  url                               String?           @db.VarChar(2048)
+  scheduledAt                       DateTime?
+  publishedAt                       DateTime?
+  lastMetricsSyncAt                 DateTime?
+  error                             String?           @db.Text
+  raw                               Json
+  performanceRaw                    Json?
+  createdAt                         DateTime          @default(now())
+  updatedAt                         DateTime          @updatedAt
+
+  video      Video                 @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  schedules  Schedule[]
+  dispatches PublicationDispatch[]
+  attempts   PublicationAttempt[]
+  events     PublicationEvent[]
+  metrics    PublicationMetric[]
+  snapshots  MetricSnapshot[]
+
+  @@unique([videoId, platform])
+  @@index([platform, status])
+  @@map("publications")
+}
+
+model PublicationMetric {
+  id            String             @id @default(uuid()) @db.VarChar(36)
+  publicationId String             @db.VarChar(36)
+  key           String             @db.VarChar(191)
+  availability  MetricAvailability
+  numericValue  Decimal?           @db.Decimal(30, 6)
+  capturedAt    DateTime?
+  updatedAt     DateTime           @updatedAt
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@unique([publicationId, key])
+  @@map("publication_metrics")
+}
+
+model MetricSnapshot {
+  id                      String   @id @default(uuid()) @db.VarChar(36)
+  publicationId           String   @db.VarChar(36)
+  capturedAt              DateTime
+  views                   BigInt?
+  likes                   BigInt?
+  comments                BigInt?
+  shares                   BigInt?
+  saves                   BigInt?
+  watchTime               Decimal? @db.Decimal(30, 6)
+  averageViewDuration     Decimal? @db.Decimal(30, 6)
+  averagePercentageViewed Decimal? @db.Decimal(10, 4)
+  completionRate          Decimal? @db.Decimal(10, 4)
+  followersGained         BigInt?
+  revenue                 Decimal? @db.Decimal(30, 8)
+  raw                     Json?
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId, capturedAt])
+  @@map("metric_snapshots")
+}
+
+model Schedule {
+  id            String         @id @default(uuid()) @db.VarChar(36)
+  publicationId String         @db.VarChar(36)
+  scheduledAt   DateTime
+  timezone      String         @default("America/Mexico_City") @db.VarChar(64)
+  status        ScheduleStatus @default(SCHEDULED)
+  version       Int            @default(1)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  dispatch    PublicationDispatch?
+
+  @@index([status, scheduledAt])
+  @@index([publicationId, status])
+  @@map("schedules")
+}
+
+model PublicationDispatch {
+  id              String                    @id @default(uuid()) @db.VarChar(36)
+  publicationId   String                    @db.VarChar(36)
+  scheduleId      String                    @unique @db.VarChar(36)
+  assetId         String                    @db.VarChar(36)
+  status          PublicationDispatchStatus @default(PENDING)
+  notBefore       DateTime
+  nextAttemptAt   DateTime?
+  attemptCount    Int                       @default(0)
+  lastError       String?                   @db.Text
+  needsAttention  Boolean                   @default(false)
+  claimedAt       DateTime?
+  claimExpiresAt  DateTime?
+  claimedBy       String?                   @db.VarChar(191)
+  payloadSnapshot Json
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  schedule    Schedule             @relation(fields: [scheduleId], references: [id], onDelete: Restrict)
+  asset       VideoAsset           @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  attempts    PublicationAttempt[]
+  events      PublicationEvent[]
+
+  @@index([status, nextAttemptAt, notBefore])
+  @@index([publicationId, createdAt])
+  @@map("publication_dispatches")
+}
+
+model PublicationAttempt {
+  id                     String                  @id @default(uuid()) @db.VarChar(36)
+  dispatchId             String                  @db.VarChar(36)
+  publicationId          String                  @db.VarChar(36)
+  provider               Platform
+  attempt                Int
+  status                 PublicationAttemptStatus
+  stage                  PublicationAttemptStage
+  externalOperationId    String?                 @db.VarChar(512)
+  platformMediaId        String?                 @db.VarChar(255)
+  recoveryStateEncrypted String?                 @db.LongText
+  retryable              Boolean                 @default(false)
+  errorCode              String?                 @db.VarChar(96)
+  safeErrorMessage       String?                 @db.Text
+  startedAt              DateTime
+  finishedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  dispatch    PublicationDispatch @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  publication Publication         @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@unique([dispatchId, attempt])
+  @@index([publicationId, createdAt])
+  @@index([status, stage])
+  @@map("publication_attempts")
+}
+
+model PublicationEvent {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  publicationId String   @db.VarChar(36)
+  type          String   @db.VarChar(191)
+  fromStatus    String?  @db.VarChar(64)
+  toStatus      String?  @db.VarChar(64)
+  dispatchId    String?  @db.VarChar(36)
+  payload       Json?
+  createdAt     DateTime @default(now())
+
+  publication Publication          @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+  dispatch    PublicationDispatch? @relation(fields: [dispatchId], references: [id], onDelete: SetNull)
+
+  @@index([publicationId, createdAt])
+  @@index([dispatchId])
+  @@map("publication_events")
+}
+
+model Worker {
+  id              String       @id @db.VarChar(191)
+  status          WorkerStatus @default(OFFLINE)
+  agentVersion    String?      @db.VarChar(64)
+  rendererVersion String?      @db.VarChar(64)
+  secretHash      String?      @db.VarChar(255)
+  secretVersion   Int          @default(1)
+  lastHeartbeatAt DateTime?
+  currentVideoId  String?      @db.VarChar(191)
+  progress        Int?
+  lastError       String?      @db.Text
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  leases         WorkerLease[]
+  renderAttempts RenderAttempt[]
+  uploadSessions AssetUploadSession[]
+
+  @@map("workers")
+}
+
+model WorkerLease {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  videoId        String   @db.VarChar(191)
+  workerId       String   @db.VarChar(191)
+  leaseTokenHash String   @unique @db.VarChar(255)
+  claimedAt      DateTime
+  leaseExpiresAt DateTime
+  releasedAt     DateTime?
+
+  video  Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Restrict)
+
+  @@index([videoId, leaseExpiresAt])
+  @@index([workerId, leaseExpiresAt])
+  @@map("worker_leases")
+}
+
+model RenderAttempt {
+  id              String              @id @default(uuid()) @db.VarChar(36)
+  videoId         String              @db.VarChar(191)
+  workerId        String?             @db.VarChar(191)
+  workerLabel     String?             @db.VarChar(191)
+  attempt         Int
+  status          RenderAttemptStatus
+  rendererVideoId String?             @db.VarChar(255)
+  startedAt       DateTime?
+  finishedAt      DateTime?
+  durationSeconds Decimal?            @db.Decimal(12, 3)
+  width           Int?
+  height          Int?
+  hasAudio        Boolean?
+  localFile       String?             @db.VarChar(2048)
+  error           String?             @db.Text
+  raw             Json
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  video          Video                @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  worker         Worker?              @relation(fields: [workerId], references: [id], onDelete: SetNull)
+  uploadSessions AssetUploadSession[]
+
+  @@unique([videoId, attempt])
+  @@index([workerId])
+  @@map("render_attempts")
+}
+
+model QaResult {
+  id               String   @id @default(uuid()) @db.VarChar(36)
+  videoId          String   @db.VarChar(191)
+  attempt          Int      @default(1)
+  passed           Boolean?
+  durationPassed   Boolean?
+  resolutionPassed Boolean?
+  audioPassed      Boolean?
+  captionsPassed   Boolean?
+  raw              Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, attempt])
+  @@map("qa_results")
+}
+
+model IntegrationAccount {
+  id                    String   @id @default(uuid()) @db.VarChar(36)
+  profileId             String?  @unique @db.VarChar(191)
+  provider              String   @db.VarChar(64)
+  accountId             String   @db.VarChar(255)
+  displayName           String?  @db.VarChar(255)
+  encryptedAccessToken  String?  @db.LongText
+  encryptedRefreshToken String?  @db.LongText
+  expiresAt             DateTime?
+  refreshExpiresAt      DateTime?
+  scopes                Json?
+  status                String   @db.VarChar(64)
+  readiness             String?  @db.VarChar(64)
+  version               Int      @default(1)
+  lastRefreshAt         DateTime?
+  refreshClaimedAt      DateTime?
+  refreshClaimExpiresAt DateTime?
+  refreshClaimedBy      String?  @db.VarChar(191)
+  metadata              Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  profile Profile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, accountId])
+  @@index([provider, status])
+  @@map("integration_accounts")
+}
+
+model OAuthTransaction {
+  id                String   @id @default(uuid()) @db.VarChar(36)
+  profileId         String   @db.VarChar(191)
+  provider          String   @db.VarChar(64)
+  actor             String   @db.VarChar(255)
+  stateHash         String   @unique @db.VarChar(64)
+  redirectUri       String   @db.VarChar(2048)
+  verifierEncrypted String?  @db.LongText
+  expiresAt         DateTime
+  usedAt            DateTime?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([provider, expiresAt])
+  @@index([profileId, createdAt])
+  @@map("oauth_transactions")
+}
+
+model AuditLog {
+  id         String    @id @default(uuid()) @db.VarChar(36)
+  actorType  ActorType
+  actor      String    @db.VarChar(255)
+  action     String    @db.VarChar(191)
+  entityType String    @db.VarChar(191)
+  entityId   String?   @db.VarChar(191)
+  requestId  String?   @db.VarChar(64)
+  beforeData Json?
+  afterData  Json?
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actor, createdAt])
+  @@map("audit_logs")
+}
+
+model JobEvent {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  videoId        String   @db.VarChar(191)
+  type           String   @db.VarChar(191)
+  fromStatus     String?  @db.VarChar(64)
+  toStatus       String?  @db.VarChar(64)
+  workerId       String?  @db.VarChar(191)
+  idempotencyKey String?  @unique @db.VarChar(191)
+  payload        Json?
+  createdAt      DateTime @default(now())
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@index([videoId, createdAt])
+  @@map("job_events")
+}
+
+model LegacyImport {
+  id             String   @id @default(uuid()) @db.VarChar(36)
+  videoId        String   @unique @db.VarChar(191)
+  basePath       String   @db.VarChar(768)
+  baseHash       String   @db.VarChar(64)
+  v3Path         String?  @db.VarChar(768)
+  v3Hash         String?  @db.VarChar(64)
+  v4Path         String?  @db.VarChar(768)
+  v4Hash         String?  @db.VarChar(64)
+  dashboardPath  String?  @db.VarChar(768)
+  dashboardHash  String?  @db.VarChar(64)
+  effectiveHash  String   @db.VarChar(64)
+  baseJson       Json
+  v3Json         Json?
+  v4Json         Json?
+  dashboardJson  Json?
+  effectiveJson  Json
+  importedAt     DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@map("legacy_imports")
+}
+
+model IdempotencyKey {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  scope     String   @db.VarChar(191)
+  key       String   @db.VarChar(191)
+  result    Json?
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  @@unique([scope, key])
+  @@map("idempotency_keys")
+}
+
+model SchedulerLease {
+  name           String   @id @db.VarChar(191)
+  owner          String   @db.VarChar(191)
+  leaseExpiresAt DateTime
+  updatedAt      DateTime @updatedAt
+
+  @@map("scheduler_leases")
+}

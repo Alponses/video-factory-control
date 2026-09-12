@@ -1,0 +1,70 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import express, { type Express } from 'express';
+import type { PrismaClient } from '@prisma/client';
+import type { AppConfig } from './config.js';
+import { createAdminAuth, createWorkerAccessAuth, type CloudflareAuthDependencies } from './http/auth.js';
+import { errorHandler, ApiError } from './http/errors.js';
+import { consoleJsonLogger, requestLogger, type Logger } from './http/logger.js';
+import { createAdminRouter, createHealthRouter, createWorkerRouter } from './http/routes.js';
+import { createSchedulingRouter } from './http/scheduling-routes.js';
+import { browserMutationGuard, fixedWindowRateLimit, requestContext, sameOriginCors, securityHeaders } from './http/security.js';
+import { createWorkerSecretAuth } from './http/worker-service.js';
+import type { R2Storage } from './storage/r2.js';
+
+export interface AppDependencies {
+  prisma: PrismaClient;
+  auth?: CloudflareAuthDependencies;
+  workerAuth?: CloudflareAuthDependencies;
+  logger?: Logger;
+  adminDistPath?: string;
+  storage?: R2Storage;
+}
+
+export function createApp(config: AppConfig, dependencies: AppDependencies): Express {
+  const app = express();
+  app.disable('x-powered-by');
+  // Trust exactly one hosting reverse-proxy hop. Do not trust arbitrary X-Forwarded-* chains.
+  // Authorization never depends on forwarded IP. Revisit only after Hostinger topology is verified.
+  app.set('trust proxy', 1);
+
+  app.use(requestContext);
+  app.use(securityHeaders(config));
+  app.use(requestLogger(dependencies.logger ?? consoleJsonLogger));
+  app.use(sameOriginCors(config));
+  app.use(express.json({ limit: '1mb', strict: true }));
+
+  app.use('/api/health', createHealthRouter(dependencies.prisma, config));
+
+  const adminAuth = createAdminAuth(config, dependencies.auth);
+  const adminReadLimit = fixedWindowRateLimit(120, 60_000);
+  const adminMutationLimit = fixedWindowRateLimit(60, 60_000);
+  app.use('/api/admin', adminAuth);
+  app.use('/api/admin', (req, res, next) => (req.method === 'GET' ? adminReadLimit : adminMutationLimit)(req, res, next));
+  app.use('/api/admin', browserMutationGuard(config));
+  app.use('/api/admin', createAdminRouter(dependencies.prisma, config, dependencies.storage));
+  app.use('/api/admin', createSchedulingRouter(dependencies.prisma, config));
+
+  const workerAccessAuth = createWorkerAccessAuth(config, dependencies.workerAuth);
+  const workerLimit = fixedWindowRateLimit(360, 60_000);
+  app.use('/api/worker', workerAccessAuth);
+  app.use('/api/worker', createWorkerSecretAuth(dependencies.prisma));
+  app.use('/api/worker', workerLimit);
+  app.use('/api/worker', createWorkerRouter(dependencies.prisma, config, dependencies.storage));
+
+  app.use('/api', (_req, _res, next) => next(new ApiError(404, 'ROUTE_NOT_FOUND', 'API route was not found')));
+
+  if (config.nodeEnv === 'production') {
+    const adminDist = dependencies.adminDistPath ?? path.resolve(process.cwd(), 'admin/dist');
+    const indexFile = path.join(adminDist, 'index.html');
+    if (!existsSync(indexFile)) throw new Error(`Admin production build is missing: ${indexFile}`);
+    app.use(express.static(adminDist, { index: false, fallthrough: true }));
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
+      res.sendFile(indexFile, (error) => { if (error) next(error); });
+    });
+  }
+
+  app.use(errorHandler(config.nodeEnv));
+  return app;
+}
