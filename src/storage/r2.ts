@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream';
 import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
@@ -24,6 +25,13 @@ export interface R2CompletedPart {
   eTag: string;
 }
 
+export interface R2ReadResult {
+  body: Readable;
+  size: bigint;
+  contentType: string | null;
+  contentRange: string | null;
+}
+
 export interface R2Storage {
   readonly bucket: string;
   readonly origin: string;
@@ -33,6 +41,7 @@ export interface R2Storage {
   completeMultipart(objectKey: string, uploadId: string, parts: R2CompletedPart[]): Promise<void>;
   abortMultipart(objectKey: string, uploadId: string): Promise<void>;
   headObject(objectKey: string): Promise<R2HeadResult>;
+  readObject(objectKey: string, range?: { start: number; end: number }): Promise<R2ReadResult>;
   presignGet(objectKey: string, expiresIn: number): Promise<string>;
 }
 
@@ -102,6 +111,25 @@ export class AwsR2Storage implements R2Storage {
       contentType: normalizeContentType(result.ContentType),
       etag: result.ETag ?? null,
       metadata: result.Metadata ?? {},
+    };
+  }
+
+  async readObject(objectKey: string, range?: { start: number; end: number }): Promise<R2ReadResult> {
+    if (range && (!Number.isSafeInteger(range.start) || !Number.isSafeInteger(range.end) || range.start < 0 || range.end < range.start)) {
+      throw new Error('R2_RANGE_INVALID');
+    }
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: objectKey,
+      ...(range ? { Range: `bytes=${range.start}-${range.end}` } : {}),
+    });
+    const result = await this.client.send(command);
+    if (!(result.Body instanceof Readable)) throw new Error('R2_STREAM_UNAVAILABLE');
+    return {
+      body: result.Body,
+      size: BigInt(result.ContentLength ?? 0),
+      contentType: normalizeContentType(result.ContentType),
+      contentRange: result.ContentRange ?? null,
     };
   }
 
